@@ -2,7 +2,7 @@ import js from '@eslint/js';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
-import simpleImportSort from 'eslint-plugin-simple-import-sort'; 
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
 export default [
   { ignores: ['dist'] },
@@ -25,9 +25,6 @@ export default [
       'react-refresh': reactRefresh,
     },
     rules: {
-      'semi': ['error', 'always'],
-      'quotes': ['error', 'single'],
-      'react/prop-types': 'off',
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
       ...js.configs.recommended.rules,
@@ -39,7 +36,9 @@ export default [
         'warn',
         { allowConstantExport: true },
       ],
-      
+      'semi': ['error', 'always'],
+      'quotes': ['error', 'single'],
+      'react/prop-types': 'off'
     },
   },
 ];
