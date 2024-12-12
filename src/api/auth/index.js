@@ -9,21 +9,22 @@ export const signUpRequest = async({email,password,username}) => {
         });
         return response.data;
     } catch (error) {
-        console.log(error);
+        console.error('hii i am here at signUpRequest ',error);
         throw error.response.data;
     }
 };
 
-export const signInRequest = async ({email,password}) => {
+export const signInRequest = async ({email,password,loginType}) => {
     try{
-        const response = await axiosInstance.get('/users/signin',{
-            email,
-            password
+        const response = await axiosInstance.post('/users/signin',{
+            email: email,
+            password: password,
+            loginType: loginType
         });
 
         return response.data;
     }catch(error){
-        console.log(error);
+        console.error(error);
         throw error.response.data;
     }
 };

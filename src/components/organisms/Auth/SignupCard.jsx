@@ -18,7 +18,8 @@ export const SignupCard = ({
 }) => {
 
     const navigate = useNavigate();
-    
+
+
     return (
         <>
             <Card className="w-full h-full">
@@ -27,7 +28,7 @@ export const SignupCard = ({
                     <CardDescription>
                         Sign up to access your account
                     </CardDescription>
-
+                    
                     {validationError && (
                         <div className='bg-destructive/15 p-4 rounded-md flex items-center gap-x-2 text-sm text-destructive mb-6'>
                             <TriangleAlert className='size-5' />
@@ -37,10 +38,14 @@ export const SignupCard = ({
 
                     {
                         error && (
-                            <div className='bg-destructive/15 p-4 rounded-md flex items-center gap-x-2 text-sm text-destructive mb-6'>
-                                <TriangleAlert className='size-5' />
-                                <p>{error.message}</p>
-                            </div>
+                            <>
+                                <div className='bg-destructive/15 p-4 rounded-md flex items-center gap-x-2 text-sm text-destructive mb-6'>
+                                    <TriangleAlert className='size-5' />
+                                    <p>{error.message}</p>
+
+                                </div>
+                                
+                            </>
                         )
                     }
 
@@ -53,6 +58,7 @@ export const SignupCard = ({
                                     <LucideLoader2 className="animate-spin ml-2" />
                                 </p>
                             </div>
+                            
                         )
                     }
                 </CardHeader>
@@ -67,7 +73,7 @@ export const SignupCard = ({
                             onChange = {(e) => setSignupForm({...signupForm,username: e.target.value})}
                             value={signupForm.username}
                             type='text'
-                            disabled={false}
+                            disabled={isPending}
                         />
                         <Input
                             placeholder='Email'
@@ -75,7 +81,7 @@ export const SignupCard = ({
                             onChange = {(e) => setSignupForm({...signupForm,email: e.target.value})}
                             value={signupForm.email}
                             type='email'
-                            disabled={false}
+                            disabled={isPending}
                         />
                         <Input
                             placeholder='Password'
@@ -83,7 +89,7 @@ export const SignupCard = ({
                             onChange = {(e) => setSignupForm({...signupForm,password: e.target.value})}
                             value={signupForm.password}
                             type='password'
-                            disabled={false}
+                            disabled={isPending}
                         />
                         <Input
                             placeholder='Confirm Password'
@@ -91,7 +97,7 @@ export const SignupCard = ({
                             onChange = {(e) => setSignupForm({...signupForm,confirmPassword: e.target.value})}
                             value={signupForm.confirmPassword}
                             type='password'
-                            disabled={false}
+                            disabled={isPending}
                         />
                         <Button
                             disabled={isPending}
