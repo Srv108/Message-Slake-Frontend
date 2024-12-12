@@ -1,3 +1,4 @@
+
 import { axiosInstance } from '@/config/axiosConfig';
 
 export const signUpRequest = async({email,password,username}) => {
@@ -24,6 +25,35 @@ export const signInRequest = async ({email,password,loginType}) => {
 
         return response.data;
     }catch(error){
+        console.error(error);
+        throw error.response.data;
+    }
+};
+
+export const verifyLoginRequest = async ({username, email}) => {
+    try{
+        const response = await axiosInstance.post('/users/validateuser',{
+            email: email,
+            username: username
+        });
+
+        return response.data;
+    }catch(error){
+        console.error(error);
+        throw error.response.data;
+    }
+};
+
+
+export const verifyOtpRequest = async({otp,email}) => {
+    try {
+        const response = await axiosInstance.post('/users/otpverification',{
+            email:email,
+            otp: otp
+        });
+
+        return response.data;
+    } catch (error) {
         console.error(error);
         throw error.response.data;
     }

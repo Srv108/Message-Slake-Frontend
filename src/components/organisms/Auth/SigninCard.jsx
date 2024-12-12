@@ -18,7 +18,7 @@ export const SigninCard = ({
 }) => {
 
     const navigate = useNavigate();
-    
+    console.log('hey i m here',error);
     return (
         <>
             <Card className='w-full h-full'>
@@ -87,7 +87,7 @@ export const SigninCard = ({
                         Forget Password ?  {' '}
                         <span 
                             className='text-sky-600 hover:underline cursor-pointer'
-                            onClick={() => navigate('/auth/forgetpassword')}
+                            onClick={() => navigate('/auth/logincredentials')}
                         >
                             Reset
                         </span>

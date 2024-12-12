@@ -14,8 +14,6 @@ export const AuthContextProvider = ({ children }) => {
         const user = localStorage.getItem('user');
         const token = localStorage.getItem('token');
 
-        console.log(auth);
-        
         if(user && token){
             setAuth({
                 user: JSON.parse(user),
