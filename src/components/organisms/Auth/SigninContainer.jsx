@@ -18,6 +18,7 @@ export const SigninContainer = () => {
     const { isPending,isSuccess,error,signinMutation } = useSignin();
 
 
+
     async function onSigninFormSubmit(e) {
         e.preventDefault();
         console.log('Form Submitted Successfully ', signinForm);
@@ -42,7 +43,7 @@ export const SigninContainer = () => {
         if(isSuccess){
             setTimeout(() => {
                 navigate('/home');
-            },3000);
+            });
         }
     },[isSuccess, navigate]);
 

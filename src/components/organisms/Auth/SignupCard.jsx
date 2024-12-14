@@ -70,34 +70,34 @@ export const SignupCard = ({
                         <Input
                             placeholder='Username'
                             required
-                            onChange = {(e) => setSignupForm({...signupForm,username: e.target.value})}
-                            value={signupForm.username}
                             type='text'
                             disabled={isPending}
+                            value={signupForm.username}
+                            onChange = {(e) => setSignupForm({...signupForm,username: e.target.value})}
                         />
                         <Input
                             placeholder='Email'
                             required
-                            onChange = {(e) => setSignupForm({...signupForm,email: e.target.value})}
-                            value={signupForm.email}
                             type='email'
                             disabled={isPending}
+                            value={signupForm.email}
+                            onChange = {(e) => setSignupForm({...signupForm,email: e.target.value})}
                         />
                         <Input
                             placeholder='Password'
                             required
-                            onChange = {(e) => setSignupForm({...signupForm,password: e.target.value})}
-                            value={signupForm.password}
                             type='password'
                             disabled={isPending}
+                            value={signupForm.password}
+                            onChange = {(e) => setSignupForm({...signupForm,password: e.target.value})}
                         />
                         <Input
                             placeholder='Confirm Password'
                             required
-                            onChange = {(e) => setSignupForm({...signupForm,confirmPassword: e.target.value})}
-                            value={signupForm.confirmPassword}
                             type='password'
                             disabled={isPending}
+                            value={signupForm.confirmPassword}
+                            onChange = {(e) => setSignupForm({...signupForm,confirmPassword: e.target.value})}
                         />
                         <Button
                             disabled={isPending}

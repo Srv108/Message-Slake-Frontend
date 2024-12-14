@@ -18,7 +18,7 @@ export const SigninCard = ({
 }) => {
 
     const navigate = useNavigate();
-    console.log('hey i m here',error);
+    
     return (
         <>
             <Card className='w-full h-full'>
@@ -61,15 +61,17 @@ export const SigninCard = ({
                             type='email'
                             placeholder='Email'
                             required
-                            onChange={(e) => setSigninForm({...signinForm,email: e.target.value})}
                             disabled={isPending}
+                            value={signinForm.email}
+                            onChange={(e) => setSigninForm({...signinForm,email: e.target.value})}
                         />
                         <Input
                             placeholder='Password'
                             required
-                            onChange = {(e) => setSigninForm({...signinForm,password: e.target.value})}
                             type='password'
                             disabled={isPending}
+                            value={signinForm.password}
+                            onChange = {(e) => setSigninForm({...signinForm,password: e.target.value})}
                         />
                         <Button
                             disabled={isPending}
