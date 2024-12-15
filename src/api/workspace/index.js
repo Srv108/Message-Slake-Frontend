@@ -1,13 +1,13 @@
 import { axiosInstance } from '@/config/axiosConfig';
 
-export const createWorkspaceRequest = async({workspaceDetails,token}) => {
+export const createWorkspaceRequest = async(workspaceDetails) => {
     try {
         const response = await axiosInstance.post('/workspace',{
             name: workspaceDetails.name,
             description: workspaceDetails.description
         },{
             headers: {
-                'access-token' : token
+                'access-token' : workspaceDetails.token
             }
         });
 
