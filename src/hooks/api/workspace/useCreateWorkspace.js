@@ -14,8 +14,7 @@ export const useCreateWorkspce = () => {
             console.log(response);
             toast({
                 variant: 'success',
-                title: `${response.data.name} created Successfully`,
-                description: 'In some time, you will be redirected to the sign-in page',
+                title: `${response.name} created Successfully`,
             });
         },
         onError: (error) => {
@@ -23,7 +22,6 @@ export const useCreateWorkspce = () => {
             toast({
                 variant: 'destructive',
                 title: 'Failed to create workspace',
-                description: 'Please try again...'
             });
         }
     });

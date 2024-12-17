@@ -1,7 +1,8 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
+import { Avatar, AvatarImage } from '@radix-ui/react-avatar';
 import { LogOutIcon, PencilIcon, SettingsIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+import { AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/context/useAuth';
 import { useWorkspaceCreateModal } from '@/hooks/context/useWorkspaceCreateModal';
@@ -9,9 +10,9 @@ import { useToast } from '@/hooks/use-toast';
 
 export const UserButton = () => {
     
-    const { auth, logout }  = useAuth();
-    const navigate = useNavigate();
     const { toast } = useToast();
+    const navigate = useNavigate();
+    const { auth, logout }  = useAuth();
 
     const { setOpenWorkspaceCreateModal } = useWorkspaceCreateModal();
 
@@ -27,16 +28,15 @@ export const UserButton = () => {
     }
 
     function handleOpenWorkspaceCreateModal(){
-        setOpenWorkspaceCreateModal(true);
+        setTimeout(() => {
+            setOpenWorkspaceCreateModal(true);
+        },100);
     }
-
-    console.log(auth.user.avatar);
-
     return(
         <DropdownMenu>
             <DropdownMenuTrigger className='outline-none relative'>
                 <Avatar className='size-10 hover:opacity-65 transition'>
-                    <AvatarImage className='' src={auth?.user?.avatar} />
+                    <AvatarImage className='size-10 mr-2 h-10' src='https://gratisography.com/wp-content/uploads/2024/10/gratisography-cool-cat-800x525.jpg' />
                     <AvatarFallback>{auth?.user?.username[0].toUpperCase() }</AvatarFallback>
                 </Avatar>
             </DropdownMenuTrigger>

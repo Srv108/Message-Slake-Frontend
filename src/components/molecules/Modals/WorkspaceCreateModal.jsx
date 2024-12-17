@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCreateWorkspce } from '@/hooks/api/workspace/useCreateWorkspace';
@@ -30,10 +30,10 @@ export const WorkspaceCreateModal = () => {
                 description: workspaceDetails.description || ''
             });
 
-            console.log('response coming from creating a new workspace ',response.data);
-            navigate(`/workspace/${response.data._id}`);
+            console.log('response coming from creating a new workspace ',response);
+            navigate(`/workspace/${response._id}`);
         } catch (error) {
-            console.log('error coming in creating workspace in modals', error);
+            console.log('not able to create workspace', error);
         } finally {
             setWorkspaceDetails({
                 name: workspaceDetails.name,
@@ -42,7 +42,6 @@ export const WorkspaceCreateModal = () => {
             setOpenWorkspaceCreateModal(false);
         }
     }
-
     function handleClose(){
         setOpenWorkspaceCreateModal(false);
     }
@@ -94,7 +93,12 @@ export const WorkspaceCreateModal = () => {
                     </div>
                     </div>
                     <DialogFooter>
-                        <Button type='submit' disabled={isPending} onClick={handleFormSubmit}> Create Group</Button>
+                        <Button type='button' disabled={isPending} onClick={handleFormSubmit}> Create Group</Button>
+                        <DialogClose asChild>
+                            <Button type="button" variant="secondary" onClick={handleClose}>
+                                Close
+                            </Button>
+                        </DialogClose>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
