@@ -18,11 +18,15 @@ export const createWorkspaceRequest = async(workspaceDetails) => {
     }
 };
 
-export const getWorkspaceRequest = async(id) => {
+export const getWorkspaceRequest = async({workspaceId, token}) => {
     try{
-        const response = await axiosInstance.get(`/workspace/${id}`);
+        const response = await axiosInstance.get(`/workspace/${workspaceId}`,{
+            headers: {
+                'access-token' : token
+            }
+        });
 
-        return response.data;
+        return response.data.data;
     }catch(error){
         console.log('error coming from get workspace request',error);
         throw error.response.data;
@@ -38,7 +42,7 @@ export const fetchAllWorkspaceOfMemberRequest = async(token) => {
         });
 
         console.log('Workspace fetched ', response.data);
-        return response.data;
+        return response.data.data.data;
     } catch (error) {
         console.log('Error in fetching all workspace of member',error);
         throw error.response.data;
