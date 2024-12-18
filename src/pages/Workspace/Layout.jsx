@@ -1,5 +1,6 @@
 import { WorkspaceNavbar } from '@/components/organisms/workspace/WorkspaceNavbar';
 import { WorkspaceSidebar } from '@/components/organisms/workspace/WorkspaceSidebar';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 
 export const WorkspaceLayout = ({ children }) => {
 
@@ -8,7 +9,27 @@ export const WorkspaceLayout = ({ children }) => {
             <WorkspaceNavbar />
             <div className="flex h-[calc(100vh-40px)]">
                 <WorkspaceSidebar />
-                {children}
+
+                <ResizablePanelGroup
+                    direction="horizontal"
+                    autoSaveId={'workspace-resize'}
+                >
+                    <ResizablePanel
+                        defaultSize={20}
+                        minSize={11}
+                        className='bg-slack-medium'
+                    >
+                        Sidebar
+                    </ResizablePanel>
+
+                    <ResizableHandle withHandle />
+
+                    <ResizablePanel
+                        minSize={20}
+                    >
+                        {children}
+                    </ResizablePanel>
+                </ResizablePanelGroup>
             </div>
         </div>
     );
