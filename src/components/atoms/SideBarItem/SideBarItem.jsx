@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const sideBarItemVariants = cva(
-    'flex items-center justify-start gap-1.5 font-normal h-10 px-[20px] text-sm overflow-hidden',
+    'flex items-center justify-start gap-2 my-1 font-normal h-8 px-[20px] text-sm overflow-hidden',
     {
         variants: {
             variant: {
