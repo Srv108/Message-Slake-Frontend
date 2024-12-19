@@ -8,7 +8,7 @@ export const WorkspaceNavbar = () => {
 
     const { workspaceId } = useParams();
     
-    const { isFetching, workspaceData } = useGetWorkspaceById(workspaceId);
+    const { isFetching, workspaceDetails } = useGetWorkspaceById(workspaceId);
     
     if(isFetching){
         return (<Loader className='animate-spin ml-2' />);
@@ -26,7 +26,7 @@ export const WorkspaceNavbar = () => {
                 >
                     <SearchIcon className='size-5 text-white mr-2' />
                     <span className='text-white text-xs'>
-                        Search {workspaceData?.name || 'Workspace'} 
+                        Search {workspaceDetails?.name || 'Workspace'} 
                     </span>
                 </Button>
             </div>

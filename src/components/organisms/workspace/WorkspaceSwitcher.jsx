@@ -12,7 +12,7 @@ export const WorkspaceSwitcher = () => {
     const { workspaceId } = useParams();
     const navigate = useNavigate();
 
-    const { isFetching, workspaceData} = useGetWorkspaceById(workspaceId);
+    const { isFetching, workspaceDetails} = useGetWorkspaceById(workspaceId);
 
     const { isFetching: isLoading, Workspaces } = useFetchWorkspaceOfMember();
 
@@ -26,7 +26,7 @@ export const WorkspaceSwitcher = () => {
                 <Button
                     className='size-9 relative overflow-hidden bg-[#ABABAD] hover:bg-[#ABABAD]/80 font-semibold text-slate-800 text-xl'
                 >
-                    {isFetching ? (<Loader className='animate-spin' />) : workspaceData?.name.charAt(0).toUpperCase() }
+                    {isFetching ? (<Loader className='animate-spin' />) : workspaceDetails?.name.charAt(0).toUpperCase() }
                 </Button>
 
 
@@ -35,7 +35,7 @@ export const WorkspaceSwitcher = () => {
                 <DropdownMenuItem
                     className='cursor-pointer justify-start items-start'
                 >
-                    {workspaceData?.name}
+                    {workspaceDetails?.name}
                     <span className='text-xs text-muted-foregorund text-green-500'>
                         (Active)
                     </span>

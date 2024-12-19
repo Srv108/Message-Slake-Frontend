@@ -1,19 +1,33 @@
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import { UserButton } from '@/components/atoms/UserButton/UserButton';
-import { Button } from '@/components/ui/button';
+import { useFetchWorkspaceOfMember } from '@/hooks/api/workspace/useFetchWorkspaceOfMember';
 import { useWorkspaceCreateModal } from '@/hooks/context/useWorkspaceCreateModal';
 
 export const Home = () => {
 
+    const navigate = useNavigate();
+
     const { setOpenWorkspaceCreateModal } = useWorkspaceCreateModal();
 
-    function handleOpenWorkspaceCreateModal(){
-        setOpenWorkspaceCreateModal(true);
-    }
+    const { isFetching, Workspaces} = useFetchWorkspaceOfMember();
+
+    useEffect(() => {
+        if(isFetching) return;
+        console.log('Workspaces download is',Workspaces);
+
+        if(Workspaces.length === 0 || !Workspaces){
+            console.log('First Create your Workspace to go ahead');
+            setOpenWorkspaceCreateModal(true);
+        }else{
+            navigate(`/workspace/${Workspaces[0]._id}`);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[Workspaces, isFetching, navigate]);
     return(
         <>
-            <h1> Welcome to the Home page</h1>
             <UserButton/>
-            <Button onClick={handleOpenWorkspaceCreateModal} >Open</Button>
         </>
     );
 };
