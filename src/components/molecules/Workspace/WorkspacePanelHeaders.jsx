@@ -10,7 +10,7 @@ export const WorkspacePanelHeaders = ({ workspace }) => {
 
     const { auth } = useAuth();
     const { setOpenWorkspacePreference } = useWorkspacePreferenceModal();
-    const isLoggedInUserAdmin = workspace?.members?.find((member) => member.memberId === auth?.user?.id && member.role === 'admin');
+    const isLoggedInUserAdmin = workspace?.members?.find((member) => member.memberId._id === auth?.user?.id && member.role === 'admin');
 
     return (
         <div className='flex items-center justify-between px-4 h-[50px] gap-0.5'>

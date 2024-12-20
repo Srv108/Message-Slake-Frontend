@@ -10,8 +10,8 @@ import { useCreateChannelContext } from '@/hooks/context/useCreateChannelContext
 export const WorkspacePanel = () => {
 
     const { workspaceId } = useParams();
-
     const { setOpenCreateChannelModal } = useCreateChannelContext();
+
     const { isFetching, isSuccess, workspaceDetails } = useGetWorkspaceById(workspaceId);
 
     if(isFetching){
