@@ -79,3 +79,22 @@ export const updateWorkspaceRequest = async({ workspaceId, payload, token}) => {
         throw error.response.data;
     }
 };
+
+export const addMembersToWorkspaceRequest = async ({ workspaceId, userId, role, token}) => {
+    try {
+        console.log(workspaceId,userId,role,token);
+        const response = await axiosInstance.put(`/workspace/${workspaceId}/members`,{
+            user: userId,
+            role: role
+        },{
+            headers: {
+                'access-token' : token
+            }
+        });
+
+        return response.data.data;
+    } catch (error) {
+        console.log('Error coming in adding members to the workspace',error);
+        throw error.response.data;
+    }
+};

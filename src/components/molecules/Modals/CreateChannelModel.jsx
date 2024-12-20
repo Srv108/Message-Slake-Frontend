@@ -8,9 +8,11 @@ import { Label } from '@/components/ui/label';
 import { useCreateChannel } from '@/hooks/api/channel/useCreateChannel';
 import { useCreateChannelContext } from '@/hooks/context/useCreateChannelContext';
 import { useWorkspace } from '@/hooks/context/useWorkspace';
+import { useToast } from '@/hooks/use-toast';
 
 export const CreateChannelModel = () => {
 
+    const { toast} = useToast();
     const queryClient = useQueryClient();
     const [name, setName] = useState('');
     const { currentWorkspace } = useWorkspace();
@@ -21,13 +23,16 @@ export const CreateChannelModel = () => {
         e.preventDefault();
 
         try {
-            const response = await createChannelMutation({
+            await createChannelMutation({
                 name: name,
                 workspaceId: currentWorkspace?._id
             });
-
+            toast({
+                variant: 'success',
+                title: `${name} channel created Successfully`,
+            });
             queryClient.invalidateQueries(`fetchWorkspace-${currentWorkspace._id}`);
-            console.log('channel created ',response);
+            
         } catch (error) {
             console.log('Failed to create workspace',error);
         } finally{

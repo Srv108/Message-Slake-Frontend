@@ -4,7 +4,7 @@ import { FaCaretDown, FaCaretRight } from 'react-icons/fa';
 
 import { Button } from '@/components/ui/button';
 
-export const WorkspacePanelSection = ({ children ,label, onIconClick }) => {
+export const WorkspacePanelMemberSection = ({ children ,label, onIconClick }) => {
 
     const [open, setOpen] = useState(true);
 
