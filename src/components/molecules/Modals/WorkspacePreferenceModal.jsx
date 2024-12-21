@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { TrashIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogT
 import { Input } from '@/components/ui/input';
 import { useDeleteWorkspace } from '@/hooks/api/workspace/useDeleteWorkspace';
 import { useUpdateWorkspace } from '@/hooks/api/workspace/useUpdateWorkspace';
+import { useConfirmContext } from '@/hooks/context/useConfirmContext';
 import { useWorkspace } from '@/hooks/context/useWorkspace';
 import { useWorkspacePreferenceModal } from '@/hooks/context/useWorkspacePreferenceModal';
 import { useToast } from '@/hooks/use-toast';
@@ -22,11 +23,21 @@ export const WorkspacePreferenceModal = () => {
     const { deleteWorkspaceMutation, isPending: deletePending } = useDeleteWorkspace(currentWorkspace?._id);
     const { isPending: updatePending, updateWorkspaceMutataion } = useUpdateWorkspace(currentWorkspace?._id);
 
+    const { confirmation, setConfirmation , setOpenConfirmModal} = useConfirmContext(); // to confirm deletion
+    
     const [editOpen, setEditOpen] = useState(false);
     const [renameValue, setRenameValue] = useState(currentWorkspace?.name);
 
+    useEffect(() => {
+        if(!confirmation) return;
+        handleDeleteWorkspace();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[confirmation,setOpenConfirmModal,setConfirmation]);
+    
     async function handleDeleteWorkspace() {
         try {
+            setOpenConfirmModal(true);
+
             await deleteWorkspaceMutation();
             queryClient.invalidateQueries('fetchworkspaces');
             navigate('/home');
@@ -35,6 +46,8 @@ export const WorkspacePreferenceModal = () => {
                 title: 'Workspace deleted successfully',
                 type: 'success',
             });
+            setConfirmation(false);
+            setOpenConfirmModal(false);
         } catch (error) {
             console.log('Error deleting workspace', error);
             toast({
@@ -120,7 +133,7 @@ export const WorkspacePreferenceModal = () => {
                         </Dialog>
 
                         <button
-                            onClick={handleDeleteWorkspace}
+                            onClick={() => setOpenConfirmModal(true)}
                             disabled={deletePending}
                             className='flex items-center gap-x-2 px-5 py-4 bg-white rounded-lg border cursor-pointer hover:bg-gray-50'
                         >

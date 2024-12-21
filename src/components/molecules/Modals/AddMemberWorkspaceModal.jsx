@@ -80,7 +80,7 @@ export const AddMemberWorkspaceModal = () => {
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button type='button' disabled={isPending} onClick={handleFormSubmit}> Create Group</Button>
+                    <Button type='button' disabled={isPending} onClick={handleFormSubmit}> Add Member </Button>
                     <DialogClose asChild>
                         <Button type="button" disabled={isPending} variant="secondary" onClick={() => setOpenAddMemberModal(false)}>
                             Close
