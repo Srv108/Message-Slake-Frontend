@@ -5,6 +5,7 @@ import { SideBarItem } from '@/components/atoms/SideBarItem/SideBarItem';
 import { WorkspacePanelHeaders } from '@/components/molecules/Workspace/WorkspacePanelHeaders';
 import { WorkspacePanelMemberSection } from '@/components/molecules/Workspace/WorkspacePanelMemberSection';
 import { WorkspacePanelSection } from '@/components/molecules/Workspace/WorkspacePanelSection';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useGetWorkspaceById } from '@/hooks/api/workspace/useGetWorkspaceById';
 import { useAddMemberContext } from '@/hooks/context/useAddMemberContext';
 import { useCreateChannelContext } from '@/hooks/context/useCreateChannelContext';
@@ -38,57 +39,59 @@ export const WorkspacePanel = () => {
     }
     return(
 
+
         <div
             className='flex flex-col h-full bg-slack-medium'
         >
             <WorkspacePanelHeaders workspace={workspaceDetails} />
+            <ScrollArea  >
+                <div className='flex flex-col px-2 mt-3' >
+                    <SideBarItem
+                        label='Threads'
+                        variant='active'
+                        id='Thread'
+                        Icon={MessageSquareTextIcon}
+                    />
+                    <SideBarItem
+                        label='Drafts and Sends'
+                        variant='default'
+                        id='Thread'
+                        Icon={SendHorizonalIcon}
+                    />
+                    <WorkspacePanelSection 
+                        label='Channels'
+                        onIconClick={()=> setOpenCreateChannelModal(true)}
+                    >
+                        {workspaceDetails?.channels?.map((channel) => {
+                            return (
+                                <SideBarItem
+                                    key={channel._id}
+                                    label={channel.name}
+                                    id={channel._id}
+                                    Icon={HashIcon}
+                                />
+                            );
+                        })}
+                    </WorkspacePanelSection>
 
-            <div className='flex flex-col px-2 mt-3' >
-                <SideBarItem
-                    label='Threads'
-                    variant='active'
-                    id='Thread'
-                    Icon={MessageSquareTextIcon}
-                />
-                <SideBarItem
-                    label='Drafts and Sends'
-                    variant='default'
-                    id='Thread'
-                    Icon={SendHorizonalIcon}
-                />
-                <WorkspacePanelSection 
-                    label='Channels'
-                    onIconClick={()=> setOpenCreateChannelModal(true)}
-                >
-                    {workspaceDetails?.channels?.map((channel) => {
-                        return (
-                            <SideBarItem
-                                key={channel._id}
-                                label={channel.name}
-                                id={channel._id}
-                                Icon={HashIcon}
-                            />
-                        );
-                    })}
-                </WorkspacePanelSection>
-
-                <WorkspacePanelMemberSection 
-                    label='Members'
-                    onIconClick={() => setOpenAddMemberModal(true)}
-                >
-                    {workspaceDetails?.members?.map((member) => {
-                        return (
-                            <SideBarItem 
-                                key={member._id}
-                                label={member.memberId.username}
-                                id={member.memberId._id}
-                                Icon={User}
-                            />
-                        );
-                    })}
-                </WorkspacePanelMemberSection>
-            </div>
-
+                    <WorkspacePanelMemberSection 
+                        label='Members'
+                        onIconClick={() => setOpenAddMemberModal(true)}
+                    >
+                        {workspaceDetails?.members?.map((member) => {
+                            return (
+                                <SideBarItem 
+                                    key={member._id}
+                                    label={member.memberId.username}
+                                    id={member.memberId._id}
+                                    Icon={User}
+                                />
+                            );
+                        })}
+                    </WorkspacePanelMemberSection>
+                </div>
+            </ScrollArea>
         </div>
+
     );
 };

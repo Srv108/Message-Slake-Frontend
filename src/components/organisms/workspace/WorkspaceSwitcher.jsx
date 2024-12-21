@@ -9,8 +9,8 @@ import { useGetWorkspaceById } from '@/hooks/api/workspace/useGetWorkspaceById';
 
 export const WorkspaceSwitcher = () => {
 
-    const { workspaceId } = useParams();
     const navigate = useNavigate();
+    const { workspaceId } = useParams();
 
     const { isFetching, workspaceDetails} = useGetWorkspaceById(workspaceId);
 
@@ -31,7 +31,7 @@ export const WorkspaceSwitcher = () => {
 
 
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            <DropdownMenuContent className='max-h-screen overflow-y-scroll'>
                 <DropdownMenuItem
                     className='cursor-pointer justify-start items-start'
                 >

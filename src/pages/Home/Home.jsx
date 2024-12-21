@@ -18,7 +18,6 @@ export const Home = () => {
         console.log('Workspaces download is',Workspaces);
 
         if(Workspaces.length === 0 || !Workspaces){
-            console.log('First Create your Workspace to go ahead');
             setOpenWorkspaceCreateModal(true);
         }else{
             navigate(`/workspace/${Workspaces[0]._id}`);
