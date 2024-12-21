@@ -1,17 +1,18 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { TrashIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { ConfirmationModal } from '@/components/atoms/ConfirmationModal/ConfirmationModal';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { useDeleteWorkspace } from '@/hooks/api/workspace/useDeleteWorkspace';
 import { useUpdateWorkspace } from '@/hooks/api/workspace/useUpdateWorkspace';
-import { useConfirmContext } from '@/hooks/context/useConfirmContext';
 import { useWorkspace } from '@/hooks/context/useWorkspace';
 import { useWorkspacePreferenceModal } from '@/hooks/context/useWorkspacePreferenceModal';
 import { useToast } from '@/hooks/use-toast';
+import { useConfirm } from '@/hooks/useConfirm';
 
 export const WorkspacePreferenceModal = () => {
     const navigate = useNavigate();
@@ -23,36 +24,30 @@ export const WorkspacePreferenceModal = () => {
     const { deleteWorkspaceMutation, isPending: deletePending } = useDeleteWorkspace(currentWorkspace?._id);
     const { isPending: updatePending, updateWorkspaceMutataion } = useUpdateWorkspace(currentWorkspace?._id);
 
-    const { confirmation, setConfirmation , setOpenConfirmModal} = useConfirmContext(); // to confirm deletion
     
     const [editOpen, setEditOpen] = useState(false);
     const [renameValue, setRenameValue] = useState(currentWorkspace?.name);
 
-    useEffect(() => {
-        if(!confirmation) return;
-        handleDeleteWorkspace();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[confirmation,setOpenConfirmModal,setConfirmation]);
-    
+    const { promise, handleClose, handleConfirm, confirmation } = useConfirm();
+
     async function handleDeleteWorkspace() {
         try {
-            setOpenConfirmModal(true);
-
+            const ok = await confirmation();
+            console.log('Confirmation recieved');
+            if(!ok) return;
             await deleteWorkspaceMutation();
             queryClient.invalidateQueries('fetchworkspaces');
             navigate('/home');
             setOpenWorkspacePreference(false); 
             toast({
+                variant: 'success',
                 title: 'Workspace deleted successfully',
-                type: 'success',
             });
-            setConfirmation(false);
-            setOpenConfirmModal(false);
         } catch (error) {
             console.log('Error deleting workspace', error);
             toast({
+                variant: 'destructive',
                 title: 'Error deleting workspace',
-                type: 'error',
             });
         }
     }
@@ -65,7 +60,7 @@ export const WorkspacePreferenceModal = () => {
                 name: renameValue,
             });
             queryClient.invalidateQueries(`fetchWorkspace-${currentWorkspace?._id}`);
-            setOpenWorkspacePreference(false); // Close the modal
+            setOpenWorkspacePreference(false);
             toast({
                 title: 'Workspace updated successfully',
                 type: 'success',
@@ -81,6 +76,13 @@ export const WorkspacePreferenceModal = () => {
 
     return (
         <>
+            <ConfirmationModal 
+                title='Confirm Deletion'
+                message='Are you sure want to delete'
+                promise={promise}
+                handleClose={handleClose}
+                handleConfirm={handleConfirm}
+            />
             <Dialog open={openWorkspacePreference} onOpenChange={() => setOpenWorkspacePreference(false)}>
                 <DialogContent>
                     <DialogHeader>
@@ -133,7 +135,7 @@ export const WorkspacePreferenceModal = () => {
                         </Dialog>
 
                         <button
-                            onClick={() => setOpenConfirmModal(true)}
+                            onClick={handleDeleteWorkspace}
                             disabled={deletePending}
                             className='flex items-center gap-x-2 px-5 py-4 bg-white rounded-lg border cursor-pointer hover:bg-gray-50'
                         >
