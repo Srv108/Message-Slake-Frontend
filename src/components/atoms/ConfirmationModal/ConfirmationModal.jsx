@@ -11,7 +11,6 @@ export const ConfirmationModal = ({
     handleConfirm
 }) => {
 
-    console.log('modal opened');
     return (
         <Dialog
             open={promise !== null}

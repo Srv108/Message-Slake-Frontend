@@ -71,15 +71,15 @@ export const CreateChannelModel = () => {
                             onChange={(e) => setName(e.target.value)}
                         />
                     </div>
-                    </div>
-                    <DialogFooter>
-                        <Button type='button' disabled={isPending} onClick={handleFormSubmit}> Create Channel</Button>
-                        <DialogClose asChild>
-                            <Button type="button" variant="secondary" onClick={handleClose}>
-                                Close
-                            </Button>
-                        </DialogClose>
-                    </DialogFooter>
+                </div>
+                <DialogFooter>
+                    <Button type='button' disabled={isPending} onClick={handleFormSubmit}> Create Channel</Button>
+                    <DialogClose asChild>
+                        <Button type="button" variant="secondary" onClick={handleClose}>
+                            Close
+                        </Button>
+                    </DialogClose>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     );

@@ -3,7 +3,6 @@ import { TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { ConfirmationModal } from '@/components/atoms/ConfirmationModal/ConfirmationModal';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -28,7 +27,15 @@ export const WorkspacePreferenceModal = () => {
     const [editOpen, setEditOpen] = useState(false);
     const [renameValue, setRenameValue] = useState(currentWorkspace?.name);
 
-    const { promise, handleClose, handleConfirm, confirmation } = useConfirm();
+    const { ConfirmDialog, confirmation } = useConfirm({
+        title: 'Confirm Deletion',
+        message: 'Are you sure want to delete'
+    });
+
+    const { ConfirmDialog: UpdateDialog, confirmation: updateConfirmation} = useConfirm({
+        title: 'Confirm Updation',
+        message: 'Are you sure to update'
+    });
 
     async function handleDeleteWorkspace() {
         try {
@@ -55,7 +62,9 @@ export const WorkspacePreferenceModal = () => {
     async function handleFormSubmit(e) {
         e.preventDefault(); 
         try {
-            console.log(renameValue);
+
+            const ok = await updateConfirmation();
+            if(!ok) return;
             await updateWorkspaceMutataion({
                 name: renameValue,
             });
@@ -75,14 +84,9 @@ export const WorkspacePreferenceModal = () => {
     }
 
     return (
-        <>
-            <ConfirmationModal 
-                title='Confirm Deletion'
-                message='Are you sure want to delete'
-                promise={promise}
-                handleClose={handleClose}
-                handleConfirm={handleConfirm}
-            />
+        <>  
+            <UpdateDialog />
+            <ConfirmDialog />
             <Dialog open={openWorkspacePreference} onOpenChange={() => setOpenWorkspacePreference(false)}>
                 <DialogContent>
                     <DialogHeader>
@@ -109,8 +113,10 @@ export const WorkspacePreferenceModal = () => {
 
                             <DialogContent>
                                 <DialogHeader>Rename Workspace</DialogHeader>
-                                <form className='space-y-4' onSubmit={handleFormSubmit}>
-                                    <Input
+
+                                <div className="flex items-center space-y-5">
+                                    <Input 
+                                        type='text'
                                         value={renameValue}
                                         onChange={(e) => setRenameValue(e.target.value)}
                                         required
@@ -120,17 +126,17 @@ export const WorkspacePreferenceModal = () => {
                                         disabled={updatePending}
                                         placeholder='Workspace Name e.g. Design Team'
                                     />
-                                    <DialogFooter>
-                                        <DialogClose>
-                                            <Button variant='outline' disabled={updatePending}>
-                                                Cancel
-                                            </Button>
-                                        </DialogClose>
-                                        <Button type='submit' disabled={updatePending}>
-                                            Save
+                                </div>
+                                <DialogFooter>
+                                    <DialogClose>
+                                        <Button variant='outline' disabled={updatePending}>
+                                            Cancel
                                         </Button>
-                                    </DialogFooter>
-                                </form>
+                                    </DialogClose>
+                                    <Button type='submit' onClick={handleFormSubmit} disabled={updatePending}>
+                                        Save
+                                    </Button>
+                                </DialogFooter>
                             </DialogContent>
                         </Dialog>
 
