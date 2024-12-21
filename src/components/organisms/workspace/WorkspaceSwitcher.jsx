@@ -1,5 +1,4 @@
 import { Loader } from 'lucide-react';
-import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
@@ -15,11 +14,6 @@ export const WorkspaceSwitcher = () => {
     const { isFetching, workspaceDetails} = useGetWorkspaceById(workspaceId);
 
     const { isFetching: isLoading, Workspaces } = useFetchWorkspaceOfMember();
-
-    useEffect(() => {
-        if(Workspaces) console.log(Workspaces);
-    },[Workspaces,isLoading]);
-
     return (
         <DropdownMenu>
             <DropdownMenuTrigger>

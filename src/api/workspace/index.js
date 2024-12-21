@@ -41,7 +41,6 @@ export const fetchAllWorkspaceOfMemberRequest = async(token) => {
             }
         });
 
-        console.log('Workspace fetched ', response.data);
         return response?.data?.data?.data;
     } catch (error) {
         console.log('Error in fetching all workspace of member',error);
@@ -57,22 +56,23 @@ export const deleteWorkspaceRequest = async ({ workspaceId, token}) => {
             }
         });
 
-        return response?.data;
+        return response?.data.data;
     } catch (error) {
         console.log('Error coming in deleting workspace request ',error);
         throw error.response.data;
     }
 };
 
-export const updateWorkspaceRequest = async({ workspaceId, payload, token}) => {
+export const updateWorkspaceRequest = async({ workspaceId, name, token}) => {
     try {
-        const response = await axiosInstance.put(`/workspace/${workspaceId}/update`,{ payload },{
+        console.log(name);
+        const response = await axiosInstance.put(`/workspace/${workspaceId}/update`,{name},{
             headers: {
                 'access-token' : token
             }
         });
     
-        return response?.data;
+        return response?.data?.data;
         
     } catch (error) {
         console.log('Error coming in updating workspace request ',error);
