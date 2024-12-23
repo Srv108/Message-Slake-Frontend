@@ -23,7 +23,6 @@ export const SideBarItem = ({
     label,
     variant
 }) => {
-
     const { workspaceId } = useParams();
     return (
         <Button
@@ -35,7 +34,7 @@ export const SideBarItem = ({
                 className='flex items-center gap-2'
                 to={`/workspace/${workspaceId}/channels/${id}`}
             >
-                <Icon className='size-3.5 mr-1' />
+                <Icon className='size-3.5 mr-1' /> 
                 <span className='text-sm'>
                     {label}
                 </span>

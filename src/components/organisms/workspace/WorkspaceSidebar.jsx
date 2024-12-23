@@ -1,11 +1,14 @@
-import { BellIcon, HomeIcon, MessageSquareIcon, MoreHorizontalIcon } from 'lucide-react';
+import  { HeartIcon, HomeIcon, MessageSquareIcon, MoreHorizontalIcon, SearchIcon, UserIcon } from 'lucide-react';
 
 import { UserButton } from '@/components/atoms/UserButton/UserButton';
 import { SidebarButton } from '@/components/molecules/SidebarButton/SidebarButton';
+import { useProfileModal } from '@/hooks/context/useProfileModal';
 
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 
 export const WorkspaceSidebar = () => {
+
+    const { setOpenProfileModal } = useProfileModal();
 
     return (
         <aside
@@ -18,21 +21,30 @@ export const WorkspaceSidebar = () => {
                 label="Home"
             />
 
+            <SidebarButton 
+                Icon={SearchIcon}
+                label='Search'
+            />
+
+            <SidebarButton
+                Icon={HeartIcon}
+                label="Notification"
+            />
+            
             <SidebarButton
                 Icon={MessageSquareIcon}
                 label="DMs"
             />
 
             <SidebarButton
-                Icon={BellIcon}
-                label="Notifications"
-            />
-
-            <SidebarButton
                 Icon={MoreHorizontalIcon}
                 label="More"
             />
-
+            <SidebarButton 
+                Icon={UserIcon}
+                label='Profile'
+                iconOnClick={() => setOpenProfileModal(true)}
+            />
             <div className='flex flex-col items-center justify-center mt-auto mb-5 gap-y-1'>
                 <UserButton />
             </div>

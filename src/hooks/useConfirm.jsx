@@ -30,8 +30,8 @@ export const useConfirm = ({
     const ConfirmDialog = () => {
         return (
             <Dialog
-            open={promise !== null}
-            onOpenChange={handleClose}
+                open={promise !== null}
+                onOpenChange={handleClose}
             >
                 <DialogContent className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
                     <DialogHeader className="text-xl font-semibold text-gray-900">{title}</DialogHeader>
