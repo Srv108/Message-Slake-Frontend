@@ -85,6 +85,7 @@ export const WorkspacePreferenceModal = () => {
 
     return (
         <>  
+            
             <UpdateDialog />
             <ConfirmDialog />
             <Dialog open={openWorkspacePreference} onOpenChange={() => setOpenWorkspacePreference(false)}>

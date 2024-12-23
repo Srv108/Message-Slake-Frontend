@@ -1,5 +1,7 @@
 import { ChevronDownIcon, ListFilterIcon, SquarePenIcon } from 'lucide-react';
+import { useState } from 'react';
 
+import { WorkspaceInviteModal } from '@/components/organisms/Modals/WorkspaceInviteModal';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/context/useAuth';
@@ -9,10 +11,19 @@ export const WorkspacePanelHeaders = ({ workspace }) => {
 
 
     const { auth } = useAuth();
+    const [openInviteModal, setOpenInviteModal] = useState(false);
     const { setOpenWorkspacePreference } = useWorkspacePreferenceModal();
     const isLoggedInUserAdmin = workspace?.members?.find((member) => member.memberId._id === auth?.user?.id && member.role === 'admin');
 
     return (
+        <>
+        <WorkspaceInviteModal
+            workspaceId={workspace._id}
+            joinCode={workspace.joinCode}
+            workspaceName={workspace.name}
+            openInviteModal={openInviteModal}
+            setOpenInviteModal={setOpenInviteModal}
+        />
         <div className='flex items-center justify-between px-4 h-[50px] gap-0.5'>
             <DropdownMenu>
                 <DropdownMenuTrigger>
@@ -60,6 +71,11 @@ export const WorkspacePanelHeaders = ({ workspace }) => {
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
                                     className='cursor-pointer py-2'
+                                    onClick={() => {
+                                        setTimeout(() => {
+                                            setOpenInviteModal(true);
+                                        },10);
+                                    }}
                                 >
                                     Invite people to {workspace?.name}
                                 </DropdownMenuItem>
@@ -85,6 +101,6 @@ export const WorkspacePanelHeaders = ({ workspace }) => {
                     </Button>
             </div>
         </div>
-
+        </>
     );
 };

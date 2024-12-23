@@ -98,3 +98,19 @@ export const addMembersToWorkspaceRequest = async ({ workspaceId, userId, role, 
         throw error.response.data;
     }
 };
+
+export const updateWorkspaceJoinCodeRequest = async ({workspaceId,token}) => {
+    try {
+        console.log(workspaceId,token);
+        const response = await axiosInstance.put(`workspace/${workspaceId}/joincode/reset`,{},{
+            headers: {
+                'access-token' : token
+            }
+        });
+
+        return response?.data?.data;
+    } catch (error) {
+        console.log('Error coming in updating joincode api',error);
+        throw error.response.data;
+    }
+};

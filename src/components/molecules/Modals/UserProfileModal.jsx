@@ -29,7 +29,7 @@ export const UserProfileModal = () => {
             handleUploadImage();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[file,deletePic,setDeletePic]);
+    },[file,deletePic,setDeletePic,openProfilePic]);
 
     async function handleUploadImage(){
         setOpenEditPic(false);
@@ -46,6 +46,10 @@ export const UserProfileModal = () => {
             setPreview(null);
             setDeletePic(false);
         }
+    }
+
+    function handleProfilePicture(){
+        setOpenProfilePic(true);
     }
     return (
         <Dialog
@@ -72,14 +76,14 @@ export const UserProfileModal = () => {
                                         >
                                             <Button 
                                                 variant='outline'
-                                                onClick={() => setOpenProfilePic(true)}
+                                                onClick={handleProfilePicture}
                                                 className="text-blue-500 hover:text-blue-700 border-2 focus:outline-none text-center py-2 rounded-md transition duration-200 ease-in-out transform hover:scale-105"
                                             >
                                                 See Profile Pic
                                             </Button>
                                             <DialogContent className='p-0' >
                                                 <div>
-                                                    <img src={(deletePic) ? '' : auth?.user?.avatar} className={`${deletePic ? 'border-0' : 'w-full h-full object-cover border-2 border-slate-300'}  `} />
+                                                    <img src={(deletePic) ? '' : auth?.user?.avatar} className={`${deletePic ? 'border-0' : 'w-full h-full rounded-lg object-cover border-2 border-slate-300'}  `} />
                                                 </div>
                                             </DialogContent>
                                         </Dialog>
