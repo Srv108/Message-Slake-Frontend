@@ -30,7 +30,6 @@ export const WorkspaceNavbar = () => {
     },[workspaceDetails,setCurrentWorkspace, error, isSuccess ,isFetching ]);
     
     if(isFetching){
-        console.log('data is there');
         return (<Loader className='animate-spin ml-2' />);
     }
 

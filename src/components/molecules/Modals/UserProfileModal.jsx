@@ -48,9 +48,7 @@ export const UserProfileModal = () => {
         }
     }
 
-    function handleProfilePicture(){
-        setOpenProfilePic(true);
-    }
+    
     return (
         <Dialog
             open={openProfileModal}
@@ -59,10 +57,23 @@ export const UserProfileModal = () => {
             <DialogContent className='h-3/4 p-1'>
                 <div className="h-full w-full bg-slack-medium border border-zinc-800 rounded-lg shadow-lg overflow-hidden">
                     <div className="p-6 text-center h-4/6 flex flex-col items-center justify-center space-y-6 bg-center bg-cover bg-no-repeat backdrop-blur-md bg-[url('https://gratisography.com/wp-content/uploads/2024/10/gratisography-cool-cat-800x525.jpg')] " >
-                        <img src={(deletePic) ? '' : auth?.user?.avatar} className={`${deletePic ? 'border-0' : 'w-60 h-60 rounded-full object-cover border-2 border-slate-300 cursor-pointer'}  `} />
+                        <img onClick={() => {
+                            console.log('pic clicked ');
+                            setOpenProfilePic(true);
+                        }} src={(deletePic) ? '' : auth?.user?.avatar} className={`${deletePic ? 'border-0' : 'w-60 h-60 rounded-full object-cover border-2 border-slate-300 cursor-pointer'}  `} />
                         <div onClick={() => setOpenEditPic(true)} className='absolute right-2 bottom-2 cursor-pointer p-0.5 rounded-full border-2 bg-slack hover:bg-slack-dark'>
                             <PencilIcon className='size-5 text-white' />
                         </div>
+                        <Dialog
+                            open={openProfilePic}
+                            onOpenChange={() => setOpenProfilePic(false)}
+                        >
+                            <DialogContent className='p-0' >
+                                <div>
+                                    <img src={(deletePic) ? '' : auth?.user?.avatar} className={`${deletePic ? 'border-0' : 'w-full h-full rounded-lg object-cover border-2 border-slate-300'}  `} />
+                                </div>
+                            </DialogContent>
+                        </Dialog>
                         <Dialog
                             open={openEditPic}
                             onOpenChange={() => setOpenEditPic(false)}
@@ -70,24 +81,13 @@ export const UserProfileModal = () => {
                             <DialogContent className="p-6 rounded-lg shadow-xl bg-slack-medium w-full max-w-sm mx-auto">
                                 <div className="flex flex-col justify-center items-center space-y-4">
                                     <div className="flex flex-col space-y-2">
-                                        <Dialog
-                                            open={openProfilePic}
-                                            onOpenChange={() => setOpenProfilePic(false)}
+                                        <Button 
+                                            variant='outline'
+                                            onClick={() => setOpenProfilePic(true)}
+                                            className="text-blue-500 hover:text-blue-700 border-2 focus:outline-none text-center py-2 rounded-md transition duration-200 ease-in-out transform hover:scale-105"
                                         >
-                                            <Button 
-                                                variant='outline'
-                                                onClick={handleProfilePicture}
-                                                className="text-blue-500 hover:text-blue-700 border-2 focus:outline-none text-center py-2 rounded-md transition duration-200 ease-in-out transform hover:scale-105"
-                                            >
-                                                See Profile Pic
-                                            </Button>
-                                            <DialogContent className='p-0' >
-                                                <div>
-                                                    <img src={(deletePic) ? '' : auth?.user?.avatar} className={`${deletePic ? 'border-0' : 'w-full h-full rounded-lg object-cover border-2 border-slate-300'}  `} />
-                                                </div>
-                                            </DialogContent>
-                                        </Dialog>
-                                        
+                                            See Profile Pic
+                                        </Button>
                                         <Button 
                                             variant='outline'
                                             onClick={() => {

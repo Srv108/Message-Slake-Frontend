@@ -40,7 +40,6 @@ export const fetchAllWorkspaceOfMemberRequest = async(token) => {
                 'access-token' : token
             }
         });
-        console.log('all workspace',response?.data?.data?.data);
         return response?.data?.data?.data;
     } catch (error) {
         console.log('Error in fetching all workspace of member',error,error.status);
