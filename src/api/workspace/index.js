@@ -11,7 +11,7 @@ export const createWorkspaceRequest = async(workspaceDetails) => {
             }
         });
 
-        return response?.data?.data;
+        return response?.data;
     } catch (error) {
         console.log('error coming from create workspace request',error);
         throw error.response.data;
@@ -28,8 +28,8 @@ export const getWorkspaceRequest = async({workspaceId, token}) => {
 
         return response?.data?.data;
     }catch(error){
-        console.log('error coming from get workspace request',error);
-        throw error.response.data;
+        console.log('error coming from get workspace request',error.status);
+        throw error.response;
     }
 };
 
@@ -40,11 +40,11 @@ export const fetchAllWorkspaceOfMemberRequest = async(token) => {
                 'access-token' : token
             }
         });
-
+        console.log('all workspace',response?.data?.data?.data);
         return response?.data?.data?.data;
     } catch (error) {
-        console.log('Error in fetching all workspace of member',error);
-        throw error.response.data;
+        console.log('Error in fetching all workspace of member',error,error.status);
+        throw error.response;
     }
 };
 

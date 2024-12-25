@@ -1,25 +1,36 @@
 import { InfoIcon, Loader, SearchIcon } from 'lucide-react';
 import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
 import { useGetWorkspaceById } from '@/hooks/api/workspace/useGetWorkspaceById';
+import { useAuth } from '@/hooks/context/useAuth';
 import { useWorkspace } from '@/hooks/context/useWorkspace';
 
 export const WorkspaceNavbar = () => {
 
+    const navigate = useNavigate();
+    const { logout } = useAuth();
     const { workspaceId } = useParams();
     
     const { setCurrentWorkspace } = useWorkspace();
-    const { isFetching, workspaceDetails } = useGetWorkspaceById(workspaceId);
+    const { isFetching, workspaceDetails ,error, isSuccess } = useGetWorkspaceById(workspaceId);
 
     useEffect(()=>{
+        if(!isFetching && !isSuccess && error){
+            if(error.status === 403){
+                logout();
+                navigate('/auth/signin');
+            }
+        }
         if(workspaceDetails){
             setCurrentWorkspace(workspaceDetails);
         }
-    },[workspaceDetails,setCurrentWorkspace]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[workspaceDetails,setCurrentWorkspace, error, isSuccess ,isFetching ]);
     
     if(isFetching){
+        console.log('data is there');
         return (<Loader className='animate-spin ml-2' />);
     }
 

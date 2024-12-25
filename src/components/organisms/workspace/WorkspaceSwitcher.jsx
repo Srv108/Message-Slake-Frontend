@@ -14,6 +14,7 @@ export const WorkspaceSwitcher = () => {
     const { isFetching, workspaceDetails} = useGetWorkspaceById(workspaceId);
 
     const { isFetching: isLoading, Workspaces } = useFetchWorkspaceOfMember();
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger>

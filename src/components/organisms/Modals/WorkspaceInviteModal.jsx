@@ -48,7 +48,7 @@ export const WorkspaceInviteModal = ({
                 </DialogHeader>
 
                 <div className="flex flex-col justify-center items-center py-5 gap-y-4">
-                    <p className="font-serif bg-slack-dark rounded-lg p-1 text-white text-4xl uppercase">
+                    <p className="font-bold bg-slack-dark rounded-lg p-1 text-white text-3xl uppercase">
                         {joinCode}
                     </p>
                     <Button
