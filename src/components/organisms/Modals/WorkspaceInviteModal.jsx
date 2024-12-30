@@ -19,12 +19,12 @@ export const WorkspaceInviteModal = ({
     const { updateWorkspaceJoinCodeMutation } = useUpdateWorkspaceJoincode(workspaceId);
 
     async function handleCopy(){
-        const invuteLink = `${window.location.origin}/${workspaceName}/join/${joinCode}`;
-        await navigator.clipboard.writeText(invuteLink);
+        const inviteLink = `${window.location.origin}/workspace/join/${workspaceId}`;
+        await navigator.clipboard.writeText(inviteLink);
 
         toast({
             variant: 'success',
-            title: 'Link Copied'
+            title: 'Link Link'
         });
     }
 
@@ -37,7 +37,9 @@ export const WorkspaceInviteModal = ({
             console.log('failed to reset the join code',error);
         }
     }
-
+    async function handleCopyCode() {
+        await navigator.clipboard.writeText(joinCode);
+    }
     function openJoinPage(){
         window.open(`/workspace/join/${workspaceId}`,'_blank');
     }
@@ -52,9 +54,12 @@ export const WorkspaceInviteModal = ({
                 </DialogHeader>
 
                 <div className="flex flex-col justify-center items-center py-5 gap-y-4">
-                    <p className="font-bold bg-slack-dark rounded-lg p-1 text-white text-3xl uppercase">
-                        {joinCode}
-                    </p>
+                    <div className='flex flex-row '>
+                        <div className="flex flex-row font-bold bg-slack-dark rounded-lg p-1 text-white text-2xl uppercase">
+                            {joinCode}
+                            <CopyIcon onClick={handleCopyCode} className="size-6 ml-2 mt-1 cursor-pointer rounded " />
+                        </div>
+                    </div>
                     <Button
                         // variant='outline'
                         onClick={handleCopy}

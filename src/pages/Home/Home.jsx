@@ -18,6 +18,7 @@ export const Home = () => {
     
     useEffect(() => {
         if(isFetching) return;
+        console.log(Workspaces,Workspaces.length);
         
         if (error?.status === 403) {
             console.log('Token expired or unauthorized. Redirecting to signin...');
@@ -26,7 +27,8 @@ export const Home = () => {
             return;
         }
 
-        if (Workspaces.length === 0 && !Workspaces) {
+        if (Workspaces.length === 0 || !Workspaces) {
+            console.log('Hey you have to open modal to create');
             setOpenWorkspaceCreateModal(true);
         } else {
             navigate(`/workspace/${Workspaces[0]._id}`);

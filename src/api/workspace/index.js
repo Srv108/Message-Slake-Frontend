@@ -11,7 +11,7 @@ export const createWorkspaceRequest = async(workspaceDetails) => {
             }
         });
 
-        return response?.data;
+        return response?.data?.data;
     } catch (error) {
         console.log('error coming from create workspace request',error);
         throw error.response.data;
@@ -98,6 +98,22 @@ export const addMembersToWorkspaceRequest = async ({ workspaceId, userId, role, 
     }
 };
 
+
+export const addMemberToWorkspaceByUsernameRequest = async({ username, workspaceId, token}) => {
+    try {
+        const response = await axiosInstance.put(`/workspace/${workspaceId}/add/member`,{username},{
+            headers: {
+                'access-token' : token
+            }
+        });
+        console.log(response?.data?.data);
+        return response?.data?.data;
+    } catch (error) {
+        console.log('Error coming in adding user to workspace by username request',error);
+        throw error.response.data;
+    }
+};
+
 export const updateWorkspaceJoinCodeRequest = async ({workspaceId,token}) => {
     try {
         console.log(workspaceId,token);
@@ -113,3 +129,21 @@ export const updateWorkspaceJoinCodeRequest = async ({workspaceId,token}) => {
         throw error.response.data;
     }
 };
+
+export const joinWorkspaceRequest = async({ workspaceId, joinCode, token}) => {
+    try {
+        console.log('join  request', workspaceId,joinCode,token);
+        const response = await axiosInstance.put(`/workspace/join/${workspaceId}`,{ joinCode: joinCode },{
+            headers: {
+                'access-token' : token
+            }
+        });
+        console.log('Response coming from join workspace request',response);
+        return response?.data?.data;
+    } catch (error) {
+        console.log('Error coming in workspace join request',error);
+        throw error.response.data;
+    }
+};
+
+

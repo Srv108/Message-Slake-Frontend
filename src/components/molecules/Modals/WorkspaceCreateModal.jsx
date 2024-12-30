@@ -31,9 +31,11 @@ export const WorkspaceCreateModal = () => {
                 description: workspaceDetails.description || ''
             });
 
-            queryClient.invalidateQueries('fetchworkspaces');
+            
             console.log('response coming from creating a new workspace ',response);
-            navigate(`/workspace/${response._id}`);
+            navigate(`/workspace/${response?._id}`);
+
+            queryClient.invalidateQueries('fetchworkspaces');
         } catch (error) {
             console.log('not able to create workspace', error);
         } finally {

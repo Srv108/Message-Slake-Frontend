@@ -14,7 +14,7 @@ export const useCreateWorkspce = () => {
             console.log(response);
             toast({
                 variant: 'success',
-                title: `${response.name} created Successfully`,
+                title: `${response?.name} created Successfully`,
             });
         },
         onError: (error) => {

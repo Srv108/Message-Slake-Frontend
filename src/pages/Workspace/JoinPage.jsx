@@ -1,13 +1,24 @@
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import VerificationInput from 'react-verification-input';
 
 import { Button } from '@/components/ui/button';
+import { useJoinWorkspace } from '@/hooks/api/workspace/useJoinWorkspace';
 
 export const JoinPage = () => {
 
+    const navigate = useNavigate();
     const { workspaceId } = useParams();
-    function handleAddMemberToWorkspace() {
-        console.log('Adding member to workspace',workspaceId);
+    const { isPending, joinWorkspaceMutation } = useJoinWorkspace(workspaceId);
+
+    async function handleAddMemberToWorkspace(joinCode) {
+        try {
+            console.log('now ready to join the workspce',joinCode);
+            const response = await joinWorkspaceMutation(joinCode);
+
+            if(response) navigate(`/workspace/${response._id}`);
+        } catch (error) {
+            console.log('Error coming from join workspace layout',error);
+        }
     }
 
     function goBackToWorkspace(){
@@ -33,7 +44,6 @@ export const JoinPage = () => {
                 <VerificationInput 
                     onComplete={handleAddMemberToWorkspace}
                     length={6}
-                    // onChange={}
                     classNames={{
                         container: 'flex gap-x-2',
                         character: 'h-auto rounded-md border border-gray-300 flex items-center justify-center text-lg font-medium focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500',
@@ -50,6 +60,7 @@ export const JoinPage = () => {
                 <Button
                     size='lg'
                     variant='outline'
+                    disabled={isPending}
                     onClick={goBackToWorkspace}
                 >
                     Back To Workspace
