@@ -20,6 +20,7 @@ const sideBarItemVariants = cva(
 export const SideBarItem = ({
     id,
     Icon,
+    type,
     label,
     variant
 }) => {
@@ -32,7 +33,7 @@ export const SideBarItem = ({
         >
             <Link
                 className='flex items-center gap-2'
-                to={`/workspace/${workspaceId}/channels/${id}`}
+                to={(type === 'channel') ? `/workspace/${workspaceId}/channels/${id}` : `/workspace/${workspaceId}/members/${id}`}
             >
                 <Icon className='size-3.5 mr-1' /> 
                 <span className='text-sm'>

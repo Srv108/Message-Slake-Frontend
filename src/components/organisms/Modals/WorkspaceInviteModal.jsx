@@ -3,7 +3,7 @@ import { CopyIcon, RefreshCcwIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useUpdateWorkspaceJoincode } from '@/hooks/api/workspace/useupdateWorkspaceJoincode';
+import { useUpdateWorkspaceJoincode } from '@/hooks/api/workspace/useUpdateWorkspaceJoincode';
 import { useToast } from '@/hooks/use-toast';
 
 export const WorkspaceInviteModal = ({
@@ -37,6 +37,10 @@ export const WorkspaceInviteModal = ({
             console.log('failed to reset the join code',error);
         }
     }
+
+    function openJoinPage(){
+        window.open(`/workspace/join/${workspaceId}`,'_blank');
+    }
     return (
         <Dialog
             open={openInviteModal}
@@ -52,12 +56,19 @@ export const WorkspaceInviteModal = ({
                         {joinCode}
                     </p>
                     <Button
-                        variant='outline'
+                        // variant='outline'
                         onClick={handleCopy}
-                        className='font-semibold'
+                        className='font-semibold text-blue-500'
                     >
                         Copy Link
                         <CopyIcon className="size-5 ml-3" />
+                    </Button>
+
+                    <Button
+                        onClick={openJoinPage}
+                        className='text-blue-500'
+                    >
+                            Redirect to join page
                     </Button>
                 </div>
                 <div

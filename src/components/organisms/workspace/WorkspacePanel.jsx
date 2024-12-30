@@ -66,6 +66,7 @@ export const WorkspacePanel = () => {
                             return (
                                 <SideBarItem
                                     key={channel._id}
+                                    type='channel'
                                     label={channel.name}
                                     id={channel._id}
                                     Icon={HashIcon}
@@ -82,6 +83,7 @@ export const WorkspacePanel = () => {
                             return (
                                 <SideBarItem 
                                     key={member._id}
+                                    type='member'
                                     label={member.memberId.username}
                                     id={member.memberId._id}
                                     Icon={User}
