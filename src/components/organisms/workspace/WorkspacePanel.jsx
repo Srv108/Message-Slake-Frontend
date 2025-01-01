@@ -1,7 +1,8 @@
-import { HashIcon, Loader, MessageSquareTextIcon, SendHorizonalIcon, TriangleAlertIcon, User } from 'lucide-react';
+import { HashIcon, Loader, MessageSquareTextIcon, SendHorizonalIcon, TriangleAlertIcon } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 
 import { SideBarItem } from '@/components/atoms/SideBarItem/SideBarItem';
+import { UserItem } from '@/components/atoms/UserItem/UserItem';
 import { WorkspacePanelHeaders } from '@/components/molecules/Workspace/WorkspacePanelHeaders';
 import { WorkspacePanelMemberSection } from '@/components/molecules/Workspace/WorkspacePanelMemberSection';
 import { WorkspacePanelSection } from '@/components/molecules/Workspace/WorkspacePanelSection';
@@ -76,17 +77,16 @@ export const WorkspacePanel = () => {
                     </WorkspacePanelSection>
 
                     <WorkspacePanelMemberSection 
-                        label='Members'
+                        label='Direct messages'
                         onIconClick={() => setOpenAddMemberModal(true)}
                     >
                         {workspaceDetails?.members?.map((member) => {
                             return (
-                                <SideBarItem 
-                                    key={member._id}
-                                    type='member'
-                                    label={member.memberId.username}
+                                <UserItem
+                                    key={member.memberId._id}
                                     id={member.memberId._id}
-                                    Icon={User}
+                                    label={member.memberId.username}
+                                    image={member.memberId.avatar}
                                 />
                             );
                         })}

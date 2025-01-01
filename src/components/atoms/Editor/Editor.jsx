@@ -40,7 +40,6 @@ export const Editor = ({
                     ['bold', 'italic', 'underline', 'strike'],
                     ['link'],
                     [{ list: 'ordered' }, { list: 'bullet' }],
-                    ['image'],
                     ['clean']
                 ],
                 keyboard: {
