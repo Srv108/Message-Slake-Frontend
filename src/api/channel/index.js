@@ -18,3 +18,18 @@ export const createChannelRequest = async (data) => {
         throw error.response.data;
     }
 };
+
+export const getChannelByIdRequest = async({ channelId, token}) => {
+    try {
+        const response = await axiosInstance.get(`/channel/${channelId}`,{
+            headers: {
+                'access-token': token
+            }
+        });
+
+        return response?.data?.data;
+    } catch (error) {
+        console.log('Error coming from requesting channel id',error);
+        throw error.response.data;
+    }
+};

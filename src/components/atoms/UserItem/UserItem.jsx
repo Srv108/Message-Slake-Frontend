@@ -1,9 +1,8 @@
-import { AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
 import { cva } from 'class-variance-authority';
 import { FaChevronDown } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
-import { Avatar } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useWorkspace } from '@/hooks/context/useWorkspace';
 import { cn } from '@/lib/utils';
@@ -41,7 +40,7 @@ export const UserItem = ({
                 <Link to={`/workspace/${currentWorkspace?._id}/members/${id}`}  className="flex items-center space-x-5 w-4/5">
                     <Avatar className="w-10 h-10">
                         <AvatarImage src={image} className="rounded-full w-full h-full object-cover" />
-                        <AvatarFallback className="rounded-md bg-sky-500 text-white">
+                        <AvatarFallback className="rounded-full bg-slate-600 text-white text-xl font-bold">
                             {label.charAt(0).toUpperCase()}
                         </AvatarFallback>
                     </Avatar>
