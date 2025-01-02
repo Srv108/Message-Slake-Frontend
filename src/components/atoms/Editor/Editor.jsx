@@ -21,11 +21,7 @@ export const Editor = ({
     const [ isToolbarVisible,setIsToolbarVisible ] = useState(false);
 
     function toggleToolbar(){
-        setIsToolbarVisible(!isToolbarVisible);
-        const toolbar = containerRef.current.querySelector('.ql-toolbar');
-        if(toolbar){
-            toolbar.classList.toggle('hidden');
-        }
+        setIsToolbarVisible(prevState => !prevState);
     }
 
     useEffect(() => {
@@ -70,6 +66,20 @@ export const Editor = ({
         quill.setContents(defaultValueRef.current);
 
     },[]);
+
+    useEffect(() => {
+        if (!containerRef.current) return;
+
+        const toolbar = containerRef.current.querySelector('.ql-toolbar');
+        if (toolbar) {
+            if (isToolbarVisible) {
+                toolbar.classList.remove('hidden');
+            } else {
+                toolbar.classList.add('hidden');
+            }
+        }
+    }, [isToolbarVisible]);
+
 
     function handleSubmit(){
         const messageContent = JSON.stringify(quillRef.current?.getContents());
