@@ -17,6 +17,7 @@ export const Editor = ({
     const containerRef = useRef(); // read to initialise the container
     const defaultValueRef = useRef();
     const quillRef = useRef();
+    // const [isEmpty, setIsEmpty] = useState(false);
     const [ isToolbarVisible,setIsToolbarVisible ] = useState(false);
 
     function toggleToolbar(){
@@ -67,8 +68,14 @@ export const Editor = ({
         quillRef.current.focus();
 
         quill.setContents(defaultValueRef.current);
-        
+
     },[]);
+
+    function handleSubmit(){
+        const messageContent = JSON.stringify(quillRef.current?.getContents());
+        onSubmit({ body: messageContent });
+        quillRef.current?.setText('');
+    }
 
     return (
         <div className="flex flex-col mb-5">
@@ -98,11 +105,7 @@ export const Editor = ({
 
                     <Button
                         className="h-7 rounded-md  bg-[#007a6a] hover:bg-[#007a6a]/80 text-white"
-                        onClick={() => {
-                            const messageContent = JSON.stringify(quillRef.current?.getContents());
-                            onSubmit({ body: messageContent });
-                            quillRef.current?.setText('');
-                        }}
+                        onClick={handleSubmit}
                         disabled={false}
                     >
                         <MdSend className="size-5" />

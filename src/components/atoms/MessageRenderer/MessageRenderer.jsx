@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 
 export const MessageRenderer = ({ value }) => {
 
-    console.log(value);
     const rendererRef = useRef(null);
     const [isEmpty,setIsEmpty] = useState(false);
 
@@ -18,11 +17,11 @@ export const MessageRenderer = ({ value }) => {
 
         const content = JSON.parse(value);
         quill.setContents(content);
-
-        console.log('Content' , quill.root.innerHTML);
         
-        const isContentEmpty = quill.getText.trim().length === 0;
+        const isContentEmpty = quill.getText().trim().length === 0;
         setIsEmpty(isContentEmpty);
+
+        console.log('kya string khali hai',isContentEmpty);
 
         rendererRef.current.innerHTML = quill.root.innerHTML;
 

@@ -12,7 +12,6 @@ export const useGetChannelById = (channelId) => {
             channelId,
             token: auth?.token
         }),
-        staleTime: 30000
     });
     return {
         error,

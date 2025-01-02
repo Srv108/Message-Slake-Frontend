@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 export const ChannelHeader = ({ name }) => {
-
     return (
         <div
             className="bg-white border-b h-[50px] flex items-center px-4 overflow-hidden"
@@ -13,9 +12,9 @@ export const ChannelHeader = ({ name }) => {
                 <DialogTrigger asChild>
                     <Button
                         variant="ghost"
-                        className="text-lg font-semibold px-2 w-auto overflow-hidden"
+                        className="text-lg font-semibold text-black px-2 w-auto overflow-hidden"
                     >
-                        <span> { name }</span>
+                        <span> { name } </span>
                         <FaChevronDown className="size-5 ml-2" />
                     </Button>
                 </DialogTrigger>

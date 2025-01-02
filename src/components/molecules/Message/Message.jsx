@@ -15,10 +15,10 @@ export const Message = ({
             <div className="flex items-center gap-2">
                 <button>
                     <Avatar>
-                        <AvatarImage src={authorImage} className='rounded-md' />
+                        <AvatarImage src={authorImage} className='rounded-full size-7' />
                         <AvatarFallback
                             className="rounded-md bg-sky-500 text-white text-sm"
-                        > { authorName.charAt(0).toUpperCase() } </AvatarFallback>
+                        > { authorName?.charAt(0).toUpperCase() } </AvatarFallback>
                     </Avatar>
                 </button>
                 <div

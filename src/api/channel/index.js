@@ -27,9 +27,28 @@ export const getChannelByIdRequest = async({ channelId, token}) => {
             }
         });
 
-        return response?.data?.data;
+        return response?.data?.data?.data;
     } catch (error) {
         console.log('Error coming from requesting channel id',error);
+        throw error.response.data;
+    }
+};
+
+export const getPaginatedMessageRequest = async ({ channelId, limit, offset, token }) => {
+    try {
+        const response = await axiosInstance.get(`/messages/${channelId}`,{
+            params: {
+                limit: limit || 20,
+                page: offset || 1
+            },
+            headers: {
+                'access-token': token
+            }
+        });
+
+        return response?.data?.data?.data;
+    } catch (error) {
+        console.log('Error coming in getting paginated message request',error);
         throw error.response.data;
     }
 };
