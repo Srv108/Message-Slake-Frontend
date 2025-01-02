@@ -4,7 +4,7 @@ import { ProtectedRoutes } from './components/molecules/ProtectedRoutes/Protecte
 import { ForgetAccountContainer } from './components/organisms/Auth/ForgetAccountContainer';
 import { SigninContainer } from './components/organisms/Auth/SigninContainer';
 import { SignupContainer } from './components/organisms/Auth/SignupContainer';
-import { NotFound } from './pages/alert/NoFound';
+// import { NotFound } from './pages/alert/NoFound';
 import { Auth } from './pages/Auth/Auth';
 import { Home } from './pages/Home/Home';
 import { Member } from './pages/Member/Member';
@@ -23,7 +23,7 @@ export const AppRoutes = () => {
             <Route path='/workspace/:workspaceId/members/:memberId' element={<ProtectedRoutes> <WorkspaceLayout> <Member /> </WorkspaceLayout></ProtectedRoutes>} />
             <Route path='/workspace/join/:workspaceId' element={<JoinPage />} />
             <Route path='/home' element={<ProtectedRoutes> <Home/> </ProtectedRoutes> } />
-            <Route path='/*' element={<NotFound/>} />
+            <Route path='/*' element={<Auth><SignupContainer/> </Auth>} />
         </Routes>
     );
 };
