@@ -31,6 +31,13 @@ export const NotFound = () => {
                     <CardContent>
                         <Button
                             variant="outline"
+                            onClick={(() => navigate('/auth/signin'))}
+                            className="mt-4 font-serif"
+                        >
+                            Go to signin page
+                        </Button>
+                        <Button
+                            variant="outline"
                             onClick={(() => navigate(-1))}
                             className="mt-4 font-serif"
                         >
