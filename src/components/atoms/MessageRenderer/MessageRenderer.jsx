@@ -21,8 +21,6 @@ export const MessageRenderer = ({ value }) => {
         const isContentEmpty = quill.getText().trim().length === 0;
         setIsEmpty(isContentEmpty);
 
-        console.log('kya string khali hai',isContentEmpty);
-
         rendererRef.current.innerHTML = quill.root.innerHTML;
 
     },[value]);

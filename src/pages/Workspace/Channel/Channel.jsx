@@ -6,7 +6,6 @@ import { useParams } from 'react-router-dom';
 import { ChatInput } from '@/components/atoms/ChatInput/ChatInput';
 import { ChannelHeader } from '@/components/molecules/Channel/ChannelHeader';
 import { Message } from '@/components/molecules/Message/Message';
-// import { ScrollArea } from '@/components/ui/scroll-area';
 import { useGetChannelById } from '@/hooks/api/channel/useGetChannelById';
 import { useGetChannelMessage } from '@/hooks/api/channel/useGetChannelMessage';
 import { useChannelMessage } from '@/hooks/context/useChannelMessage';
@@ -20,33 +19,44 @@ export const Channel = () => {
 
     const { joinChannel } = useSocket();
     const { messageList, setMessageList } = useChannelMessage();
-    const { isSuccess, channelMessages } = useGetChannelMessage(channelId);
+
+    const { 
+        isSuccess, 
+        channelMessages 
+    } = useGetChannelMessage(channelId);
 
     const messageContainerListRef = useRef(null);
 
+    const scrollToBottom = () => {
+        if (messageContainerListRef.current) {
+            messageContainerListRef.current.scrollTop = messageContainerListRef?.current?.scrollHeight;
+        }
+    };
+    
     useEffect(() => {
-        if(messageContainerListRef.current){
-            console.log('scroll height is ',messageContainerListRef.current.scrollHeight);
-            messageContainerListRef.current.scrollTop = messageContainerListRef.current.scrollHeight;        }
-    },[messageList]);
+        scrollToBottom();
+    },[messageList,isSuccess]);
 
     useEffect(() => {
         queryClient.invalidateQueries('getChannelMessages');
+        scrollToBottom();
     }, [channelId,queryClient]);
 
     useEffect(() => {
         if(isSuccess){
-            console.log('message recieved is ',channelMessages);
             setMessageList(channelMessages);
+            scrollToBottom();
         }
     }, [isSuccess,channelMessages,setMessageList,channelId]);
 
     useEffect(() => {
         if(!isFetching && !isError){
-            console.log('ready to join channel',channelsDetails);
             joinChannel(channelId);
+            scrollToBottom();
         }
     },[isFetching,isError,channelId,joinChannel,channelsDetails]);
+
+
 
     if(isFetching) {
         return (
@@ -66,20 +76,23 @@ export const Channel = () => {
             </div>
         );
     }
+
+    
     return (
-        <div className='flex flex-col h-full'>
+        <div className='flex flex-col h-full bg-slack'>
             <ChannelHeader name={channelsDetails?.name} />
             <div 
                 ref={messageContainerListRef} 
-                className='h-full overflow-y-auto p-5 gap-y-2'
+                className='h-full overflow-y-auto p-5 gap-y-2 mb-2 mt-1'
             >
                 {messageList?.map((message) => {
                     return <Message 
                         key={message?._id} 
+                        authorId={message?.senderId?._id}
                         authorImage={message?.senderId?.avatar} 
                         authorName={message?.senderId?.username} 
                         createdAt={message?.createdAt} 
-                        body={message.body} 
+                        body={message?.body} 
                     />;
                 })}
             </div>

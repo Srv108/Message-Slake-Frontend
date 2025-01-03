@@ -44,7 +44,7 @@ export const Editor = ({
                         enter: {
                             key: 'Enter',
                             handler: () => {
-                                return;
+                                return handleSubmit();
                             }
                         },
                         shift_enter: {

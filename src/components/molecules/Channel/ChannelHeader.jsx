@@ -6,16 +6,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 export const ChannelHeader = ({ name }) => {
     return (
         <div
-            className="bg-white border-b h-[50px] flex items-center px-4 overflow-hidden"
+            className="border-b h-[50px] flex items-center px-4 overflow-hidden bg-slack-medium"
         >
             <Dialog>
                 <DialogTrigger asChild>
                     <Button
-                        variant="ghost"
+                        variant="transparent"
                         className="text-lg font-semibold text-black px-2 w-auto overflow-hidden"
                     >
-                        <span> { name } </span>
-                        <FaChevronDown className="size-5 ml-2" />
+                        <span className='text-white'> { name } </span>
+                        <FaChevronDown className="size-5 ml-2 text-white" />
                     </Button>
                 </DialogTrigger>
                 <DialogContent>
