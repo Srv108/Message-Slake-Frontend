@@ -13,7 +13,8 @@ export const useGetChannelMessage = (channelId) => {
             offset: 1,
             token: auth?.token
         }),
-        queryKey: ['getChannelMessages']
+        queryKey: ['getChannelMessages'],
+        cacheTime: 0
     });
 
     return {

@@ -51,7 +51,7 @@ export const Message = ({
                             <span className="font-extrabold font-serif">{authorName}</span>
                         </div>
                     }
-                    <div className='flex flex-row justify-between space-x-5'>
+                    <div className='flex flex-row justify-between space-x-5 text-right'>
                         <MessageRenderer value={body} />
                         <div className='flex items-end text-xs text-gray-500 mt-1 whitespace-nowrap'>
                             <span className='text-blue-900 font-semibold'>{formatTime(createdAt)}</span>
