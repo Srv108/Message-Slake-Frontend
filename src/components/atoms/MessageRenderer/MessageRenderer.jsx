@@ -28,6 +28,6 @@ export const MessageRenderer = ({ value }) => {
     if(isEmpty) return null;
 
     return (
-        <div ref={rendererRef} className="ql-editor ql-renderer" /> 
+        <div ref={rendererRef} className="ql-editor ql-renderer pl-2" /> 
     );
 };

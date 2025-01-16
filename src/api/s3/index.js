@@ -4,10 +4,10 @@ import { axiosInstance } from '@/config/axiosConfig';
 
 export const uploadImageToAwsPresignedUrl = async({ url , file}) => {
     try {
-        
-        const response = await axios.put(url,{ file },{
+
+        const response = await axios.put(url, file, {
             headers: {
-                'Content-Type': file.type,
+                'Content-Type': file.type
             }
         });
 
@@ -18,18 +18,20 @@ export const uploadImageToAwsPresignedUrl = async({ url , file}) => {
         throw error.response.data;
     }
 };
-
-export const getPresignedUrlRequest = async({token}) => {
+export const getPresignedUrlRequest = async({token,fileName,contentType}) => {
     try {
         
         const response = await axiosInstance.get('/messages/pre-signed-url',{
             headers: {
                 'access-token': token
+            },
+            params:{
+                fileName,
+                contentType
             }
         });
 
-        console.log('Url recieved from aws',response);
-        return response?.data?.data;
+        return response?.data?.data?.data;
     } catch (error) {
         console.log('Error coming from getting presigned url ',error);
         throw error.response.data;

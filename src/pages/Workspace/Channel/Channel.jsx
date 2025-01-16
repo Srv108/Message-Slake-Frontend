@@ -93,6 +93,7 @@ export const Channel = () => {
                         authorName={message?.senderId?.username} 
                         createdAt={message?.createdAt} 
                         body={message?.body} 
+                        image={message?.image}
                     />;
                 })}
             </div>

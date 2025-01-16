@@ -1,4 +1,6 @@
 import { MessageRenderer } from '@/components/atoms/MessageRenderer/MessageRenderer';
+import { MessageThumbnail } from '@/components/atoms/MessageThumbnail/MessageThumbnail';
+// import { MessageThumbnail } from '@/components/atoms/MessageThumbnail/MessageThumbnail';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/context/useAuth';
 
@@ -8,6 +10,7 @@ export const Message = ({
     authorName,
     createdAt,
     body,
+    image
 }) => {
 
     const { auth } = useAuth();
@@ -30,7 +33,7 @@ export const Message = ({
             className={`mb-3 flex  ${isLoggedInUser ? 'justify-end' : 'justify-start'}`}
         >
             <div 
-                className='flex gap-2 max-w-[80%] bg-slate-500 text-black rounded-lg shadow-md p-3'
+                className='flex gap-2 max-w-[70%] bg-slate-500 text-black rounded-lg shadow-md p-3'
             >
                 
                 {isLoggedInUser? '' : <div 
@@ -50,10 +53,11 @@ export const Message = ({
                         <div className={`flex items-center ${isLoggedInUser ? 'justify-end' : 'justify-start'} text-sm mb-1`}>
                             <span className="font-extrabold font-serif">{authorName}</span>
                         </div>
-                    }
-                    <div className='flex flex-row justify-between space-x-5 text-right'>
+                    } 
+                    { image && <MessageThumbnail url={image} />}
+                    <div className={`flex flex-row ${body ? 'justify-between' : 'justify-end' } space-x-5 text-right`}>
                         <MessageRenderer value={body} />
-                        <div className='flex items-end text-xs text-gray-500 mt-1 whitespace-nowrap'>
+                        <div className='flex items-end justify-end text-xs text-gray-500 mt-1 whitespace-nowrap'>
                             <span className='text-blue-900 font-semibold'>{formatTime(createdAt)}</span>
                         </div>
                     </div>

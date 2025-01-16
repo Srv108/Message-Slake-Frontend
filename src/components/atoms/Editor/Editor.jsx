@@ -1,6 +1,6 @@
 import 'quill/dist/quill.snow.css'; // ES6
 
-import { ImageIcon } from 'lucide-react';
+import { ImageIcon, XIcon } from 'lucide-react';
 import Quill from 'quill';
 import { useEffect, useRef, useState } from 'react'; 
 import { MdSend } from 'react-icons/md';
@@ -14,10 +14,13 @@ export const Editor = ({
     onSubmit
 }) => {
 
+    const imageRef = useRef(null);  // read to file input
     const containerRef = useRef(); // read to initialise the container
     const defaultValueRef = useRef();
     const quillRef = useRef();
     // const [isEmpty, setIsEmpty] = useState(false);
+
+    const [image, setImage] = useState(null);
     const [ isToolbarVisible,setIsToolbarVisible ] = useState(false);
 
     function toggleToolbar(){
@@ -83,8 +86,12 @@ export const Editor = ({
 
     function handleSubmit(){
         const messageContent = JSON.stringify(quillRef.current?.getContents());
-        onSubmit({ body: messageContent });
+        const content = quillRef.current.getText().trim();
+        if(!content && !image) return;
+        onSubmit({ body: messageContent ,image: image});
         quillRef.current?.setText('');
+        setImage(null);
+        imageRef.current.value = '';
     }
 
     return (
@@ -93,6 +100,30 @@ export const Editor = ({
                 className="relative flex flex-row items-center border border-slate-300 rounded-md overflow-hidden focus-within:shadow-sm focus-within:border-slate-400 bg-white"
             >
                 <div ref={containerRef} className="h-full ql-custom w-4/5" />
+                {
+                    image &&  (
+                        <div className='p-2'>
+                            <div
+                                className='relative size-[50px] flex items-center justify-center group/image'
+                            > 
+                                <button
+                                    className='hidden group-hover/image:flex rounded-full bg-black/70 hover:bg-black absolute -top-2.5 -right-2.5 text-white size-6 z-[5] border-2 border-white items-center justify-center'
+                                    onClick={() => {
+                                        setImage(null);
+                                        imageRef.current.value = '';
+                                    }}
+                                >
+
+                                    <XIcon className='size-3' />
+                                </button>
+                                <img
+                                    src={URL.createObjectURL(image)}
+                                    className='rounded-xl overflow-hidden border object-cover'
+                                />
+                            </div>
+                        </div>
+                    )
+                }
                 
                 <div className="absolute bottom-0 right-0 flex flex-row justify-center items-center space-x-2 p-1 bg-white">
                     <Button
@@ -108,10 +139,19 @@ export const Editor = ({
                         size="iconSm"
                         variant="ghost"
                         disabled={false}
-                        onClick={() => {}}
+                        onClick={() => {
+                            imageRef.current.click();
+                        }}
                     >
                         <ImageIcon className="size-5" />
                     </Button>
+
+                    <input
+                        type='file'
+                        ref={imageRef}
+                        onChange={(e) => setImage(e.target.files[0])}
+                        className='hidden'
+                    />
 
                     <Button
                         className="h-7 rounded-md  bg-[#007a6a] hover:bg-[#007a6a]/80 text-white"
