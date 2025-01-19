@@ -6,9 +6,9 @@ import { useAuth } from '@/hooks/context/useAuth';
 export const useFtechAllRooms = () => {
 
     const { auth } = useAuth();
-    const { isFetching, isPending, isSuccess, isError, error, data: usersRoomDetails} = useQuery({
+    const { isFetching, isPending, isSuccess, isError, error, data: AllRoomDetails} = useQuery({
         queryKey: [`ftechAllRooms-${auth?.user?.id}`],
-        queryFn: fetchAllRoomsRequest(auth?.token),
+        queryFn:() => fetchAllRoomsRequest(auth?.token),
     });
 
     return {
@@ -17,6 +17,6 @@ export const useFtechAllRooms = () => {
         isPending,
         isFetching,
         isSuccess,
-        usersRoomDetails
+        AllRoomDetails
     };
 };

@@ -35,7 +35,7 @@ export const SideBarItem = ({
                 className='flex items-center gap-2'
                 to={(type === 'channel') ? `/workspace/${workspaceId}/channels/${id}` : `/workspace/${workspaceId}/members/${id}`}
             >
-                <Icon className='size-3.5 mr-1' /> 
+                <Icon className='size-3.5 mr-1' />
                 <span className='text-sm'>
                     {label}
                 </span>

@@ -6,6 +6,7 @@ import { SigninContainer } from './components/organisms/Auth/SigninContainer';
 import { SignupContainer } from './components/organisms/Auth/SignupContainer';
 // import { NotFound } from './pages/alert/NoFound';
 import { Auth } from './pages/Auth/Auth';
+import { DirectMessageLayout } from './pages/DirectMessages/Layout';
 import { Home } from './pages/Home/Home';
 import { Member } from './pages/Member/Member';
 import { Channel } from './pages/Workspace/Channel/Channel';
@@ -22,6 +23,7 @@ export const AppRoutes = () => {
             <Route path='/workspace/:workspaceId/channels/:channelId' element={<ProtectedRoutes> <WorkspaceLayout> <Channel /> </WorkspaceLayout></ProtectedRoutes>} />
             <Route path='/workspace/:workspaceId/members/:memberId' element={<ProtectedRoutes> <WorkspaceLayout> <Member /> </WorkspaceLayout></ProtectedRoutes>} />
             <Route path='/workspace/join/:workspaceId' element={<JoinPage />} />
+            <Route path='/directMessages' element={<ProtectedRoutes> <DirectMessageLayout> Direct Message </DirectMessageLayout> </ProtectedRoutes>} />
             <Route path='/home' element={<ProtectedRoutes> <Home/> </ProtectedRoutes> } />
             <Route path='/*' element={<Auth><SignupContainer/> </Auth>} />
         </Routes>

@@ -85,6 +85,7 @@ export const WorkspacePanel = () => {
                                 <UserItem
                                     key={member.memberId._id}
                                     id={member.memberId._id}
+                                    type='workspace'
                                     label={member.memberId.username}
                                     image={member.memberId.avatar}
                                 />
