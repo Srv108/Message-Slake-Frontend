@@ -1,8 +1,8 @@
-import { Loader, MessageSquareTextIcon, SendHorizonalIcon, TriangleAlertIcon } from 'lucide-react';
+import { Loader, TriangleAlertIcon } from 'lucide-react';
 import { useEffect } from 'react';
 
-import { SideBarItem } from '@/components/atoms/SideBarItem/SideBarItem';
 import { UserItem } from '@/components/atoms/UserItem/UserItem';
+import { DirectMessagePanelHeaders } from '@/components/molecules/DirectMessage/DirectMessagePanelHeader';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useFtechAllRooms } from '@/hooks/api/room/useFetchAllRooms';
 import { useAuth } from '@/hooks/context/useAuth';
@@ -38,20 +38,9 @@ export const DirectMessagePanel = () => {
         <div
             className='flex flex-col h-full bg-slack-medium'
         >
+            <DirectMessagePanelHeaders />
             <ScrollArea  >
                 <div className='flex flex-col px-2 mt-3' >
-                    <SideBarItem
-                        label='Threads'
-                        variant='active'
-                        id='Thread'
-                        Icon={MessageSquareTextIcon}
-                    />
-                    <SideBarItem
-                        label='Drafts and Sends'
-                        variant='default'
-                        id='Thread'
-                        Icon={SendHorizonalIcon}
-                    />
                     {AllRoomDetails?.map((room) => {
                         const isUserSender = room?.senderId?._id.toString() === auth?.user?.id;
                         const member = (isUserSender) ? room?.recieverId : room?.senderId;

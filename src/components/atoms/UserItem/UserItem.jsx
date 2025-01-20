@@ -38,7 +38,7 @@ export const UserItem = ({
             asChild
         >
             <div className="w-full p-1 flex flex-row justify-between items-center">
-                <Link to={(type === 'workspace') ? `/workspace/${currentWorkspace?._id}/members/${id}` : `/directMessages/${id}`}  className="flex items-center space-x-5 w-4/5">
+                <Link to={(type === 'workspace') ? `/workspace/${currentWorkspace?._id}/members/${id}` : `/directMessages/member/${id}`}  className="flex items-center space-x-5 w-4/5">
                     <Avatar className="w-10 h-10">
                         <AvatarImage src={image} className="rounded-full w-full h-full object-cover" />
                         <AvatarFallback className="rounded-full bg-slate-600 text-white text-xl font-bold">

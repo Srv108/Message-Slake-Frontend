@@ -1,29 +1,27 @@
-import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAddMemberToWorkspaceByUsername } from '@/hooks/api/workspace/useAddMemberToWorkspaceByUsername';
 import { useAddMemberContext } from '@/hooks/context/useAddMemberContext';
 
 export const AddMemberWorkspaceModal = () => {
 
-    const queryClient = useQueryClient();
 
     const [ username, setUsername ] = useState('');
 
-    const { openAddMemberModal, setOpenAddMemberModal } = useAddMemberContext();
+    const { openAddMemberModal, setOpenAddMemberModal, formSubmitHandler, isPending } = useAddMemberContext();
 
-    const { isPending, addMemberToWorkspaceByUsernameMutation} = useAddMemberToWorkspaceByUsername();
     async function handleFormSubmit(e) {
         e.preventDefault();
+        if (!formSubmitHandler) {
+            console.error('Form submit handler is not set.');
+            return;
+        }
+        
         try {
-
-            const response = await addMemberToWorkspaceByUsernameMutation (username);
-
-            queryClient.invalidateQueries(`FetchMembers-${response._id}`);
+            await formSubmitHandler (username);
         } catch (error) {
             console.log('Error coming in add member in modal',error);
         } finally{

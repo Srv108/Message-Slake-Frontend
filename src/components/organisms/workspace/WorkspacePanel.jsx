@@ -1,4 +1,6 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { HashIcon, Loader, MessageSquareTextIcon, SendHorizonalIcon, TriangleAlertIcon } from 'lucide-react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { SideBarItem } from '@/components/atoms/SideBarItem/SideBarItem';
@@ -7,17 +9,41 @@ import { WorkspacePanelHeaders } from '@/components/molecules/Workspace/Workspac
 import { WorkspacePanelMemberSection } from '@/components/molecules/Workspace/WorkspacePanelMemberSection';
 import { WorkspacePanelSection } from '@/components/molecules/Workspace/WorkspacePanelSection';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useAddMemberToWorkspaceByUsername } from '@/hooks/api/workspace/useAddMemberToWorkspaceByUsername';
 import { useGetWorkspaceById } from '@/hooks/api/workspace/useGetWorkspaceById';
 import { useAddMemberContext } from '@/hooks/context/useAddMemberContext';
 import { useCreateChannelContext } from '@/hooks/context/useCreateChannelContext';
 
 export const WorkspacePanel = () => {
 
+    const queryClient = useQueryClient();
     const { workspaceId } = useParams();
     const { setOpenCreateChannelModal } = useCreateChannelContext();
     const { setOpenAddMemberModal } = useAddMemberContext();
 
     const { isFetching, isSuccess, workspaceDetails } = useGetWorkspaceById(workspaceId);
+
+    const { setFormSubmitHandler, setIsPending } = useAddMemberContext();
+    const { isPending, addMemberToWorkspaceByUsernameMutation} = useAddMemberToWorkspaceByUsername();
+
+    async function formHandlerFunction(username){
+        try {
+            console.log('add member to workspace handler initiates....');
+            const response = await addMemberToWorkspaceByUsernameMutation (username);
+            queryClient.invalidateQueries(`FetchMembers-${response._id}`);
+        } catch (error) {
+            console.log('error coming add member to workspace modal',error);
+        }
+    }
+
+    useEffect(() => {
+        setIsPending(isPending);
+    },[isPending,setIsPending]);
+
+    function handleAddMemberIconClick(){
+        setOpenAddMemberModal(true);
+        setFormSubmitHandler(() => formHandlerFunction);
+    }
 
     if(isFetching){
         return (
@@ -46,7 +72,7 @@ export const WorkspacePanel = () => {
         >
             <WorkspacePanelHeaders workspace={workspaceDetails} />
             <ScrollArea  >
-                <div className='flex flex-col px-2 mt-3' >
+                <div className='flex flex-col px-2 mt-3 mb-3' >
                     <SideBarItem
                         label='Threads'
                         variant='active'
@@ -78,7 +104,7 @@ export const WorkspacePanel = () => {
 
                     <WorkspacePanelMemberSection 
                         label='Direct messages'
-                        onIconClick={() => setOpenAddMemberModal(true)}
+                        onIconClick={handleAddMemberIconClick}
                     >
                         {workspaceDetails?.members?.map((member) => {
                             return (
