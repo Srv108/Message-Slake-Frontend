@@ -7,7 +7,7 @@ export const useGetChannelMessage = (channelId) => {
 
     const { auth } = useAuth();
     const { isFetching, isLoading, isError, isSuccess, error, data: channelMessages} = useQuery({
-        queryFn: () => getPaginatedMessageRequest({
+        queryFn: async() => await getPaginatedMessageRequest({
             channelId,
             limit: 1000,
             offset: 1,

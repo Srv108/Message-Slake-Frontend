@@ -9,7 +9,7 @@ export const useAddMemberToWorkspaceByUsername = () => {
     const { auth } = useAuth();
     const { currentWorkspace } = useWorkspace();
     const { isPending, isSuccess, error, mutateAsync: addMemberToWorkspaceByUsernameMutation} = useMutation({
-        mutationFn: (username) => addMemberToWorkspaceByUsernameRequest({
+        mutationFn: async (username) => await addMemberToWorkspaceByUsernameRequest({
             workspaceId: currentWorkspace?._id,
             username: username,
             token: auth?.token

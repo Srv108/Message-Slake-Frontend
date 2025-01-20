@@ -8,7 +8,7 @@ export const useFtechAllRooms = () => {
     const { auth } = useAuth();
     const { isFetching, isPending, isSuccess, isError, error, data: AllRoomDetails} = useQuery({
         queryKey: [`ftechAllRooms-${auth?.user?.id}`],
-        queryFn:() => fetchAllRoomsRequest(auth?.token),
+        queryFn:async() => await fetchAllRoomsRequest(auth?.token),
     });
 
     return {

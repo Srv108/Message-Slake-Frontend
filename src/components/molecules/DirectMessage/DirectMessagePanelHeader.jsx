@@ -1,9 +1,36 @@
 import { ChevronDownIcon, MessageSquarePlusIcon } from 'lucide-react';
+import { useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { useCreateRoom } from '@/hooks/api/room/useCreateRoom';
+import { useAddMemberContext } from '@/hooks/context/useAddMemberContext';
 
 export const DirectMessagePanelHeaders = () => {
 
+    const { setOpenAddMemberModal, setIsPending, setFormSubmitHandler } = useAddMemberContext();
+    const { isPending, createRoomMutation } = useCreateRoom();
+
+    async function formHandlerFunction (username) {
+        try {
+            await createRoomMutation({
+                username: username
+            });
+
+            
+        } catch (error) {
+            console.log('error coming in create room at direct message panel header',error);
+        }
+    }
+
+    useEffect(() => {
+        setIsPending(isPending);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[isPending]);
+
+    function newChatIconClick(){
+        setOpenAddMemberModal(true);
+        setFormSubmitHandler(() => formHandlerFunction);
+    }
 
     return (
         <>
@@ -21,6 +48,7 @@ export const DirectMessagePanelHeaders = () => {
                     <Button
                         variant='transparent'
                         size='sm'
+                        onClick={newChatIconClick}
                     >
                         <MessageSquarePlusIcon className='size-5'/>
                     </Button>

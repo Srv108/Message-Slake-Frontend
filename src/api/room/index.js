@@ -1,9 +1,11 @@
 import { axiosInstance } from '@/config/axiosConfig';
 
-export const createRoomRequest = async({recieverId,token}) => {
+export const createRoomRequest = async({recieverId,username,token}) => {
     try {
+        const reciever = ((recieverId) ? {recieverId: recieverId} : {username: username}) ;
+        console.log('you are at create room with the user request',reciever);
         
-        const response = await axiosInstance.post('/room',{recieverId},{
+        const response = await axiosInstance.post('/room',reciever,{
             headers: {
                 'access-token': token
             }

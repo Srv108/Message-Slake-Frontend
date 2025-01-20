@@ -7,7 +7,7 @@ export const useGetRoomById = (roomId) => {
 
     const { auth } = useAuth();
     const { isLoading, isError, error, isSuccess, isFetching, data: roomDetails} = useQuery({
-        queryFn: () => {getRoomByIdRequest({
+        queryFn: async() => {await getRoomByIdRequest({
             roomId,
             token: auth?.token
         });},

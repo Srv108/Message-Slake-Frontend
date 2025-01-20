@@ -13,7 +13,7 @@ export const useOtpVerification = () => {
         isSuccess: otpSuccessState, 
         mutateAsync: otpMutation
     } = useMutation({
-        mutationFn: verifyOtpRequest,
+        mutationFn:async() => await verifyOtpRequest(),
         onSuccess: (response) => {
             console.log('Otp verified Successfully', response);
             toast({

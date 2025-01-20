@@ -10,7 +10,7 @@ export const useCreateChannel = () => {
     const { auth } = useAuth();
 
     const { isPending, isSuccess, error, mutateAsync: createChannelMutation} = useMutation({
-        mutationFn: (data) => createChannelRequest({...data,token: auth?.token}),
+        mutationFn: async(data) => await createChannelRequest({...data,token: auth?.token}),
         onError: (error) => {
             console.log('Error coming in Create channel hook',error);
             toast({

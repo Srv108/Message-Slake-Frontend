@@ -7,7 +7,7 @@ export const useUpdateUserDetails = () => {
 
     const { auth } = useAuth();
     const { isPending, isSuccess, error, mutateAsync: updateUserMutation } = useMutation({
-        mutationFn:(payload) => updateUsersDetailsRequest({...payload,token: auth?.token}),
+        mutationFn: async(payload) => await updateUsersDetailsRequest({...payload,token: auth?.token}),
         onSuccess: (response) => {
             console.log('Details updated successfully',response);
         },

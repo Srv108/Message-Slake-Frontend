@@ -7,7 +7,7 @@ export const useJoinWorkspace = (workspaceId) => {
 
     const { auth } = useAuth();
     const { isPending, isSuccess, error, mutateAsync: joinWorkspaceMutation} = useMutation({
-        mutationFn: (joinCode) => joinWorkspaceRequest({
+        mutationFn: async(joinCode) => await joinWorkspaceRequest({
             workspaceId,
             joinCode,
             token: auth?.token

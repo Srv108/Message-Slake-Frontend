@@ -8,7 +8,7 @@ export const useUpdateWorkspace = (workspaceId) => {
     const { auth } = useAuth();
 
     const { isPending, isSuccess, error, mutateAsync: updateWorkspaceMutataion} = useMutation({
-        mutationFn: (payload) => updateWorkspaceRequest({
+        mutationFn: async(payload) => await updateWorkspaceRequest({
             name: payload.name,
             workspaceId: workspaceId,
             token: auth?.token

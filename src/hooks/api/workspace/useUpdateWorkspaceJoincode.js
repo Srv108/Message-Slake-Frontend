@@ -8,7 +8,7 @@ export const useUpdateWorkspaceJoincode = (workspaceId) => {
     const { auth } = useAuth();
 
     const { isPending, isSuccess, error, mutateAsync: updateWorkspaceJoinCodeMutation } = useMutation({
-        mutationFn:() => updateWorkspaceJoinCodeRequest({ workspaceId: workspaceId,token: auth?.token}),
+        mutationFn: async() => await updateWorkspaceJoinCodeRequest({ workspaceId: workspaceId,token: auth?.token}),
         onSuccess: (response) => {
             console.log('Join code updated successfully',response);
 

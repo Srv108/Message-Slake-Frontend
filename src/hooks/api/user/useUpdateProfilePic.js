@@ -7,7 +7,7 @@ export const useUpdateProfilePic = () => {
 
     const { auth, setAuth } = useAuth();
     const { isPending, isSuccess, error, mutateAsync: updateProfilePicMutation } = useMutation({
-        mutationFn: (formData) => updateProfilePicRequest({formData,token: auth?.token}),
+        mutationFn: async(formData) => await updateProfilePicRequest({formData,token: auth?.token}),
         mutationKey: [`userDetails-${auth?.user?.id}`],
         onSuccess: (response) => {
             console.log(auth?.user);

@@ -11,7 +11,7 @@ export const useAddMemberToWorkspace = () => {
     const { toast } = useToast();
     const { currentWorkspace } = useWorkspace();
     const { isPending, isSuccess, error, mutateAsync: addMemberToWorkspaceMutation} = useMutation({
-        mutationFn: (data) => addMembersToWorkspaceRequest({
+        mutationFn: async (data) => await addMembersToWorkspaceRequest({
             ...data,
             token: auth?.token,
             workspaceId: currentWorkspace?._id
