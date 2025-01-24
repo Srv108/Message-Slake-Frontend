@@ -6,6 +6,8 @@ import { AddMemberWorkspaceContextProvider } from './AddMemberWorkspace';
 import { AuthContextProvider } from './AuthContext';
 import { ChannelMessageProvider } from './ChannelMessage';
 import { CreateChannelContextProvider } from './CreateChannelContext';
+import { RoomDetailsProvider } from './RoomDetailsContext';
+import { RoomMessageProvider } from './RoomMessage';
 import { SocketContextProvider } from './SocketContex';
 import { UserProfileContextProvider } from './UserProfileContext';
 import { WorkspaceContextProvider } from './WorkspaceContext';
@@ -14,6 +16,8 @@ import { WorkspacePreferenceProvider } from './WorkspacePreferencesContext';
 
 export const AppContextProvider = combineContext(
     ChannelMessageProvider,
+    RoomMessageProvider,
+    RoomDetailsProvider,
     SocketContextProvider,
     AuthContextProvider,
     WorkspaceCreateProvider,

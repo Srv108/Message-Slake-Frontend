@@ -7,10 +7,10 @@ export const useRoomUpdate = () => {
 
     const { auth } = useAuth();
     const { isPending, error, isSuccess, mutateAsync: roomUpdateMutation} = useMutation({
-        mutationFn: async(data) => {await updateRoomRequest({
+        mutationFn: async(data) => await updateRoomRequest({
             ...data,
             token: auth?.token
-        });},
+        }),
         onError: (error) => {
             console.log('failed to update room status',error);
         },

@@ -14,8 +14,10 @@ import { useSocket } from '@/hooks/context/useSocket';
 export const Channel = () => {
 
     const { channelId } = useParams();
+    const hasJoinedChannel = useRef(false); 
     const queryClient = useQueryClient();
-    const { isFetching, channelsDetails, isError } = useGetChannelById(channelId);
+    const safeChannelId = channelId?.toString();
+    const { isFetching, channelsDetails, isError } = useGetChannelById(safeChannelId);
 
     const { joinChannel } = useSocket();
     const { messageList, setMessageList } = useChannelMessage();
@@ -23,7 +25,7 @@ export const Channel = () => {
     const { 
         isSuccess, 
         channelMessages 
-    } = useGetChannelMessage(channelId);
+    } = useGetChannelMessage(safeChannelId);
 
     const messageContainerListRef = useRef(null);
 
@@ -35,12 +37,24 @@ export const Channel = () => {
     
     useEffect(() => {
         scrollToBottom();
-    },[messageList,isSuccess]);
+    },[messageList]);
 
     useEffect(() => {
         queryClient.invalidateQueries('getChannelMessages');
         scrollToBottom();
-    }, [channelId,queryClient]);
+    }, [channelId]);
+
+    useEffect(() => {
+        if (channelId && !hasJoinedChannel.current && !isFetching && !isError && channelId) {
+            joinChannel(channelId);
+            scrollToBottom();
+            hasJoinedChannel.current = true;
+        }
+
+        return () => {
+            hasJoinedChannel.current = false;
+        };
+    },[isFetching,isError,channelId]);
 
     useEffect(() => {
         if(isSuccess){
@@ -48,15 +62,6 @@ export const Channel = () => {
             scrollToBottom();
         }
     }, [isSuccess,channelMessages,setMessageList,channelId]);
-
-    useEffect(() => {
-        if(!isFetching && !isError){
-            joinChannel(channelId);
-            scrollToBottom();
-        }
-    },[isFetching,isError,channelId,joinChannel,channelsDetails]);
-
-
 
     if(isFetching) {
         return (

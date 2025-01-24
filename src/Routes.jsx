@@ -9,6 +9,8 @@ import { Auth } from './pages/Auth/Auth';
 import { DirectMessageLayout } from './pages/DirectMessages/Layout';
 import { Home } from './pages/Home/Home';
 import { Member } from './pages/Member/Member';
+import { Room } from './pages/Room/Room';
+// import { Room } from './pages/Room/Room';
 import { Channel } from './pages/Workspace/Channel/Channel';
 import { JoinPage } from './pages/Workspace/JoinPage';
 import { WorkspaceLayout } from './pages/Workspace/Layout';
@@ -24,7 +26,7 @@ export const AppRoutes = () => {
             <Route path='/workspace/:workspaceId/members/:memberId' element={<ProtectedRoutes> <WorkspaceLayout> <Member /> </WorkspaceLayout></ProtectedRoutes>} />
             <Route path='/workspace/join/:workspaceId' element={<JoinPage />} />
             <Route path='/directMessages' element={<ProtectedRoutes> <DirectMessageLayout> Direct Message </DirectMessageLayout> </ProtectedRoutes>} />
-            <Route path='/directMessages/member/:memberId' element={<ProtectedRoutes> <DirectMessageLayout> Direct Message </DirectMessageLayout> </ProtectedRoutes>} />
+            <Route path='/directMessages/member/:roomId' element={<ProtectedRoutes> <DirectMessageLayout> <Room />  </DirectMessageLayout> </ProtectedRoutes>} />
             <Route path='/home' element={<ProtectedRoutes> <Home/> </ProtectedRoutes> } />
             <Route path='/*' element={<Auth><SignupContainer/> </Auth>} />
         </Routes>

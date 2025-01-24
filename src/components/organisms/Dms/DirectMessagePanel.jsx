@@ -46,8 +46,8 @@ export const DirectMessagePanel = () => {
                         const member = (isUserSender) ? room?.recieverId : room?.senderId;
                         return (
                             <UserItem
-                                key={member?._id}
-                                id={member?._id}
+                                key={room?._id}
+                                id={room?._id}
                                 type='dms'
                                 label={member?.username}
                                 image={member?.avatar}

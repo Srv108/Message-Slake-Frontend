@@ -96,7 +96,7 @@ export const getRoomByIdRequest = async({roomId,token}) => {
             }
         });
 
-        console.log('response coming from fetching room request',response);
+        console.log('response coming from getting room details',response?.data?.data);
         return response?.data?.data;
     } catch (error) {
         console.log('Error coming in getting room request',error);
@@ -104,17 +104,21 @@ export const getRoomByIdRequest = async({roomId,token}) => {
     }
 };
 
-export const getRoomMessageRequest = async({roomId,token}) => {
+export const fetchRoomMessageRequest = async({roomId,limit,offset,token}) => {
     try {
         
         const response = await axiosInstance.get(`/directMessages/${roomId}`,{
+            params: {
+                limit: limit || 20,
+                page: offset || 1
+            },
             headers: {
                 'access-token': token
             }
         });
 
         console.log('response coming from fetching room message request',response);
-        return response?.data?.data;
+        return response?.data?.data?.data;
     } catch (error) {
         console.log('Error coming in getting room message request',error);
         throw error.response.data;
