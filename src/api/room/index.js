@@ -3,7 +3,6 @@ import { axiosInstance } from '@/config/axiosConfig';
 export const createRoomRequest = async({recieverId,username,token}) => {
     try {
         const reciever = ((recieverId) ? {recieverId: recieverId} : {username: username}) ;
-        console.log('you are at create room with the user request',reciever);
         
         const response = await axiosInstance.post('/room',reciever,{
             headers: {
@@ -49,6 +48,22 @@ export const fetchRoomOfAUserRequest = async(recieverId,token) => {
         return response?.data?.data;
     } catch (error) {
         console.log('Error coming in fetching room by both user and owner request',error);
+        throw error.response.data;
+    }
+};
+
+export const fetchMemberDetailsRequest = async({ memberId,token }) => {
+    try {
+        const response = await axiosInstance.get('/room/member',{
+            headers: {
+                'access-token': token
+            },
+            params: { memberId }
+        });
+
+        return response?.data?.data?.data;
+    } catch (error) {
+        console.log('Error coming in fetching member request',error);
         throw error.response.data;
     }
 };
@@ -122,5 +137,20 @@ export const fetchRoomMessageRequest = async({roomId,limit,offset,token}) => {
     } catch (error) {
         console.log('Error coming in getting room message request',error);
         throw error.response.data;
+    }
+};
+
+export const fetchLastMessageDetailsRequest = async({ roomId, token,}) => {
+    try {
+        console.log('calling lst message api');
+        const response = await axiosInstance.get(`/directMessages/${roomId}/lastMessage`,{
+            headers: {
+                'access-token': token
+            }
+        });
+        console.log('response coming from fetching last message ',response);
+        return response?.data?.data;
+    } catch (error) {
+        console.log('Error coming in fetching last message Details',error);
     }
 };

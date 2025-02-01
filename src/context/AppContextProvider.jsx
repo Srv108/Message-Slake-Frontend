@@ -15,11 +15,11 @@ import { WorkspaceCreateProvider } from './WorkspaceCreateContext';
 import { WorkspacePreferenceProvider } from './WorkspacePreferencesContext';
 
 export const AppContextProvider = combineContext(
+    AuthContextProvider,
     ChannelMessageProvider,
     RoomMessageProvider,
     RoomDetailsProvider,
     SocketContextProvider,
-    AuthContextProvider,
     WorkspaceCreateProvider,
     WorkspaceContextProvider,
     AcceptFileContexProvider,

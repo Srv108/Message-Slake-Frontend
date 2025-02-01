@@ -1,0 +1,7 @@
+The WebRTC standard covers two different technologies: 
+    media capture devices 
+    peer-to-peer connectivity.
+
+navigator.mediaDevices.getUserMedia() to capture MediaStreams
+For screen recording, we use navigator.mediaDevices.getDisplayMedia().
+The peer-to-peer connectivity is handled by the RTCPeerConnection interface

@@ -116,6 +116,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  .ql-editor {
+    @apply text-white text-xs leading-tight truncate;
+  }
 }
 
 .ql-toolbar {
@@ -139,7 +142,7 @@
   font-size: 14px !important;
   line-height: 22px !important;
   padding: 8px 12px !important;
-  color: #1d1d1d !important;
+  color: inherit !important;
   font-weight: 400 !important;
 }
 

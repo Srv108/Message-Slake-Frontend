@@ -1,9 +1,10 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 
 import { RoomChatInput } from '@/components/atoms/ChatInput/RoomChatInput';
 import { Message } from '@/components/molecules/Message/Message';
+import { RoomHeader } from '@/components/molecules/Room/RoomHeader';
 import { useFetchRoomMessage } from '@/hooks/api/room/useFetchRoomMessage';
 import { useGetRoomById } from '@/hooks/api/room/useGetRoomById';
 import { useAuth } from '@/hooks/context/useAuth';
@@ -12,7 +13,13 @@ import { useRoomMessage } from '@/hooks/context/useRoomMessage';
 import { useSocket } from '@/hooks/context/useSocket';
 
 export const Room = () => {
-    const { roomId } = useParams();
+    
+    const location = useLocation();
+    const userID = location?.state?.reciverId;
+
+    const params = useParams();
+    const roomId = params?.roomId;
+
     const hasJoinedRoom = useRef(false);
     const messageContainerListRef = useRef(null);
 
@@ -31,6 +38,7 @@ export const Room = () => {
             messageContainerListRef.current.scrollTop = messageContainerListRef.current.scrollHeight;
         }
     };
+
 
     useEffect(() => {
         scrollToBottom();
@@ -86,6 +94,7 @@ export const Room = () => {
 
     return (
         <div className='flex flex-col h-full bg-slack'>
+            <RoomHeader userID={userID} />
             <div 
                 ref={messageContainerListRef} 
                 className='h-full overflow-y-auto p-5 gap-y-2 mb-2 mt-1'
@@ -99,6 +108,7 @@ export const Room = () => {
                         createdAt={message?.createdAt} 
                         body={message?.body} 
                         image={message?.image}
+                        type='dms'
                     />
                 ))}
             </div>

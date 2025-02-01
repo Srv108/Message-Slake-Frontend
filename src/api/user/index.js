@@ -47,3 +47,4 @@ export const updatePasswordRequest = async({password,token}) => {
         throw error.response.data;
     }
 };
+

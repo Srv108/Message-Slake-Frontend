@@ -1,5 +1,5 @@
 import { Loader, TriangleAlertIcon } from 'lucide-react';
-import { useEffect } from 'react';
+import { useMemo } from 'react';
 
 import { UserItem } from '@/components/atoms/UserItem/UserItem';
 import { DirectMessagePanelHeaders } from '@/components/molecules/DirectMessage/DirectMessagePanelHeader';
@@ -11,10 +11,29 @@ export const DirectMessagePanel = () => {
 
     const { isFetching, isSuccess, AllRoomDetails } = useFtechAllRooms();
     const { auth } = useAuth();
-    useEffect(() => {
-        if(isSuccess) console.log(AllRoomDetails);
-        
-    },[isSuccess,AllRoomDetails]);
+
+    const roomList = useMemo(() => {
+        return AllRoomDetails?.map((room) => {
+            const isUserSender = room?.senderId?._id.toString() === auth?.user?.id;
+            const member = (isUserSender) ? room?.recieverId : room?.senderId;
+            const isRoomYourSelf = room?.recieverId?._id === room?.senderId?._id;
+            return (
+                <UserItem
+                    key={room?._id}
+                    id={room?._id}
+                    type='dms'
+                    label={member?.username}
+                    image={member?.avatar}
+                    reciverId={member?._id || null}
+                    messageYourself={isRoomYourSelf}
+                    lastMessage={room?.lastMessage?.body || null}
+                    lastMessageTime={room?.lastMessage?.createdAt}
+                    lastMessageSender={room?.lastMessage?.senderId?.username}
+                />
+            );
+        });
+    },[AllRoomDetails,auth]);
+
     if(isFetching){
         return (
             <div
@@ -41,19 +60,7 @@ export const DirectMessagePanel = () => {
             <DirectMessagePanelHeaders />
             <ScrollArea  >
                 <div className='flex flex-col px-2 mt-3' >
-                    {AllRoomDetails?.map((room) => {
-                        const isUserSender = room?.senderId?._id.toString() === auth?.user?.id;
-                        const member = (isUserSender) ? room?.recieverId : room?.senderId;
-                        return (
-                            <UserItem
-                                key={room?._id}
-                                id={room?._id}
-                                type='dms'
-                                label={member?.username}
-                                image={member?.avatar}
-                            />
-                        );
-                    })}
+                    {roomList}
                 </div>
             </ScrollArea>
         </div>
