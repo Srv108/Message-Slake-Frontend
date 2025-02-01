@@ -84,7 +84,7 @@ export const UserItem = ({
                             </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col space-y-1 w-full">
-                            <p className="text-sm text-white truncate">{label}{(messageYourself) ? ' (You)' : ''}</p>
+                            <p className="text-sm text-teal-300 font-serif font-bold truncate">{label}{(messageYourself) ? ' (You)' : ''}</p>
                             <p className="text-xs text-slate-400 truncate max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap space-x-2">
                                 { lastMessage && messageContent || 'Hey, are you available'}
                             </p>

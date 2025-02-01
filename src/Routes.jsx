@@ -10,6 +10,7 @@ import { DirectMessageLayout } from './pages/DirectMessages/Layout';
 import { Home } from './pages/Home/Home';
 import { Member } from './pages/Member/Member';
 import { Room } from './pages/Room/Room';
+import { VideoChat } from './pages/Room/VideoChat';
 // import { Room } from './pages/Room/Room';
 import { Channel } from './pages/Workspace/Channel/Channel';
 import { JoinPage } from './pages/Workspace/JoinPage';
@@ -27,6 +28,8 @@ export const AppRoutes = () => {
             <Route path='/workspace/join/:workspaceId' element={<JoinPage />} />
             <Route path='/directMessages' element={<ProtectedRoutes> <DirectMessageLayout> Direct Message </DirectMessageLayout> </ProtectedRoutes>} />
             <Route path='/directMessages/chat/:roomId' element={<ProtectedRoutes> <DirectMessageLayout> <Room />  </DirectMessageLayout> </ProtectedRoutes>} />
+            <Route path='/directMessages/chat/:roomId/video/call' element={<ProtectedRoutes> <VideoChat /> </ProtectedRoutes>} />
+
             <Route path='/home' element={<ProtectedRoutes> <Home/> </ProtectedRoutes> } />
             <Route path='/*' element={<Auth><SignupContainer/> </Auth>} />
         </Routes>

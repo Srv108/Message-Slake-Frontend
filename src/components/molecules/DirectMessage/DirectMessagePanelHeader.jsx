@@ -39,10 +39,10 @@ export const DirectMessagePanelHeaders = () => {
                 variant='transparent'
                 className='font-semibold text-lg w-auto  p-1.5 overflow-hidden'
             >
-                <span className='min-w-[100px] font-serif'>
+                <span className='min-w-[100px] font-serif text-teal-600'>
                     New Chat
                 </span>
-                <ChevronDownIcon className=""/>
+                <ChevronDownIcon className="text-teal-300"/>
             </Button>
             <div className='flex items-center'>
                     <Button
@@ -50,7 +50,7 @@ export const DirectMessagePanelHeaders = () => {
                         size='sm'
                         onClick={newChatIconClick}
                     >
-                        <MessageSquarePlusIcon className='size-5'/>
+                        <MessageSquarePlusIcon className='size-5 text-teal-300'/>
                     </Button>
             </div>
         </div>
