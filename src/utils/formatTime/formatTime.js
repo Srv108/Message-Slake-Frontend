@@ -30,7 +30,9 @@ export const formatTime = (currentDate,targetDateStr) => {
     } else if (diffInMin < 60) {
         return `${diffInMin} min ago`;
     } else if (diffInHours < 24) {
-        return formattedTime;
+        if(currentDate.getDate() !== targetDate.getDate()){
+            return 'Yesterday';
+        } else return formattedTime;
     } else if (diffInDays < 2) {
         return 'Yesterday';
     } else if (diffInDays < 7) {
