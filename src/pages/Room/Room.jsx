@@ -5,12 +5,14 @@ import { useLocation, useParams } from 'react-router-dom';
 import { RoomChatInput } from '@/components/atoms/ChatInput/RoomChatInput';
 import { Message } from '@/components/molecules/Message/Message';
 import { RoomHeader } from '@/components/molecules/Room/RoomHeader';
+import { Button } from '@/components/ui/button';
 import { useFetchRoomMessage } from '@/hooks/api/room/useFetchRoomMessage';
 import { useGetRoomById } from '@/hooks/api/room/useGetRoomById';
 import { useAuth } from '@/hooks/context/useAuth';
 import { useRoomDetails } from '@/hooks/context/useRoomDetails';
 import { useRoomMessage } from '@/hooks/context/useRoomMessage';
 import { useSocket } from '@/hooks/context/useSocket';
+import { seperateTimeFormat } from '@/utils/formatTime/seperator';
 
 export const Room = () => {
     
@@ -26,6 +28,7 @@ export const Room = () => {
     const queryClient = useQueryClient();
     const { roomMessageList, setRoomMessageList } = useRoomMessage();
     const { setRecieverId, setSenderId } = useRoomDetails();
+    const lastTimeSeparatorRef = useRef('');
     
     const { auth } = useAuth();
     const { joinRoom } = useSocket();
@@ -94,23 +97,42 @@ export const Room = () => {
 
     return (
         <div className='flex flex-col h-full bg-slack'>
-            <RoomHeader userID={userID} />
+            <RoomHeader userID={userID} roomId={roomId}/>
             <div 
                 ref={messageContainerListRef} 
                 className='h-full overflow-y-auto p-5 gap-y-2 mb-2 mt-1'
             >
-                {roomMessageList?.map((message) => (
-                    <Message 
-                        key={message?._id} 
-                        authorId={message?.senderId?._id}
-                        authorImage={message?.senderId?.avatar} 
-                        authorName={message?.senderId?.username} 
-                        createdAt={message?.createdAt} 
-                        body={message?.body} 
-                        image={message?.image}
-                        type='dms'
-                    />
-                ))}
+                {roomMessageList?.map((message) => {
+                    const separator = seperateTimeFormat(message?.createdAt);
+                    const shouldRenderSeparator = lastTimeSeparatorRef.current !== separator;
+                    
+                    if (shouldRenderSeparator) {
+                        lastTimeSeparatorRef.current = separator;
+                    } 
+
+                    return (
+                        <div key={message?._id}>
+                            {shouldRenderSeparator && (
+                                <div className='flex justify-center items-center'>
+                                    <Button
+                                        className="text-center text-teal-600 bg-slack-dark my-2 font-semibold"
+                                    >
+                                        {separator}
+                                    </Button>
+                                </div>
+                            )}
+                            <Message  
+                                authorId={message?.senderId?._id}
+                                authorImage={message?.senderId?.avatar} 
+                                authorName={message?.senderId?.username} 
+                                createdAt={message?.createdAt} 
+                                body={message?.body} 
+                                image={message?.image}
+                                type='dms'
+                            />
+                        </div>
+                    );
+                })}
             </div>
             <RoomChatInput />
         </div>

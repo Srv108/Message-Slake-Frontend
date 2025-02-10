@@ -6,15 +6,18 @@ import { useParams } from 'react-router-dom';
 import { ChatInput } from '@/components/atoms/ChatInput/ChatInput';
 import { ChannelHeader } from '@/components/molecules/Channel/ChannelHeader';
 import { Message } from '@/components/molecules/Message/Message';
+import { Button } from '@/components/ui/button';
 import { useGetChannelById } from '@/hooks/api/channel/useGetChannelById';
 import { useGetChannelMessage } from '@/hooks/api/channel/useGetChannelMessage';
 import { useChannelMessage } from '@/hooks/context/useChannelMessage';
 import { useSocket } from '@/hooks/context/useSocket';
+import { seperateTimeFormat } from '@/utils/formatTime/seperator';
 
 export const Channel = () => {
 
     const { channelId } = useParams();
     const hasJoinedChannel = useRef(false); 
+    const lastTimeSeparatorRef = useRef('');
     const queryClient = useQueryClient();
     const safeChannelId = channelId?.toString();
     const { isFetching, channelsDetails, isError } = useGetChannelById(safeChannelId);
@@ -91,15 +94,34 @@ export const Channel = () => {
                 className='h-full overflow-y-auto p-5 gap-y-2 mb-2 mt-1'
             >
                 {messageList?.map((message) => {
-                    return <Message 
-                        key={message?._id} 
-                        authorId={message?.senderId?._id}
-                        authorImage={message?.senderId?.avatar} 
-                        authorName={message?.senderId?.username} 
-                        createdAt={message?.createdAt} 
-                        body={message?.body} 
-                        image={message?.image}
-                    />;
+                    
+                    const separator = seperateTimeFormat(message?.createdAt);
+                    const shouldRenderSeparator = lastTimeSeparatorRef.current !== separator;
+                    
+                    if (shouldRenderSeparator) {
+                        lastTimeSeparatorRef.current = separator;
+                    } 
+                    return (
+                        <div key={message?._id}>
+                            {shouldRenderSeparator && (
+                                <div className='flex justify-center items-center'>
+                                    <Button
+                                        className="text-center text-teal-600 bg-slack-dark my-2 font-semibold"
+                                    >
+                                        {separator}
+                                    </Button>
+                                </div>
+                            )}
+                            <Message 
+                                authorId={message?.senderId?._id}
+                                authorImage={message?.senderId?.avatar} 
+                                authorName={message?.senderId?.username} 
+                                createdAt={message?.createdAt} 
+                                body={message?.body} 
+                                image={message?.image}
+                            />
+                        </div>
+                    );
                 })}
             </div>
             <ChatInput />

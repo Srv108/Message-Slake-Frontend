@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useGetMemberDetails } from '@/hooks/api/room/useGetMemberDetails';
 
-export const RoomHeader = ({ userID }) => {
+export const RoomHeader = ({ userID, roomId }) => {
 
     const navigate = useNavigate();
     const { isSuccess, RoomMember } = useGetMemberDetails(userID);
@@ -27,7 +27,7 @@ export const RoomHeader = ({ userID }) => {
                         <PhoneIcon className="size-4 text-teal-300  hover:text-teal-600 transition-all" />
                     </button>
                     <button 
-                        onClick={() => navigate('/video/call')}
+                        onClick={() => navigate(`/directMessages/chat/${roomId}/video/call`)}
                         className="flex justify-center items-center p-2"
                     >
                         <VideoIcon className="size-6 text-teal-400  hover:text-teal-600 transition-all" />

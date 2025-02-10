@@ -1,58 +1,18 @@
-import { CameraIcon, CameraOffIcon, Volume2Icon, VolumeOffIcon } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { CameraIcon, CameraOffIcon, PhoneOffIcon, ShareIcon, Volume2Icon, VolumeOffIcon } from 'lucide-react';
+
+import { useGetUserMedia } from '@/hooks/context/useGetUserMedia';
 
 export const VideoChat = () => {
 
-    const remoteVideoRef = useRef(null);
-    const localVideoRef = useRef(null);
-
-    const [isMuted, setIsMuted] = useState(false);
-    const [isCameraOn, setIsCameraOn] = useState(true);
-    const [ stream, setStream ] = useState(null);
-    
-    const toggleMute = () => {
-        if(stream){
-            stream.getAudioTracks().forEach(track => {
-                track.enabled = !isMuted;
-            });
-            setIsMuted(!isMuted);
-        }
-    };
-
-    const toggleCamera = () => {
-        if(stream){
-            stream.getVideoTracks().forEach(track => {
-                track.enabled = !isCameraOn;
-            });
-            setIsCameraOn(!isCameraOn);
-        }
-    };
-
-    const openMediaDevices = async () => {
-        const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-            video: true, 
-            audio: true 
-        });
-        console.log('mediaStream',mediaStream);
-        setStream(mediaStream);
-        if (localVideoRef.current) {
-            localVideoRef.current.srcObject = mediaStream;
-        }
-    };
-
-    const stopMediaDevices = () => {
-        if(stream){
-            stream.getTracks().forEach(track => track.stop());
-            setStream(null);
-        }
-    };
-
-    useEffect(() => {
-        openMediaDevices();
-
-        return () => stopMediaDevices();
-    },[]);
-
+    const {
+        remoteVideoRef,
+        localVideoRef,
+        toggleCamera,
+        toggleMute,
+        isMuted,
+        isCameraOn,
+        stopMediaDevices
+    } = useGetUserMedia();
 
     return (
         <div className="flex flex-col h-screen bg-gray-900 text-white">
@@ -70,24 +30,29 @@ export const VideoChat = () => {
 
             <div className="flex items-center justify-center space-x-4 p-4 bg-gray-800">
                 <button 
-                    onClick={toggleMute} 
-                    className="p-3 rounded-full bg-gray-700 hover:bg-red-500 transition-all"
+                    className="p-3 rounded-full bg-gray-700 text-teal-600 hover:text-teal-300 transition-all"
                 >
-                    {isMuted ? <Volume2Icon className='size-6' /> : <VolumeOffIcon className='size-6' />}
+                    <ShareIcon className='size-6 ' />
+                </button>
+                <button 
+                    onClick={toggleMute} 
+                    className="p-3 rounded-full bg-gray-700 text-teal-600 hover:text-teal-300 transition-all"
+                >
+                    {isMuted ? <Volume2Icon className='size-6 ' /> : <VolumeOffIcon className='size-6' />}
                 </button>
                 <button 
                     onClick={toggleCamera} 
-                    className="p-3 rounded-full bg-gray-700 hover:bg-blue-500 transition-all"
+                    className="p-3 rounded-full bg-gray-700 text-teal-600 hover:text-teal-300 transition-all"
                 >
                     {isCameraOn ?  <CameraOffIcon className='size-6' /> : <CameraIcon className='size-6' />}
                 </button>
                 <button 
                     onClick={stopMediaDevices}
-                    className="p-3 rounded-full bg-red-600 hover:bg-red-700 transition-all"
+                    className="p-3 rounded-full bg-red-600 hover:text-red-700 transition-all"
                 >
-                    ❌ End Call
+                    <PhoneOffIcon className='size-6' />
                 </button>
             </div>
-    </div>
+        </div>
     );
 };

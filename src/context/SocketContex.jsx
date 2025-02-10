@@ -51,7 +51,7 @@ export const SocketContextProvider = ({ children }) => {
     }
 
     return (
-        <SocketContext.Provider value={{ socket, joinChannel, currentChannel, joinRoom }} >
+        <SocketContext.Provider value={{ socket , joinChannel, currentChannel, joinRoom }} >
             { children }
         </SocketContext.Provider>
     );
