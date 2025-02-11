@@ -33,15 +33,15 @@ export const useConfirm = ({
                 open={promise !== null}
                 onOpenChange={handleClose}
             >
-                <DialogContent className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
+                <DialogContent className="w-full max-w-md p-6 bg-slack-medium rounded-lg shadow-lg">
                     <DialogHeader className="text-xl font-semibold text-gray-900">{title}</DialogHeader>
-                    <DialogDescription className="mt-2 text-sm text-gray-600">{message}</DialogDescription>
+                    <DialogDescription className="mt-2 text-sm text-teal-600">{message}</DialogDescription>
 
                     <DialogFooter className="flex justify-between space-x-4 mt-6">
                         <DialogClose>
                             <Button
-                                variant="outline"
-                                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 transition"
+                                variant='outline'
+                                className="px-4 py-2 bg-blue-800 text-white border border-blue-900 hover:bg-blue-800 rounded-md transition"
                             >
                                 Cancel
                             </Button>
