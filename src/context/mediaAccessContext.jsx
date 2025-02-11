@@ -11,6 +11,7 @@ export const UserMediaProvider = ({ children }) => {
     const navigate = useNavigate();
     const { socket } = useSocket();
 
+    const [ callDialed , setCallDialed ] = useState(false);
     const [ stream, setStream ] = useState(null);
     const [ isCameraOn, setIsCameraOn ] = useState(true);
     const [ isMuted, setIsMuted ] = useState(false);
@@ -60,10 +61,13 @@ export const UserMediaProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        openMediaDevices();
+        if(callDialed) openMediaDevices();
 
-        return () => stream?.getTracks().forEach(track => track.stop());
-    },[]);
+        return () => {
+            stream?.getTracks().forEach(track => track.stop());
+            setCallDialed(false);
+        };
+    },[callDialed, stream]);
 
     return (
         <UserMediaContext.Provider value={{
@@ -77,6 +81,7 @@ export const UserMediaProvider = ({ children }) => {
             setIsMuted,
             toggleCamera,
             toggleMute,
+            setCallDialed,
             stopMediaDevices,
             openMediaDevices,
         }} >

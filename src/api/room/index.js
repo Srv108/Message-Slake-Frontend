@@ -154,3 +154,19 @@ export const fetchLastMessageDetailsRequest = async({ roomId, token,}) => {
         console.log('Error coming in fetching last message Details',error);
     }
 };
+
+export const deleteMessageRequest = async({ messageId, token }) => {
+    try {
+        
+        const response = await axiosInstance.delete(`/directMessages/delete/${messageId}`,{
+            headers: {
+                'access-token': token
+            }
+        });
+
+        return response?.data?.data;
+    } catch (error) {
+        console.log('error coming in deleting message request',error);
+        throw error?.response;
+    }
+};

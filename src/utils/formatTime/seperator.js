@@ -22,8 +22,8 @@ export const seperateTimeFormat = (targetDateStr) => {
     const currentDay = currentDate.getDate();
 
     if (diffInDays === 0) {
-        if(currentDay != day) currentSeperator = 'Yesterday';
-        currentSeperator = 'Today';
+        if(currentDay !== day) currentSeperator = 'Yesterday';
+        else currentSeperator = 'Today';
     } else if (diffInDays === 1) {
         currentSeperator = 'Yesterday';
     } else if (diffInDays < 7) {

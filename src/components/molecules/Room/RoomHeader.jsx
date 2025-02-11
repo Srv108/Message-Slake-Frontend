@@ -3,11 +3,13 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useGetMemberDetails } from '@/hooks/api/room/useGetMemberDetails';
+import { useGetUserMedia } from '@/hooks/context/useGetUserMedia';
 
 export const RoomHeader = ({ userID, roomId }) => {
 
     const navigate = useNavigate();
     const { isSuccess, RoomMember } = useGetMemberDetails(userID);
+    const { setCallDialed } = useGetUserMedia();
     useEffect(() => {
         if(isSuccess){
             console.log('room member details is ',RoomMember);
@@ -30,7 +32,7 @@ export const RoomHeader = ({ userID, roomId }) => {
                         onClick={() => navigate(`/directMessages/chat/${roomId}/video/call`)}
                         className="flex justify-center items-center p-2"
                     >
-                        <VideoIcon className="size-6 text-teal-400  hover:text-teal-600 transition-all" />
+                        <VideoIcon onClick={() => setCallDialed(true)} className="size-6 text-teal-400  hover:text-teal-600 transition-all" />
                     </button>
                 </div>
                 <button className="flex justify-center items-center pt-1 pb-1">

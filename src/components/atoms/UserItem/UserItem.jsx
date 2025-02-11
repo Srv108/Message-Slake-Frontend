@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useWorkspace } from '@/hooks/context/useWorkspace';
 import { cn } from '@/lib/utils';
-import { formatTime } from '@/utils/formatTime/formatTime';
+import { seperateTimeFormat } from '@/utils/formatTime/seperator';
 
 import { MessageRenderer } from '../MessageRenderer/MessageRenderer';
 
@@ -39,7 +39,6 @@ export const UserItem = ({
 
     const { currentWorkspace } = useWorkspace();
     const messageRef = useRef(null);
-    const [ currentDate, setCurrentDate] = useState(new Date());
     const [ messageContent, setMessageContent ] = useState('');
 
     const linkProps = (type === 'workspace') 
@@ -48,20 +47,12 @@ export const UserItem = ({
 
 
     useEffect(() => {
-        const intervalId = setInterval(() => {
-            setCurrentDate(new Date());
-        },1000);
-
-        return () => clearInterval(intervalId);
-    },[]);
-
-    useEffect(() => {
         const textContent = messageRef.current.innerText;
         setMessageContent(textContent);
     },[lastMessage]);
 
     function handleLastMessageTime(str){
-        return formatTime(currentDate,str);
+        return seperateTimeFormat(str);
     }
     return (
         <>

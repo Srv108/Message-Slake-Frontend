@@ -122,6 +122,7 @@ export const Room = () => {
                                 </div>
                             )}
                             <Message  
+                                messageId={message?._id}
                                 authorId={message?.senderId?._id}
                                 authorImage={message?.senderId?.avatar} 
                                 authorName={message?.senderId?.username} 
