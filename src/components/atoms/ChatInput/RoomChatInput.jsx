@@ -16,9 +16,10 @@ export const RoomChatInput = () => {
     
     async function handleSubmit({ body, image }){
         let fileUrl = null;
+        let timeStamp = null;
 
         if(image) {
-            const presignedUrl = await queryClient.fetchQuery({
+            const { presignedUrl, time } = await queryClient.fetchQuery({
                 queryKey: ['getPresignedUrl'],
                 queryFn: () => getPresignedUrlRequest({ 
                     token: auth?.token,
@@ -27,15 +28,14 @@ export const RoomChatInput = () => {
                 })
             });
 
-            console.log('file type is ',image.type);
-            console.log('Presigned url', presignedUrl);
             const responseAws = await uploadImageToAwsPresignedUrl({ 
                 url: presignedUrl,
                 file: image 
             });
-
+            
             console.log('file upload success',responseAws);
             fileUrl = presignedUrl.split('?')[0];
+            timeStamp = time;
             console.log(fileUrl);
         }
         
@@ -44,6 +44,8 @@ export const RoomChatInput = () => {
             body,
             image: fileUrl,
             senderId: auth?.user?.id,
+            filename: image?.name || '',
+            timeStamp: timeStamp,
         },(data)=>{
             console.log('room id is',currentRoom);
             console.log('Message Sent',data);

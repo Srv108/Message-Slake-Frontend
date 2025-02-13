@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { createContext, useState } from 'react';
 import { io } from 'socket.io-client';
 
+import { useAuth } from '@/hooks/context/useAuth';
 import { useChannelMessage } from '@/hooks/context/useChannelMessage';
 import { useRoomDetails } from '@/hooks/context/useRoomDetails';
 import { useRoomMessage } from '@/hooks/context/useRoomMessage';
@@ -11,12 +12,17 @@ const SocketContext = createContext();
 export const SocketContextProvider = ({ children }) => {
 
     const queryClient = useQueryClient();
+    const { auth } = useAuth();
     const [ currentChannel, setCurrentChannel ] = useState(null); 
     const { messageList, setMessageList } = useChannelMessage();
     const { roomMessageList, setRoomMessageList } = useRoomMessage();
     const { currentRoom, setCurrentRoom } = useRoomDetails();
 
-    const socket = io(import.meta.env.VITE_BACKEND_SOCKET_URL);
+    const socket = io(import.meta.env.VITE_BACKEND_SOCKET_URL,{
+        extraHeaders: {
+            'access-token': auth?.token
+        }
+    });
 
     socket.on('NewMessageReceived',(data)=>{
         console.log('New message recieved ',data);
@@ -34,7 +40,7 @@ export const SocketContextProvider = ({ children }) => {
 
     async function joinRoom (roomId){
         if(roomId !== currentRoom){
-            socket.emit('joinRoom',{ roomId},(data)=>{
+            socket.emit('joinRoom',{roomId},(data)=>{
                 console.log('successfully joined room',data);
                 setCurrentRoom(data?.data);
             });

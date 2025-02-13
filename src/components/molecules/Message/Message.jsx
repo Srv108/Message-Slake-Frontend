@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
 import { FaChevronDown } from 'react-icons/fa';
 
+import { getDownloadSignedUrlRequest } from '@/api/s3';
 import { MessageRenderer } from '@/components/atoms/MessageRenderer/MessageRenderer';
 import { MessageThumbnail } from '@/components/atoms/MessageThumbnail/MessageThumbnail';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -10,6 +10,9 @@ import { useDeleteMessage } from '@/hooks/api/room/useDeleteMessage';
 import { useAuth } from '@/hooks/context/useAuth';
 import { useConfirm } from '@/hooks/useConfirm';
 import { formatTime } from '@/utils/formatTime/formatTime';
+
+
+
 
 export const Message = ({
     messageId,
@@ -26,7 +29,6 @@ export const Message = ({
     const queryClient = useQueryClient();
 
     const isLoggedInUser = (auth?.user?.id === authorId);
-    const [ currentDate ] = useState(new Date());
 
 
     const { deleteMessageMutation } = useDeleteMessage();
@@ -36,7 +38,7 @@ export const Message = ({
         });
 
     function handleMessageTime(str) {
-        return formatTime(currentDate,str);
+        return formatTime(str);
     }
 
     async function handleDeleteMessage(){
@@ -55,6 +57,40 @@ export const Message = ({
             console.log('failed to delete message',error);
         }
     }
+
+    async function handleSaveImage() {
+        try {
+            
+            const preSignedUrl = await queryClient.fetchQuery({
+                queryKey: ['getDownloadPresignedUrl'],
+                queryFn: async() => await getDownloadSignedUrlRequest({
+                    messageId: messageId,
+                    token: auth?.token
+                })
+            });
+
+            const response = await fetch(preSignedUrl);
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            
+            const filename = `${authorName}-${new Date().toISOString()}.jpg`;
+            const link = document.createElement('a');
+            
+            link.href = blobUrl;
+            link.download = filename;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Clean up the blob URL after download
+            URL.revokeObjectURL(blobUrl);
+
+        } catch (error) {
+            console.error('Error downloading the image:', error);
+        }
+    }
+    
     return (
         <>
             <ConfirmDialog />
@@ -95,20 +131,20 @@ export const Message = ({
                             </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
-                            className='bg-slack-medium font-serif text-teal-500 font-medium border-0 border-slack-dark'
+                            className='bg-slack-medium font-serif text-teal-500 font-medium border-2 border-slack-dark'
                         >
                             <DropdownMenuItem>React</DropdownMenuItem>
                             <DropdownMenuItem>Reply</DropdownMenuItem>
                             <DropdownMenuItem>Forward</DropdownMenuItem>
                             <DropdownMenuItem>Copy</DropdownMenuItem>
                             <DropdownMenuItem>Info</DropdownMenuItem>
-                            <DropdownMenuSeparator className='p-0.5 bg-slack-dark'/>
+                            {(image || isLoggedInUser) && <DropdownMenuSeparator className='p-[1px] bg-slack-dark'/>}
                             {image && <DropdownMenuItem
-                                onClick={() => {}}
+                                onClick={handleSaveImage}
                             > Save </DropdownMenuItem>}
-                            <DropdownMenuItem
+                            {isLoggedInUser && <DropdownMenuItem
                                 onClick={handleDeleteMessage}
-                            >Delete</DropdownMenuItem>
+                            >Delete</DropdownMenuItem>}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>

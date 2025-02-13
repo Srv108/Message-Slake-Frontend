@@ -1,4 +1,4 @@
-export const formatTime = (currentDate,targetDateStr) => {
+export const formatTime = (targetDateStr) => {
     const targetDate = new Date(targetDateStr);
 
     const formattedTime = targetDate.toLocaleTimeString('en-US',{

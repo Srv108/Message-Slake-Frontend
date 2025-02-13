@@ -1,4 +1,5 @@
 import { cva } from 'class-variance-authority';
+import { ImageIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { FaChevronDown } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
@@ -7,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useWorkspace } from '@/hooks/context/useWorkspace';
 import { cn } from '@/lib/utils';
+import { formatTime } from '@/utils/formatTime/formatTime';
 import { seperateTimeFormat } from '@/utils/formatTime/seperator';
 
 import { MessageRenderer } from '../MessageRenderer/MessageRenderer';
@@ -52,6 +54,9 @@ export const UserItem = ({
     },[lastMessage]);
 
     function handleLastMessageTime(str){
+        if(seperateTimeFormat(str) === 'Today'){
+            return formatTime(str);
+        }
         return seperateTimeFormat(str);
     }
     return (
@@ -77,7 +82,12 @@ export const UserItem = ({
                         <div className="flex flex-col space-y-1 w-full">
                             <p className="text-sm text-teal-300 font-serif font-bold truncate">{label}{(messageYourself) ? ' (You)' : ''}</p>
                             <p className="text-xs text-slate-400 truncate max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap space-x-2">
-                                { lastMessage && messageContent || 'Hey, are you available'}
+                                { lastMessage && (messageContent || image && ( 
+                                    <span className="flex items-center gap-1">
+                                        <ImageIcon className="size-3 text-gray-400" />
+                                        <span className="text-xs text-gray-400">Image</span>
+                                    </span>
+                                ))}
                             </p>
                         </div>
                     </Link>
