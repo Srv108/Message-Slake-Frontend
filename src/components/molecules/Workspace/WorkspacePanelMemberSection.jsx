@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 
 export const WorkspacePanelMemberSection = ({ children ,label, onIconClick }) => {
 
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
 
     return (
         <div className="flex flex-col mt-3 px-2">

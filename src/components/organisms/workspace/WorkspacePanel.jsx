@@ -103,7 +103,7 @@ export const WorkspacePanel = () => {
                     </WorkspacePanelSection>
 
                     <WorkspacePanelMemberSection 
-                        label='Direct messages'
+                        label='Members'
                         onIconClick={handleAddMemberIconClick}
                     >
                         {workspaceDetails?.members?.map((member) => {
