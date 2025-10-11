@@ -70,6 +70,7 @@ export const WorkspaceChannelDrawer = ({ open, workspaceId, onClose }) => {
                         searchPlaceholder='Search channels...'
                         showBackButton={true}
                         onBackClick={onClose}
+                        onHeaderClick={() => setShowDetailsDrawer(true)}
                     />
                 )}
 
@@ -115,6 +116,7 @@ export const WorkspaceChannelDrawer = ({ open, workspaceId, onClose }) => {
                                                 label={channel.name}
                                                 variant={channelId === channel._id ? 'active' : 'default'}
                                                 Icon={HashIcon}
+                                                workspaceId={workspaceId}
                                             />
                                         );
                                     })
