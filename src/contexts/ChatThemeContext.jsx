@@ -99,6 +99,15 @@ export const chatThemes = {
         messageBackground: 'bg-[#2a2a2a]',
         pattern: null,
         textColor: 'text-gray-100'
+    },
+    custom: {
+        id: 'custom',
+        name: 'Custom',
+        background: 'bg-white',
+        messageBackground: 'bg-white',
+        pattern: null,
+        textColor: 'text-gray-900',
+        isCustom: true
     }
 };
 
@@ -108,16 +117,32 @@ export const ChatThemeProvider = ({ children }) => {
         return savedTheme || 'default';
     });
 
+    const [customColor, setCustomColor] = useState(() => {
+        const savedColor = localStorage.getItem('customChatColor');
+        return savedColor || '#ffffff';
+    });
+
     useEffect(() => {
         localStorage.setItem('chatTheme', chatTheme);
     }, [chatTheme]);
 
+    useEffect(() => {
+        localStorage.setItem('customChatColor', customColor);
+    }, [customColor]);
+
     const getCurrentTheme = () => {
+        if (chatTheme === 'custom') {
+            return {
+                ...chatThemes.custom,
+                background: '',
+                customBackground: customColor
+            };
+        }
         return chatThemes[chatTheme] || chatThemes.default;
     };
 
     return (
-        <ChatThemeContext.Provider value={{ chatTheme, setChatTheme, getCurrentTheme, chatThemes }}>
+        <ChatThemeContext.Provider value={{ chatTheme, setChatTheme, getCurrentTheme, chatThemes, customColor, setCustomColor }}>
             {children}
         </ChatThemeContext.Provider>
     );

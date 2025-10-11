@@ -11,7 +11,7 @@ import { useCreateChannelContext } from '@/hooks/context/useCreateChannelContext
 
 export const WorkspaceChannelDrawer = ({ open, workspaceId, onClose }) => {
     const { channelId } = useParams();
-    const { setOpenCreateChannelModal } = useCreateChannelContext();
+    const { setOpenCreateChannelModal, setTargetWorkspaceId } = useCreateChannelContext();
     const [showDetailsDrawer, setShowDetailsDrawer] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -55,7 +55,7 @@ export const WorkspaceChannelDrawer = ({ open, workspaceId, onClose }) => {
             />
             
             {/* Drawer - slides over the panel */}
-            <div className={`absolute inset-0 bg-slack-medium border-r border-slate-700 shadow-2xl z-20 transform transition-transform duration-300 ease-in-out overflow-hidden ${
+            <div className={`absolute inset-0 bg-white dark:bg-slack-medium border-r border-gray-200 dark:border-slate-700 shadow-2xl z-20 transform transition-transform duration-300 ease-in-out overflow-hidden ${
                 open ? 'translate-x-0' : '-translate-x-full'
             }`}>
                 {/* Unified Header */}
@@ -63,7 +63,10 @@ export const WorkspaceChannelDrawer = ({ open, workspaceId, onClose }) => {
                     <UnifiedPanelHeader
                         appName='Channels'
                         workspaceName={workspaceDetails?.name}
-                        onAddClick={() => setOpenCreateChannelModal(true)}
+                        onAddClick={() => {
+                            setTargetWorkspaceId(workspaceId);
+                            setOpenCreateChannelModal(true);
+                        }}
                         addButtonLabel='Create Channel'
                         menuItems={menuItems}
                         onSearch={handleSearch}
@@ -78,12 +81,12 @@ export const WorkspaceChannelDrawer = ({ open, workspaceId, onClose }) => {
                 <ScrollArea className={isFetching ? 'h-full' : 'h-[calc(100vh-128px)]'}>
                     {isFetching ? (
                         <div className='flex items-center justify-center py-8'>
-                            <Loader className='animate-spin size-6 text-white' />
+                            <Loader className='animate-spin size-6 text-gray-900 dark:text-white' />
                         </div>
                     ) : !isSuccess ? (
                         <div className='flex flex-col items-center justify-center py-8 gap-2'>
                             <TriangleAlertIcon className='size-8 text-red-500' />
-                            <p className='text-sm text-slate-400'>Failed to load workspace</p>
+                            <p className='text-sm text-gray-600 dark:text-slate-400'>Failed to load workspace</p>
                         </div>
                     ) : (
                         <div className='py-2'>
@@ -91,15 +94,18 @@ export const WorkspaceChannelDrawer = ({ open, workspaceId, onClose }) => {
                             <div className='px-2'>
                                 {filteredChannels?.length === 0 ? (
                                     <div className='flex flex-col items-center justify-center py-8 px-4'>
-                                        <HashIcon className='size-12 text-slate-600 mb-3' />
-                                        <p className='text-sm text-slate-400 text-center mb-2'>
+                                        <HashIcon className='size-12 text-gray-400 dark:text-slate-600 mb-3' />
+                                        <p className='text-sm text-gray-700 dark:text-slate-400 text-center mb-2'>
                                             No channels yet
                                         </p>
-                                        <p className='text-xs text-slate-500 text-center mb-4'>
+                                        <p className='text-xs text-gray-600 dark:text-slate-500 text-center mb-4'>
                                             Create your first channel to get started
                                         </p>
                                         <button
-                                            onClick={() => setOpenCreateChannelModal(true)}
+                                            onClick={() => {
+                                                setTargetWorkspaceId(workspaceId);
+                                                setOpenCreateChannelModal(true);
+                                            }}
                                             className='px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm rounded-lg transition-colors flex items-center gap-2'
                                         >
                                             <HashIcon className='size-4' />

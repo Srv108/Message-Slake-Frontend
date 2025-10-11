@@ -93,9 +93,9 @@ export const DirectMessagePanel = () => {
     if(isFetching){
         return (
             <div
-                className='flex flex-col gap-y-2 h-full items-center justify-center text-white'
+                className='flex flex-col gap-y-2 h-full items-center justify-center bg-white dark:bg-slack-medium'
             >
-                <Loader className='animate-spin size-6 text-white'/>
+                <Loader className='animate-spin size-6 text-gray-900 dark:text-white'/>
             </div>
         );
     }
@@ -103,7 +103,7 @@ export const DirectMessagePanel = () => {
     if(!isSuccess){
         return (
             <div
-                className='flex flex-col gap-y-2 h-full items-center justify-center text-white'
+                className='flex flex-col gap-y-2 h-full items-center justify-center bg-white dark:bg-slack-medium'
             >
                 <TriangleAlertIcon className='size-8 text-red-500'/>
             </div>
@@ -111,7 +111,7 @@ export const DirectMessagePanel = () => {
     }
 
     return(
-        <div className='flex flex-col h-full bg-slack-medium'>
+        <div className='flex flex-col h-full bg-white dark:bg-slack-medium'>
             <UnifiedPanelHeader
                 appName='Message Slake'
                 onAddClick={handleAddUser}
@@ -124,10 +124,10 @@ export const DirectMessagePanel = () => {
                 <div className='flex flex-col px-2 mt-3'>
                     {roomList?.length === 0 ? (
                         <div className='flex flex-col items-center justify-center py-12 px-4'>
-                            <p className='text-sm text-slate-400 text-center mb-2'>
+                            <p className='text-sm text-gray-600 dark:text-slate-400 text-center mb-2'>
                                 No conversations found
                             </p>
-                            <p className='text-xs text-slate-500 text-center'>
+                            <p className='text-xs text-gray-500 dark:text-slate-500 text-center'>
                                 Start a new chat to get started
                             </p>
                         </div>

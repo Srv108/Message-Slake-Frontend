@@ -105,7 +105,10 @@ export const Room = () => {
     }
 
     return (
-        <div className={`flex flex-col h-full ${currentTheme.background} ${currentTheme.pattern || ''} transition-colors duration-300`}>
+        <div 
+            className={`flex flex-col h-full ${currentTheme.background} ${currentTheme.pattern || ''} transition-colors duration-300`}
+            style={currentTheme.customBackground ? { backgroundColor: currentTheme.customBackground } : {}}
+        >
             <RoomHeader userID={userID} roomId={roomId}/>
             <div 
                 ref={messageContainerListRef} 

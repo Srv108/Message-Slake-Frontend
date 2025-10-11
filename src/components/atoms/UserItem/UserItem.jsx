@@ -15,12 +15,12 @@ import { seperateTimeFormat } from '@/utils/formatTime/seperator';
 import { MessageRenderer } from '../MessageRenderer/MessageRenderer';
 
 const userItemVariants = cva(
-    'flex items-center gap-3 justify-start font-normal h-14 px-4 mt-2 text-sm border border-slack-dark rounded-md transition-colors duration-200',
+    'flex items-center gap-3 justify-start font-normal h-14 px-4 mt-2 text-sm border border-transparent rounded-md transition-colors duration-200',
     {
         variants: {
             variant: {
-                default: 'text-[#f9edffcc] hover:bg-[#f9edff33]',
-                active: 'text-[#481350] bg-white/90 hover:bg-white/80'
+                default: 'text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50',
+                active: 'text-gray-900 dark:text-white bg-gray-200 dark:bg-slate-700/70 hover:bg-gray-300 dark:hover:bg-slate-700/80'
             }
         },
         defaultVariants: 'default'
@@ -110,8 +110,8 @@ export const UserItem = ({
                             </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col space-y-1 w-full">
-                            <p className="text-sm text-teal-300 font-serif font-bold truncate">{label}{(messageYourself) ? ' (You)' : ''}</p>
-                            <p className="text-xs text-slate-400 truncate max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap space-x-2">
+                            <p className="text-sm text-gray-900 dark:text-slate-100 font-medium truncate">{label}{(messageYourself) ? ' (You)' : ''}</p>
+                            <p className="text-xs text-gray-600 dark:text-slate-400 truncate max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap space-x-2">
                                 { lastMessage ? (messageContent || image && ( 
                                     <span className="flex items-center gap-1">
                                         <ImagesIcon className="size-3 text-gray-400" />
@@ -123,7 +123,7 @@ export const UserItem = ({
                     </Link>
                     
 
-                    <div className="text-xs text-gray-400 w-1/5 flex items-center justify-end space-x-2">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 w-1/5 flex items-center justify-end space-x-2">
                         <div className='flex flex-col justify-center items-end space-y-1'>
                             <span>{ lastMessageTime ? handleLastMessageTime(lastMessageTime) : '00:00'}</span>
                             <div
@@ -131,7 +131,7 @@ export const UserItem = ({
                                 onClick={() => console.log('icon is clicked')}
                                 className='cursor-pointer transition-transform duration-200 hover:scale-150'
                             >
-                                <FaChevronDown  className="size-5 cursor-pointer" />
+                                <FaChevronDown  className="size-5 cursor-pointer text-gray-500 dark:text-slate-400" />
                             </div>    
                         </div>   
                     </div>

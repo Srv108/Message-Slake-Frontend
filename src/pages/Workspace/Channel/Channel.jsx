@@ -128,7 +128,10 @@ export const Channel = () => {
 
     
     return (
-        <div className={`flex flex-col h-full ${currentTheme.background} ${currentTheme.pattern || ''} transition-colors duration-300 relative`}>
+        <div 
+            className={`flex flex-col h-full ${currentTheme.background} ${currentTheme.pattern || ''} transition-colors duration-300 relative`}
+            style={currentTheme.customBackground ? { backgroundColor: currentTheme.customBackground } : {}}
+        >
             <ChannelHeader 
                 name={channelsDetails?.name} 
                 onOpenDetails={() => setShowDetailsDrawer(true)}

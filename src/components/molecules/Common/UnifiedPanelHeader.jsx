@@ -33,7 +33,7 @@ export const UnifiedPanelHeader = ({
     };
 
     return (
-        <div className='flex flex-col bg-slack-medium border-b border-slate-700'>
+        <div className='flex flex-col bg-white dark:bg-slack-medium border-b border-gray-200 dark:border-slate-700'>
             {/* Top Header - App Name, Plus Icon, Three Dots */}
             <div className='flex items-center justify-between px-4 h-[60px]'>
                 {/* Left Side - Back Button + App Name */}
@@ -46,7 +46,7 @@ export const UnifiedPanelHeader = ({
                         }`}
                         onClick={onHeaderClick}
                     >
-                        <h1 className='text-xl font-bold text-slate-100'>
+                        <h1 className='text-xl font-bold text-gray-900 dark:text-slate-100'>
                             {workspaceName ? workspaceName : appName}
                         </h1>
                     </div>
@@ -60,10 +60,10 @@ export const UnifiedPanelHeader = ({
                             variant='ghost'
                             size='icon'
                             onClick={onAddClick}
-                            className='size-10 rounded-full hover:bg-slate-700/50 transition-colors'
+                            className='size-10 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700/50 transition-colors'
                             title={addButtonLabel}
                         >
-                            <MessageSquarePlusIcon className='w-5 h-5 text-slate-300' strokeWidth={2.5} />
+                            <MessageSquarePlusIcon className='w-5 h-5 text-gray-700 dark:text-slate-300' strokeWidth={2.5} />
                         </Button>
                     )}
 
@@ -74,17 +74,17 @@ export const UnifiedPanelHeader = ({
                                 <Button
                                     variant='ghost'
                                     size='icon'
-                                    className='size-10 rounded-full hover:bg-slate-700/50 transition-colors'
+                                    className='size-10 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700/50 transition-colors'
                                 >
-                                    <MoreVertical className='size-5 text-slate-300' />
+                                    <MoreVertical className='size-5 text-gray-700 dark:text-slate-300' />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align='end' className='w-48 bg-slate-800 border-slate-700'>
+                            <DropdownMenuContent align='end' className='w-48 bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700'>
                                 {menuItems.map((item, index) => (
                                     <DropdownMenuItem
                                         key={index}
                                         onClick={item.onClick}
-                                        className='text-slate-200 hover:bg-slate-700 cursor-pointer'
+                                        className='text-gray-900 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer'
                                     >
                                         {item.icon && <span className='mr-2'>{item.icon}</span>}
                                         {item.label}
@@ -100,10 +100,10 @@ export const UnifiedPanelHeader = ({
                             variant='ghost'
                             size='icon'
                             onClick={onBackClick}
-                            className='size-10 rounded-full hover:bg-slate-700/50 transition-colors'
+                            className='size-10 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700/50 transition-colors'
                             title='Go Back'
                         >
-                            <ArrowLeftFromLine className='w-5 h-5 text-slate-300' strokeWidth={3} />
+                            <ArrowLeftFromLine className='w-5 h-5 text-gray-700 dark:text-slate-300' strokeWidth={3} />
                         </Button>
                     )}
                     
@@ -113,13 +113,13 @@ export const UnifiedPanelHeader = ({
             {/* Search Bar */}
             <div className='px-4 pb-4'>
                 <div className='relative'>
-                    <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-slate-400' />
+                    <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-500 dark:text-slate-400' />
                     <Input
                         type='text'
                         placeholder={searchPlaceholder}
                         value={searchQuery}
                         onChange={handleSearchChange}
-                        className='w-full pl-10 pr-4 py-2.5 bg-slate-700/50 border-slate-600 text-slate-100 placeholder:text-slate-400 rounded-lg focus:bg-slate-700 transition-colors'
+                        className='w-full pl-10 pr-4 py-2.5 bg-gray-100 dark:bg-slate-700/50 border-gray-300 dark:border-slate-600 text-gray-900 dark:text-slate-100 placeholder:text-gray-500 dark:placeholder:text-slate-400 rounded-lg focus:bg-gray-50 dark:focus:bg-slate-700 transition-colors'
                     />
                 </div>
             </div>

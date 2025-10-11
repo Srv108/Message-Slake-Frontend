@@ -52,14 +52,14 @@ export const RoomHeader = ({ userID, roomId }) => {
                 email: RoomMember?.email
             });
         }
-    },[isSuccess,RoomMember]);
+    },[isSuccess,RoomMember,setRemoteUser]);
 
     return (
         <>
-            <div className="border-b border-slate-700/50 h-[60px] flex items-center justify-between px-3 md:px-4 bg-slack-medium shadow-sm backdrop-blur-sm">
+            <div className="border-b border-gray-200 dark:border-slate-700/50 h-[60px] flex items-center justify-between px-3 md:px-4 bg-white dark:bg-slack-medium shadow-sm backdrop-blur-sm">
                 {/* Left Section: Back Button (Mobile) + Avatar + User Info */}
                 <div 
-                    className="flex items-center gap-2 md:gap-3 flex-1 min-w-0 cursor-pointer hover:bg-slate-700/20 -mx-2 px-2 py-1 rounded-lg transition-colors"
+                    className="flex items-center gap-2 md:gap-3 flex-1 min-w-0 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700/20 -mx-2 px-2 py-1 rounded-lg transition-colors"
                     onClick={() => setIsDrawerOpen(true)}
                 >
                     {/* Back Button - Visible on mobile */}
@@ -68,10 +68,10 @@ export const RoomHeader = ({ userID, roomId }) => {
                             e.stopPropagation();
                             navigate(-1);
                         }}
-                        className="md:hidden p-2 -ml-2 hover:bg-slate-700/30 rounded-full transition-colors duration-200"
+                        className="md:hidden p-2 -ml-2 hover:bg-gray-200 dark:hover:bg-slate-700/30 rounded-full transition-colors duration-200"
                         aria-label="Go back"
                     >
-                        <ArrowLeft className="w-5 h-5 text-slate-300" />
+                        <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-slate-300" />
                     </button>
 
                     {/* Avatar */}
@@ -87,12 +87,12 @@ export const RoomHeader = ({ userID, roomId }) => {
 
                     {/* User Info */}
                     <div className="flex flex-col justify-center min-w-0 flex-1">
-                        <h2 className="text-slate-100 font-semibold text-sm md:text-base truncate">
+                        <h2 className="text-gray-900 dark:text-slate-100 font-semibold text-sm md:text-base truncate">
                             {RoomMember?.username || 'Loading...'}
                         </h2>
                         <div className="flex items-center gap-1.5">
                             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                            <p className="text-xs text-slate-400 truncate">
+                            <p className="text-xs text-gray-600 dark:text-slate-400 truncate">
                                 {RoomMember?.email ? 'Online' : 'Loading...'}
                             </p>
                         </div>
@@ -103,18 +103,18 @@ export const RoomHeader = ({ userID, roomId }) => {
                 <div className="flex items-center gap-1">
                     {/* Search Button - Hidden on small mobile */}
                     <button 
-                        className="hidden sm:flex p-2 hover:bg-slate-700/40 rounded-full transition-all duration-200 group"
+                        className="hidden sm:flex p-2 hover:bg-gray-200 dark:hover:bg-slate-700/40 rounded-full transition-all duration-200 group"
                         aria-label="Search"
                     >
-                        <Search className="w-5 h-5 text-slate-400 group-hover:text-teal-400 transition-colors" />
+                        <Search className="w-5 h-5 text-gray-600 dark:text-slate-400 group-hover:text-teal-400 transition-colors" />
                     </button>
 
                     {/* Phone Call Button */}
                     <button 
-                        className="p-2 hover:bg-slate-700/40 rounded-full transition-all duration-200 group"
+                        className="p-2 hover:bg-gray-200 dark:hover:bg-slate-700/40 rounded-full transition-all duration-200 group"
                         aria-label="Voice call"
                     >
-                        <Phone className="w-5 h-5 text-slate-400 group-hover:text-teal-400 transition-colors" />
+                        <Phone className="w-5 h-5 text-gray-600 dark:text-slate-400 group-hover:text-teal-400 transition-colors" />
                     </button>
 
                     {/* Video Call Button */}
@@ -123,18 +123,18 @@ export const RoomHeader = ({ userID, roomId }) => {
                             setCallDialed(true);
                             navigate(`/directMessages/chat/${roomId}/video/call`);
                         }}
-                        className="p-2 hover:bg-slate-700/40 rounded-full transition-all duration-200 group"
+                        className="p-2 hover:bg-gray-200 dark:hover:bg-slate-700/40 rounded-full transition-all duration-200 group"
                         aria-label="Video call"
                     >
-                        <Video className="w-5 h-5 text-slate-400 group-hover:text-teal-400 transition-colors" />
+                        <Video className="w-5 h-5 text-gray-600 dark:text-slate-400 group-hover:text-teal-400 transition-colors" />
                     </button>
 
                     {/* More Options Menu */}
                     <button 
-                        className="p-2 hover:bg-slate-700/40 rounded-full transition-all duration-200 group"
+                        className="p-2 hover:bg-gray-200 dark:hover:bg-slate-700/40 rounded-full transition-all duration-200 group"
                         aria-label="More options"
                     >
-                        <EllipsisVertical className="w-5 h-5 text-slate-400 group-hover:text-teal-400 transition-colors" />
+                        <EllipsisVertical className="w-5 h-5 text-gray-600 dark:text-slate-400 group-hover:text-teal-400 transition-colors" />
                     </button>
                 </div>
             </div>

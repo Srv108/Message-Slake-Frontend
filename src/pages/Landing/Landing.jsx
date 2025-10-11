@@ -81,27 +81,27 @@ export const Landing = () => {
             </nav>
 
             {/* Hero Section */}
-            <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+            <section className="pt-24 sm:pt-32 pb-12 sm:pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
                 {/* Decorative elements */}
                 <div className="absolute top-20 left-10 w-72 h-72 bg-gray-100 rounded-full blur-3xl opacity-50 animate-pulse"></div>
                 <div className="absolute bottom-20 right-10 w-96 h-96 bg-gray-50 rounded-full blur-3xl opacity-50 animate-pulse delay-1000"></div>
                 
                 <div className="max-w-7xl mx-auto relative z-10">
                     <div className="text-center max-w-4xl mx-auto">
-                        <div className="inline-flex items-center space-x-2 bg-gray-100 px-4 py-2 rounded-full mb-8 animate-fade-in">
-                            <Sparkles className="w-4 h-4 text-black" />
-                            <span className="text-sm font-medium text-gray-700">Introducing MessageSlake 2.0</span>
+                        <div className="inline-flex items-center space-x-2 bg-gray-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-6 sm:mb-8 animate-fade-in text-xs sm:text-sm">
+                            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-black" />
+                            <span className="font-medium text-gray-700">Introducing MessageSlake 2.0</span>
                         </div>
                         
-                        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-black mb-6 tracking-tight leading-tight animate-fade-in-up">
+                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-black mb-4 sm:mb-6 tracking-tight leading-tight animate-fade-in-up px-2">
                             Where teams
                             <span className="block mt-2 relative inline-block">
                                 <span className="relative z-10">connect & collaborate</span>
-                                <span className="absolute bottom-2 left-0 w-full h-3 bg-gray-200 -rotate-1"></span>
+                                <span className="absolute bottom-1 sm:bottom-2 left-0 w-full h-2 sm:h-3 bg-gray-200 -rotate-1"></span>
                             </span>
                         </h1>
                         
-                        <p className="mt-6 text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto animate-fade-in-up delay-200">
+                        <p className="mt-4 sm:mt-6 text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto animate-fade-in-up delay-200 px-4">
                             The modern workspace for fast-moving teams. Real-time messaging, video calls, 
                             and seamless collaboration—all in one beautiful platform.
                         </p>

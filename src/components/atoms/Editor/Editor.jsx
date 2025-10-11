@@ -206,10 +206,10 @@ export const Editor = ({
     }
 
     return (
-        <div className="flex flex-col mb-3 gap-2">
+        <div className="flex flex-col mb-3 gap-2 w-full max-w-full">
             {/* File Preview Section - Compact version above input */}
             {image && (
-                <div className="px-2 py-1.5 bg-blue-50 border border-blue-200 rounded-md file-preview-enter flex items-center gap-2">
+                <div className="px-2 py-1.5 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-md file-preview-enter flex items-center gap-2 max-w-full">
                     {/* File Preview - Smaller */}
                     <div className="relative flex-shrink-0">
                         {isImageFile(image) ? (
@@ -232,10 +232,10 @@ export const Editor = ({
 
                     {/* File Info - Compact */}
                     <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-gray-900 truncate">
+                        <p className="text-xs font-medium text-gray-900 dark:text-slate-100 truncate">
                             {image.name}
                         </p>
-                        <p className="text-[10px] text-gray-500">
+                        <p className="text-[10px] text-gray-600 dark:text-slate-400">
                             {formatFileSize(image.size)}
                         </p>
                     </div>
@@ -252,7 +252,7 @@ export const Editor = ({
             )}
 
             {/* Editor Container - WhatsApp style */}
-            <div className="relative flex items-end gap-2 bg-transparent">
+            <div className="relative flex items-end gap-2 bg-transparent w-full max-w-full">
                 {/* Hidden file inputs */}
                 <input
                     type="file"
@@ -269,19 +269,19 @@ export const Editor = ({
                 />
 
                 {/* Editor with icons inside */}
-                <div className="flex-1 relative border border-gray-300/50 rounded-3xl focus-within:border-[#007a6a] transition-colors bg-white/80 backdrop-blur-md shadow-sm">
+                <div className="flex-1 relative border border-gray-300 dark:border-slate-600 rounded-xl focus-within:border-[#007a6a] dark:focus-within:border-teal-500 transition-colors bg-white dark:bg-slate-800 shadow-sm overflow-hidden min-w-0 max-w-full">
                     {/* Quill Editor */}
-                    <div ref={containerRef} className="ql-custom-compact max-h-[120px]" />
+                    <div ref={containerRef} className="ql-custom-compact max-h-[120px] rounded-xl text-gray-900 dark:text-slate-100 overflow-x-hidden overflow-y-auto break-words w-full" style={{ wordWrap: 'break-word', overflowWrap: 'break-word', wordBreak: 'break-word' }} />
                     
                     {/* Bottom right icons - Camera and Attachment */}
-                    <div className="absolute bottom-2 right-2 flex items-center gap-1 z-10">
+                    <div className="absolute bottom-0 right-0 h-11 flex items-center gap-1 px-2 z-10">
                         {/* Camera button */}
                         <button
                             onClick={() => imageRef.current?.click()}
                             title="Send image"
-                            className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+                            className="w-8 h-8 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full transition-colors flex items-center justify-center"
                         >
-                            <Camera className="w-5 h-5 text-gray-500 hover:text-[#007a6a]" />
+                            <Camera className="w-5 h-5 text-gray-600 dark:text-slate-400 hover:text-[#007a6a] dark:hover:text-teal-400" />
                         </button>
                         
                         {/* Attachment button with menu */}
@@ -289,9 +289,9 @@ export const Editor = ({
                             <button
                                 onClick={() => setShowAttachmentMenu(!showAttachmentMenu)}
                                 title="Attach file"
-                                className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+                                className="w-8 h-8 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full transition-colors flex items-center justify-center"
                             >
-                                <Paperclip className="w-5 h-5 text-gray-500 hover:text-[#007a6a]" />
+                                <Paperclip className="w-5 h-5 text-gray-600 dark:text-slate-400 hover:text-[#007a6a] dark:hover:text-teal-400" />
                             </button>
                             
                             {/* Attachment menu */}
@@ -337,9 +337,9 @@ export const Editor = ({
                         <button
                             onClick={toggleToolbar}
                             title="Toggle formatting"
-                            className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+                            className="w-8 h-8 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full transition-colors flex items-center justify-center"
                         >
-                            <PiTextAa className="w-4 h-4 text-gray-500" />
+                            <PiTextAa className="w-5 h-5 text-gray-600 dark:text-slate-400" />
                         </button>
                     </div>
                 </div>

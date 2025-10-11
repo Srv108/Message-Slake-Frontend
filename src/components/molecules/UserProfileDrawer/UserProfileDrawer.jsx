@@ -11,7 +11,7 @@ import { useTheme } from '@/hooks/context/useTheme';
 import { useWorkspaceCreateModal } from '@/hooks/context/useWorkspaceCreateModal';
 import { useToast } from '@/hooks/use-toast';
 
-export const UserProfileDrawer = ({ open, onOpenChange }) => {
+export const UserProfileDrawer = ({ open, onOpenChange, isMobile = false }) => {
     const { auth, logout } = useAuth();
     const { theme, toggleTheme } = useTheme();
     const [isThemeSelectorOpen, setIsThemeSelectorOpen] = useState(false);
@@ -84,14 +84,16 @@ export const UserProfileDrawer = ({ open, onOpenChange }) => {
         <>
             {/* Overlay */}
             <div 
-                className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-500 ease-in-out ${
+                className={`fixed inset-0 bg-black/60 transition-opacity duration-500 ease-in-out ${
                     open ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
+                } ${isMobile ? 'z-[60]' : 'z-40'}`}
                 onClick={() => onOpenChange(false)}
             />
             
             {/* Drawer */}
-            <div className={`fixed left-0 top-0 h-full w-full md:w-1/2 lg:w-2/5 max-w-2xl bg-slack-medium border-r border-slate-700 shadow-2xl z-50 overflow-y-auto transform transition-all duration-500 ease-in-out ${
+            <div className={`fixed left-0 top-0 h-full bg-slack-medium border-r border-slate-700 shadow-2xl overflow-y-auto transform transition-all duration-500 ease-in-out ${
+                isMobile ? 'w-full z-[70] pb-16' : 'w-full md:w-1/2 lg:w-2/5 max-w-2xl z-50'
+            } ${
                 open ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
             }`}>
                 {/* Back Button */}

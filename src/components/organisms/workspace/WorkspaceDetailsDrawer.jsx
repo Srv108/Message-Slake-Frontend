@@ -46,15 +46,15 @@ export const WorkspaceDetailsDrawer = ({ open, workspace, onClose }) => {
             />
             
             {/* Drawer - slides from top */}
-            <div className="absolute inset-0 bg-slack-medium shadow-2xl z-40 animate-in slide-in-from-top duration-300">
+            <div className="absolute inset-0 bg-white dark:bg-slack-medium shadow-2xl z-40 animate-in slide-in-from-top duration-300">
                 {/* Header */}
-                <div className='flex items-center justify-between px-4 h-[50px] border-b border-slate-700'>
-                    <h2 className='font-semibold text-lg text-slate-100'>{workspace?.name}</h2>
+                <div className='flex items-center justify-between px-4 h-[50px] border-b border-gray-200 dark:border-slate-700'>
+                    <h2 className='font-semibold text-lg text-gray-900 dark:text-slate-100'>{workspace?.name}</h2>
                     <button
                         onClick={onClose}
-                        className='p-2 rounded-full hover:bg-slate-700/50 transition-colors'
+                        className='p-2 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700/50 transition-colors'
                     >
-                        <ArrowUpFromLine className='w-5 h-5 text-slate-300' strokeWidth={2.5} />
+                        <ArrowUpFromLine className='w-5 h-5 text-gray-700 dark:text-slate-300' strokeWidth={2.5} />
                     </button>
                 </div>
 
@@ -84,12 +84,12 @@ export const WorkspaceDetailsDrawer = ({ open, workspace, onClose }) => {
                                 )}
                             </div>
                             
-                            <h3 className='text-2xl font-bold text-slate-100 mb-1'>
+                            <h3 className='text-2xl font-bold text-gray-900 dark:text-slate-100 mb-1'>
                                 {workspace?.name}
                             </h3>
                             
                             {workspace?.description && (
-                                <p className='text-sm text-slate-400 text-center max-w-md px-4'>
+                                <p className='text-sm text-gray-600 dark:text-slate-400 text-center max-w-md px-4'>
                                     {workspace.description}
                                 </p>
                             )}
@@ -98,13 +98,13 @@ export const WorkspaceDetailsDrawer = ({ open, workspace, onClose }) => {
                         {/* Admin Actions */}
                         {isLoggedInUserAdmin && (
                             <div className='px-4 mb-6'>
-                                <div className='bg-slate-800/50 rounded-lg p-4 space-y-2'>
-                                    <p className='text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3'>
+                                <div className='bg-gray-100 dark:bg-slate-800/50 rounded-lg p-4 space-y-2'>
+                                    <p className='text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider mb-3'>
                                         Admin Actions
                                     </p>
                                     <Button
                                         variant='outline'
-                                        className='w-full justify-start border-slate-600 hover:bg-slate-700'
+                                        className='w-full justify-start border-gray-300 dark:border-slate-600 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-900 dark:text-slate-200'
                                         onClick={() => {
                                             setTimeout(() => {
                                                 setOpenWorkspacePreference(true);
@@ -115,7 +115,7 @@ export const WorkspaceDetailsDrawer = ({ open, workspace, onClose }) => {
                                     </Button>
                                     <Button
                                         variant='outline'
-                                        className='w-full justify-start border-slate-600 hover:bg-slate-700'
+                                        className='w-full justify-start border-gray-300 dark:border-slate-600 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-900 dark:text-slate-200'
                                         onClick={() => {
                                             setTimeout(() => {
                                                 setOpenInviteModal(true);
@@ -131,7 +131,7 @@ export const WorkspaceDetailsDrawer = ({ open, workspace, onClose }) => {
                         {/* Members Section */}
                         <div className='px-4'>
                             <div className='flex items-center justify-between mb-3'>
-                                <h3 className='text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2'>
+                                <h3 className='text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2'>
                                     <User className='size-4' />
                                     Members ({workspace?.members?.length || 0})
                                 </h3>
@@ -145,10 +145,10 @@ export const WorkspaceDetailsDrawer = ({ open, workspace, onClose }) => {
                                     return (
                                         <div
                                             key={member.memberId._id}
-                                            className='flex items-center gap-3 p-3 rounded-lg hover:bg-slate-700/30 transition-colors'
+                                            className='flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700/30 transition-colors'
                                         >
                                             {/* Avatar */}
-                                            <Avatar className='size-10 ring-2 ring-slate-700'>
+                                            <Avatar className='size-10 ring-2 ring-gray-300 dark:ring-slate-700'>
                                                 <AvatarImage 
                                                     src={member.memberId.avatar} 
                                                     alt={member.memberId.username}
@@ -161,7 +161,7 @@ export const WorkspaceDetailsDrawer = ({ open, workspace, onClose }) => {
                                             {/* User Info */}
                                             <div className='flex-1 min-w-0'>
                                                 <div className='flex items-center gap-2'>
-                                                    <p className='text-sm font-medium text-slate-100 truncate'>
+                                                    <p className='text-sm font-medium text-gray-900 dark:text-slate-100 truncate'>
                                                         {member.memberId.username}
                                                     </p>
                                                     {isCurrentUser && (
@@ -171,7 +171,7 @@ export const WorkspaceDetailsDrawer = ({ open, workspace, onClose }) => {
                                                     )}
                                                 </div>
                                                 {member.memberId.email && (
-                                                    <p className='text-xs text-slate-400 truncate'>
+                                                    <p className='text-xs text-gray-600 dark:text-slate-400 truncate'>
                                                         {member.memberId.email}
                                                     </p>
                                                 )}
@@ -193,19 +193,19 @@ export const WorkspaceDetailsDrawer = ({ open, workspace, onClose }) => {
                         </div>
 
                         {/* Workspace Info */}
-                        <div className='px-4 mt-6 pt-6 border-t border-slate-700'>
-                            <div className='space-y-3 text-xs text-slate-400'>
+                        <div className='px-4 mt-6 pt-6 border-t border-gray-200 dark:border-slate-700'>
+                            <div className='space-y-3 text-xs text-gray-600 dark:text-slate-400'>
                                 <div className='flex justify-between'>
                                     <span>Workspace ID:</span>
-                                    <span className='text-slate-300 font-mono'>{workspace?._id}</span>
+                                    <span className='text-gray-800 dark:text-slate-300 font-mono'>{workspace?._id}</span>
                                 </div>
                                 <div className='flex justify-between'>
                                     <span>Total Channels:</span>
-                                    <span className='text-slate-300'>{workspace?.channels?.length || 0}</span>
+                                    <span className='text-gray-800 dark:text-slate-300'>{workspace?.channels?.length || 0}</span>
                                 </div>
                                 <div className='flex justify-between'>
                                     <span>Total Members:</span>
-                                    <span className='text-slate-300'>{workspace?.members?.length || 0}</span>
+                                    <span className='text-gray-800 dark:text-slate-300'>{workspace?.members?.length || 0}</span>
                                 </div>
                             </div>
                         </div>

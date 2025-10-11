@@ -16,27 +16,44 @@ export const CreateChannelModel = () => {
     const queryClient = useQueryClient();
     const [name, setName] = useState('');
     const { currentWorkspace } = useWorkspace();
-    const { openCreateChannelModal, setOpenCreateChannelModal } = useCreateChannelContext();
+    const { openCreateChannelModal, setOpenCreateChannelModal, targetWorkspaceId } = useCreateChannelContext();
     const { isPending, createChannelMutation } = useCreateChannel();
+    
+    // Use targetWorkspaceId if available, otherwise fall back to currentWorkspace
+    const workspaceId = targetWorkspaceId || currentWorkspace?._id;
 
     async function handleFormSubmit(e) {
         e.preventDefault();
 
+        if (!workspaceId) {
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'No workspace selected. Please try again.',
+            });
+            return;
+        }
+
         try {
             await createChannelMutation({
                 name: name,
-                workspaceId: currentWorkspace?._id
+                workspaceId: workspaceId
             });
             toast({
                 variant: 'success',
                 title: `${name} channel created Successfully`,
             });
-            queryClient.invalidateQueries(`fetchWorkspace-${currentWorkspace._id}`);
+            queryClient.invalidateQueries(`fetchWorkspace-${workspaceId}`);
             
         } catch (error) {
-            console.log('Failed to create workspace',error);
+            console.log('Failed to create channel',error);
+            toast({
+                variant: 'destructive',
+                title: 'Failed to create channel',
+                description: error?.message || 'Please try again.',
+            });
         } finally{
-            setName(name);
+            setName('');
             setOpenCreateChannelModal(false);
         }
         
