@@ -1,7 +1,8 @@
-import { LogOutIcon, Moon, PencilIcon, SettingsIcon, Sun, X } from 'lucide-react';
-import { useEffect } from 'react';
+import { LogOutIcon, Moon, Palette, PencilIcon, SettingsIcon, Sun, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { ChatThemeSelector } from '@/components/molecules/Room/ChatThemeSelector';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/context/useAuth';
 import { useTheme } from '@/hooks/context/useTheme';
@@ -11,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 export const UserProfileDrawer = ({ open, onOpenChange }) => {
     const { auth, logout } = useAuth();
     const { theme, toggleTheme } = useTheme();
+    const [isThemeSelectorOpen, setIsThemeSelectorOpen] = useState(false);
     const { toast } = useToast();
     const navigate = useNavigate();
     const { setOpenWorkspaceCreateModal } = useWorkspaceCreateModal();
@@ -133,6 +135,20 @@ export const UserProfileDrawer = ({ open, onOpenChange }) => {
                         </div>
                     </button>
 
+                    {/* Chat Theme */}
+                    <button
+                        onClick={() => setIsThemeSelectorOpen(true)}
+                        className="w-full flex items-center gap-4 px-4 py-3 hover:bg-slate-700/50 rounded-lg transition-colors text-left"
+                    >
+                        <div className="p-2 bg-slate-800 rounded-lg">
+                            <Palette className="w-5 h-5 text-pink-400" />
+                        </div>
+                        <div className="flex-1">
+                            <p className="text-slate-200 font-medium">Chat Theme</p>
+                            <p className="text-xs text-slate-400">Customize chat background</p>
+                        </div>
+                    </button>
+
                     {/* Settings */}
                     <button
                         className="w-full flex items-center gap-4 px-4 py-3 hover:bg-slate-700/50 rounded-lg transition-colors text-left"
@@ -169,6 +185,12 @@ export const UserProfileDrawer = ({ open, onOpenChange }) => {
                     </div>
                 </div>
             </div>
+
+            {/* Chat Theme Selector */}
+            <ChatThemeSelector 
+                open={isThemeSelectorOpen}
+                onOpenChange={setIsThemeSelectorOpen}
+            />
         </>
     );
 };
