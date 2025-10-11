@@ -1,54 +1,27 @@
-import { FaChevronDown } from 'react-icons/fa';
+import { ChevronDown } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useChatTheme } from '@/hooks/context/useChatTheme';
 
-export const ChannelHeader = ({ name }) => {
+export const ChannelHeader = ({ name, onOpenDetails }) => {
+    const { getCurrentTheme } = useChatTheme();
+    const currentTheme = getCurrentTheme();
+    
     return (
         <div
-            className="border-b h-[50px] flex items-center px-4 overflow-hidden bg-slack-medium"
+            className={`border-b h-[60px] flex items-center px-5 ${currentTheme.messageBackground || 'bg-slack-medium'} transition-colors duration-300 shadow-sm`}
         >
-            <Dialog>
-                <DialogTrigger asChild>
-                    <Button
-                        variant="transparent"
-                        className="text-lg font-semibold text-black px-2 w-auto overflow-hidden"
-                    >
-                        <span className='text-white'> { name } </span>
-                        <FaChevronDown className="size-5 ml-2 text-white" />
-                    </Button>
-                </DialogTrigger>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle> # {name} </DialogTitle>
-                    </DialogHeader>
-
-                    <div
-                        className='px-4 pb-4 flex flex-col gap-y-2'
-                    >   
-                        <div
-                            className='px-5 py-4 bg-white rounded-lg border cursor-pointer hover:bg-gray-100'
-                        >
-                            <div className='flex items-center justify-between'>
-                                <p className='text-sm font-semibold'>
-                                    Channel name
-                                </p>
-                                <p className='text-sm font-semibold'>
-                                    Edit 
-                                </p>
-                            </div>
-                            <p className='text-sm'>
-                                {name}
-                            </p>
-
-                        </div>
-
-                        {/* HW implement edit dialog for editting name of a channel */}
-
-                    </div>
-                </DialogContent>
-            </Dialog>
-
+            <Button
+                variant="transparent"
+                onClick={onOpenDetails}
+                className={`text-xl font-semibold px-3 py-2.5 w-auto overflow-hidden hover:bg-slate-700/30 transition-all rounded-lg group ${currentTheme.textColor}`}
+            >
+                <span className='flex items-center gap-2.5'>
+                    <span className='font-bold text-2xl'>#</span>
+                    <span className='font-bold'>{name}</span>
+                </span>
+                <ChevronDown className="size-5 ml-3 group-hover:translate-y-0.5 transition-transform duration-200" />
+            </Button>
         </div>
     );
 };

@@ -45,9 +45,18 @@ export const UserItem = ({
     const messageRef = useRef(null);
     const [ messageContent, setMessageContent ] = useState('');
 
-    const linkProps = (type === 'workspace') 
-        ? {to : `/workspace/${currentWorkspace?._id}/members/${id}`} 
-        : {to : `/directMessages/chat/${id}`, state: {reciverId}};
+    // Determine link path based on type
+    const getLinkProps = () => {
+        if (type === 'workspace') {
+            return { to: `/workspace/${currentWorkspace?._id}/members/${id}` };
+        } else if (type === 'channel') {
+            return { to: `/workspace/${currentWorkspace?._id}/channels/${id}` };
+        } else {
+            return { to: `/directMessages/chat/${id}`, state: { reciverId } };
+        }
+    };
+
+    const linkProps = getLinkProps();
 
     // Handle room selection for DMs
     const handleRoomClick = () => {
@@ -99,12 +108,12 @@ export const UserItem = ({
                         <div className="flex flex-col space-y-1 w-full">
                             <p className="text-sm text-teal-300 font-serif font-bold truncate">{label}{(messageYourself) ? ' (You)' : ''}</p>
                             <p className="text-xs text-slate-400 truncate max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap space-x-2">
-                                { lastMessage && (messageContent || image && ( 
+                                { lastMessage ? (messageContent || image && ( 
                                     <span className="flex items-center gap-1">
                                         <ImagesIcon className="size-3 text-gray-400" />
                                         <span className="text-xs text-gray-400">Image</span>
                                     </span>
-                                ))}
+                                )) : 'tap to chat'}
                             </p>
                         </div>
                     </Link>
@@ -112,7 +121,7 @@ export const UserItem = ({
 
                     <div className="text-xs text-gray-400 w-1/5 flex items-center justify-end space-x-2">
                         <div className='flex flex-col justify-center items-end space-y-1'>
-                            <span>{ lastMessageTime && handleLastMessageTime(lastMessageTime)}</span>
+                            <span>{ lastMessageTime ? handleLastMessageTime(lastMessageTime) : '00:00'}</span>
                             <div
                                 size='iconSm'
                                 onClick={() => console.log('icon is clicked')}

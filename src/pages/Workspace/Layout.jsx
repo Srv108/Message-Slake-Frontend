@@ -1,5 +1,5 @@
 import { WorkspaceNavbar } from '@/components/organisms/workspace/WorkspaceNavbar';
-import { WorkspacePanel } from '@/components/organisms/workspace/WorkspacePanel';
+import { WorkspacePanelNew } from '@/components/organisms/workspace/WorkspacePanelNew';
 import { WorkspaceSidebar } from '@/components/organisms/workspace/WorkspaceSidebar';
 
 import { HomeLayout } from '../Home/Layout';
@@ -10,7 +10,7 @@ export const WorkspaceLayout = ({ children }) => {
         <HomeLayout
             Navbar={WorkspaceNavbar}
             Sidebar={WorkspaceSidebar}
-            Panel={WorkspacePanel}
+            Panel={WorkspacePanelNew}
         > { children }</HomeLayout>
     );
 };

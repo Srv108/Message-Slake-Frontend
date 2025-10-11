@@ -52,3 +52,20 @@ export const getPaginatedMessageRequest = async ({ channelId, limit, offset, tok
         throw error.response.data;
     }
 };
+
+export const updateChannelRequest = async ({ channelId, name, token }) => {
+    try {
+        const response = await axiosInstance.patch(`/channel/${channelId}`, {
+            channelName: name
+        }, {
+            headers: {
+                'access-token': token
+            }
+        });
+
+        return response?.data?.data;
+    } catch (error) {
+        console.log('Error coming from update channel request', error);
+        throw error.response.data;
+    }
+};
