@@ -37,7 +37,8 @@ export const UserItem = ({
     messageYourself,
     lastMessage,
     // lastMessageSender,
-    lastMessageTime
+    lastMessageTime,
+    workspaceId
 }) => {
 
     const { currentWorkspace } = useWorkspace();
@@ -47,10 +48,13 @@ export const UserItem = ({
 
     // Determine link path based on type
     const getLinkProps = () => {
+        // Use passed workspaceId prop if available, otherwise fall back to context
+        const wsId = workspaceId || currentWorkspace?._id;
+        
         if (type === 'workspace') {
-            return { to: `/workspace/${currentWorkspace?._id}/members/${id}` };
+            return { to: `/workspace/${wsId}/members/${id}` };
         } else if (type === 'channel') {
-            return { to: `/workspace/${currentWorkspace?._id}/channels/${id}` };
+            return { to: `/workspace/${wsId}/channels/${id}` };
         } else {
             return { to: `/directMessages/chat/${id}`, state: { reciverId } };
         }

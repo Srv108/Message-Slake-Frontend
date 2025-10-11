@@ -1,12 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { ChevronRight, Edit2, HashIcon, Loader, Save, X } from 'lucide-react';
+import { ArrowRightFromLine, Edit2, HashIcon, Loader, Save, X } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useToast } from '@/hooks/use-toast';
 import { useUpdateChannel } from '@/hooks/api/channel/useUpdateChannel';
+import { useToast } from '@/hooks/use-toast';
 
 export const ChannelDetailsDrawer = ({ open, channel, onClose }) => {
     const queryClient = useQueryClient();
@@ -40,6 +40,7 @@ export const ChannelDetailsDrawer = ({ open, channel, onClose }) => {
             });
             setIsEditingName(false);
         } catch (error) {
+            console.log('error in updating channel', error);
             toast({
                 title: 'Error',
                 description: 'Failed to update channel name',
@@ -74,7 +75,7 @@ export const ChannelDetailsDrawer = ({ open, channel, onClose }) => {
                         onClick={onClose}
                         className='p-2 rounded-full hover:bg-slate-700/50 transition-colors'
                     >
-                        <ChevronRight className='size-5 text-slate-300' />
+                        <ArrowRightFromLine className='w-5 h-5 text-slate-300' strokeWidth={3} />
                     </button>
                 </div>
 

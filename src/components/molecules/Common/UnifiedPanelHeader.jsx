@@ -1,4 +1,4 @@
-import { MoreVertical, Search, SquareArrowLeft, SquarePlusIcon } from 'lucide-react';
+import { ArrowLeftFromLine, MessageSquarePlusIcon, MoreVertical, Search } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,8 @@ export const UnifiedPanelHeader = ({
     onSearch,
     searchPlaceholder = 'Search or start a new chat',
     showBackButton = false,
-    onBackClick
+    onBackClick,
+    onHeaderClick
 }) => {
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -39,7 +40,12 @@ export const UnifiedPanelHeader = ({
                 <div className='flex items-center gap-2 flex-1'>
                     
                     {/* App Name / Workspace Name */}
-                    <div className='flex flex-col'>
+                    <div 
+                        className={`flex flex-col ${
+                            onHeaderClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
+                        }`}
+                        onClick={onHeaderClick}
+                    >
                         <h1 className='text-xl font-bold text-slate-100'>
                             {workspaceName ? workspaceName : appName}
                         </h1>
@@ -57,7 +63,7 @@ export const UnifiedPanelHeader = ({
                             className='size-10 rounded-full hover:bg-slate-700/50 transition-colors'
                             title={addButtonLabel}
                         >
-                            <SquarePlusIcon className='size-5 text-slate-300' />
+                            <MessageSquarePlusIcon className='w-5 h-5 text-slate-300' strokeWidth={2.5} />
                         </Button>
                     )}
 
@@ -97,7 +103,7 @@ export const UnifiedPanelHeader = ({
                             className='size-10 rounded-full hover:bg-slate-700/50 transition-colors'
                             title='Go Back'
                         >
-                            <SquareArrowLeft className='w-6 h-6 text-slate-300' />
+                            <ArrowLeftFromLine className='w-5 h-5 text-slate-300' strokeWidth={3} />
                         </Button>
                     )}
                     
