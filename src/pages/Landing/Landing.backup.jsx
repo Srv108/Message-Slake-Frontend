@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, MessageSquare, Sparkles, Users, Video, Zap } from 'lucide-react';
+import { ArrowRight, CheckCircle2, MessageSquare, Users, Video, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';

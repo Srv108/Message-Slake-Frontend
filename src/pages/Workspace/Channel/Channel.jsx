@@ -1,15 +1,17 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { Loader2Icon, TriangleAlertIcon } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { ChatInput } from '@/components/atoms/ChatInput/ChatInput';
+import { ChannelDetailsDrawer } from '@/components/molecules/Channel/ChannelDetailsDrawer';
 import { ChannelHeader } from '@/components/molecules/Channel/ChannelHeader';
 import { Message } from '@/components/molecules/Message/Message';
 import { Button } from '@/components/ui/button';
 import { useGetChannelById } from '@/hooks/api/channel/useGetChannelById';
 import { useGetChannelMessage } from '@/hooks/api/channel/useGetChannelMessage';
 import { useChannelMessage } from '@/hooks/context/useChannelMessage';
+import { useChatTheme } from '@/hooks/context/useChatTheme';
 import { useSocket } from '@/hooks/context/useSocket';
 import { seperateTimeFormat } from '@/utils/formatTime/seperator';
 
@@ -24,6 +26,10 @@ export const Channel = () => {
 
     const { joinChannel, currentChannel: socketCurrentChannel, socket } = useSocket();
     const { messageList, setMessageList } = useChannelMessage();
+    const { getCurrentTheme } = useChatTheme();
+    const [showDetailsDrawer, setShowDetailsDrawer] = useState(false);
+    
+    const currentTheme = getCurrentTheme();
 
     const { 
         isSuccess, 
@@ -122,8 +128,11 @@ export const Channel = () => {
 
     
     return (
-        <div className='flex flex-col h-full bg-white'>
-            <ChannelHeader name={channelsDetails?.name} />
+        <div className={`flex flex-col h-full ${currentTheme.background} ${currentTheme.pattern || ''} transition-colors duration-300 relative`}>
+            <ChannelHeader 
+                name={channelsDetails?.name} 
+                onOpenDetails={() => setShowDetailsDrawer(true)}
+            />
             <div 
                 ref={messageContainerListRef} 
                 className='h-full overflow-y-auto p-3 sm:p-5 gap-y-2 mb-2 mt-1'
@@ -160,6 +169,13 @@ export const Channel = () => {
                 })}
             </div>
             <ChatInput />
+
+            {/* Channel Details Drawer */}
+            <ChannelDetailsDrawer
+                open={showDetailsDrawer}
+                channel={channelsDetails}
+                onClose={() => setShowDetailsDrawer(false)}
+            />
         </div>
     );
 };
