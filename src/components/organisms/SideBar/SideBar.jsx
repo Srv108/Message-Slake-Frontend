@@ -1,16 +1,14 @@
-import  { HeartIcon, HomeIcon, MessageSquareIcon, MoreHorizontalIcon, SearchIcon, UserIcon } from 'lucide-react';
+import  { HeartIcon, HomeIcon, MessageSquareIcon, MoreHorizontalIcon, SearchIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { UserButton } from '@/components/atoms/UserButton/UserButton';
 import { SidebarButton } from '@/components/molecules/SidebarButton/SidebarButton';
-import { useProfileModal } from '@/hooks/context/useProfileModal';
 
 export const SideBar = ({
     WorkspaceSwitcher
 }) => {
 
     const navigate = useNavigate();
-    const { setOpenProfileModal } = useProfileModal();
 
     return (
         <aside
@@ -47,11 +45,6 @@ export const SideBar = ({
             <SidebarButton
                 Icon={MoreHorizontalIcon}
                 label="More"
-            />
-            <SidebarButton 
-                Icon={UserIcon}
-                label='Profile'
-                iconOnClick={() => setOpenProfileModal(true)}
             />
             <div className='flex flex-col items-center justify-center mt-auto mb-5 gap-y-1'>
                 <UserButton />

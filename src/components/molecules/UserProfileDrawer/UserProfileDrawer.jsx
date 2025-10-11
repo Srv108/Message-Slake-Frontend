@@ -1,7 +1,9 @@
-import { LogOutIcon, Moon, Palette, PencilIcon, SettingsIcon, Sun, X } from 'lucide-react';
+import { LogOutIcon, Moon, Palette, PencilIcon, SettingsIcon, SquareArrowLeft, Sun, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { ProfileEditDrawer } from '@/components/molecules/ProfileEditDrawer/ProfileEditDrawer';
+import { ProfileImageExpanded } from '@/components/molecules/ProfileImageExpanded/ProfileImageExpanded';
 import { ChatThemeSelector } from '@/components/molecules/Room/ChatThemeSelector';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/context/useAuth';
@@ -13,6 +15,8 @@ export const UserProfileDrawer = ({ open, onOpenChange }) => {
     const { auth, logout } = useAuth();
     const { theme, toggleTheme } = useTheme();
     const [isThemeSelectorOpen, setIsThemeSelectorOpen] = useState(false);
+    const [showImageExpanded, setShowImageExpanded] = useState(false);
+    const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
     const { toast } = useToast();
     const navigate = useNavigate();
     const { setOpenWorkspaceCreateModal } = useWorkspaceCreateModal();
@@ -56,6 +60,26 @@ export const UserProfileDrawer = ({ open, onOpenChange }) => {
         return name.substring(0, 2).toUpperCase();
     };
 
+    // Check if user has a valid image URL with proper extension
+    const isValidImageUrl = (url) => {
+        if (!url || url.trim() === '') return false;
+        
+        // Check if it's a data URL (base64)
+        if (url.startsWith('data:image/')) return true;
+        
+        // Check if it starts with http/https
+        if (!url.startsWith('http://') && !url.startsWith('https://')) return false;
+        
+        // Check for valid image extensions
+        const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg', '.ico'];
+        const lowerUrl = url.toLowerCase();
+        
+        // Check if URL contains any valid image extension
+        return imageExtensions.some(ext => lowerUrl.includes(ext));
+    };
+
+    const hasValidImage = isValidImageUrl(auth?.user?.avatar);
+
     return (
         <>
             {/* Overlay */}
@@ -70,23 +94,42 @@ export const UserProfileDrawer = ({ open, onOpenChange }) => {
             <div className={`fixed left-0 top-0 h-full w-full md:w-1/2 lg:w-2/5 max-w-2xl bg-slack-medium border-r border-slate-700 shadow-2xl z-50 overflow-y-auto transform transition-all duration-500 ease-in-out ${
                 open ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
             }`}>
-                {/* Close Button */}
+                {/* Back Button */}
                 <button
                     onClick={() => onOpenChange(false)}
                     className="absolute right-4 top-4 p-2 rounded-full hover:bg-slate-700/50 transition-colors z-10"
                 >
-                    <X className="w-5 h-5 text-slate-300" />
+                    <SquareArrowLeft className="w-8 h-6 text-slate-300" strokeWidth={2.5} />
                 </button>
 
                 {/* Profile Header */}
                 <div className="relative bg-gradient-to-b from-teal-600/20 to-transparent pt-16 pb-8">
                     <div className="flex flex-col items-center">
-                        <Avatar className="w-32 h-32 ring-4 ring-teal-500/30">
-                            <AvatarImage src={auth?.user?.avatar} alt={auth?.user?.username} />
-                            <AvatarFallback className="bg-teal-600 text-white text-4xl font-bold">
-                                {getInitials(auth?.user?.username)}
-                            </AvatarFallback>
-                        </Avatar>
+                        {/* Toggle between small avatar and expanded image */}
+                        {showImageExpanded && hasValidImage ? (
+                            <ProfileImageExpanded 
+                                isOpen={showImageExpanded}
+                                imageUrl={auth?.user?.avatar}
+                                onClose={() => setShowImageExpanded(false)}
+                                username={auth?.user?.username}
+                            />
+                        ) : (
+                            <Avatar 
+                                className={`w-32 h-32 ring-4 ring-teal-500/30 transition-all ${
+                                    hasValidImage ? 'cursor-pointer hover:ring-teal-400' : ''
+                                }`}
+                                onClick={() => {
+                                    if (hasValidImage) {
+                                        setShowImageExpanded(true);
+                                    }
+                                }}
+                            >
+                                <AvatarImage src={auth?.user?.avatar} alt={auth?.user?.username} />
+                                <AvatarFallback className="bg-teal-600 text-white text-4xl font-bold">
+                                    {getInitials(auth?.user?.username)}
+                                </AvatarFallback>
+                            </Avatar>
+                        )}
                         <h2 className="mt-4 text-2xl font-semibold text-slate-100">
                             {auth?.user?.username || 'User'}
                         </h2>
@@ -98,6 +141,25 @@ export const UserProfileDrawer = ({ open, onOpenChange }) => {
 
                 {/* Menu Items */}
                 <div className="px-6 py-4 space-y-2">
+                    {/* Edit Profile */}
+                    <button
+                        onClick={() => {
+                            onOpenChange(false);
+                            setTimeout(() => {
+                                setIsProfileEditOpen(true);
+                            }, 100);
+                        }}
+                        className="w-full flex items-center gap-4 px-4 py-3 hover:bg-slate-700/50 rounded-lg transition-colors text-left"
+                    >
+                        <div className="p-2 bg-slate-800 rounded-lg">
+                            <User className="w-5 h-5 text-blue-400" />
+                        </div>
+                        <div className="flex-1">
+                            <p className="text-slate-200 font-medium">Edit Profile</p>
+                            <p className="text-xs text-slate-400">Update your profile information</p>
+                        </div>
+                    </button>
+
                     {/* Theme Toggle */}
                     <button
                         onClick={toggleTheme}
@@ -190,6 +252,12 @@ export const UserProfileDrawer = ({ open, onOpenChange }) => {
             <ChatThemeSelector 
                 open={isThemeSelectorOpen}
                 onOpenChange={setIsThemeSelectorOpen}
+            />
+
+            {/* Profile Edit Drawer */}
+            <ProfileEditDrawer 
+                open={isProfileEditOpen}
+                onOpenChange={setIsProfileEditOpen}
             />
         </>
     );

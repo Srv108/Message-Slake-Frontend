@@ -1,4 +1,4 @@
-import { Check, Palette, X } from 'lucide-react';
+import { Check, Palette, SquareArrowRight } from 'lucide-react';
 import { useEffect } from 'react';
 
 import { useChatTheme } from '@/hooks/context/useChatTheme';
@@ -52,7 +52,7 @@ export const ChatThemeSelector = ({ open, onOpenChange }) => {
                             onClick={() => onOpenChange(false)}
                             className="p-2 rounded-full hover:bg-slate-700/50 transition-colors"
                         >
-                            <X className="w-5 h-5 text-slate-300" />
+                            <SquareArrowRight className="w-8 h-6 text-slate-300" strokeWidth={2.5} />
                         </button>
                     </div>
                 </div>
