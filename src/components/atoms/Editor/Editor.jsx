@@ -252,7 +252,7 @@ export const Editor = ({
             )}
 
             {/* Editor Container - WhatsApp style */}
-            <div className="relative flex items-end gap-2 bg-white">
+            <div className="relative flex items-end gap-2 bg-transparent">
                 {/* Hidden file inputs */}
                 <input
                     type="file"
@@ -269,7 +269,7 @@ export const Editor = ({
                 />
 
                 {/* Editor with icons inside */}
-                <div className="flex-1 relative border border-gray-300 rounded-3xl overflow-hidden focus-within:border-[#007a6a] transition-colors bg-white">
+                <div className="flex-1 relative border border-gray-300/50 rounded-3xl focus-within:border-[#007a6a] transition-colors bg-white/80 backdrop-blur-md shadow-sm">
                     {/* Quill Editor */}
                     <div ref={containerRef} className="ql-custom-compact max-h-[120px]" />
                     

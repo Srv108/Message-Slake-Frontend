@@ -263,6 +263,7 @@
   line-height: 20px !important;
   word-wrap: break-word !important;
   white-space: pre-wrap !important;
+  background-color: transparent !important;
 }
 
 .ql-custom-compact .ql-editor.ql-blank::before {
@@ -277,12 +278,14 @@
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
   max-height: 120px !important;
   overflow: hidden !important;
+  background-color: transparent !important;
 }
 
 .ql-custom-compact .ql-toolbar {
   border: none !important;
-  border-bottom: 1px solid #e5e7eb !important;
-  background-color: #f9fafb !important;
+  border-bottom: 1px solid rgba(229, 231, 235, 0.3) !important;
+  background-color: rgba(249, 250, 251, 0.5) !important;
+  backdrop-filter: blur(10px) !important;
   padding: 4px 8px !important;
 }
 
@@ -318,4 +321,41 @@
 
 .ql-custom-compact .ql-editor::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
+}
+
+/* Chat Theme Patterns */
+.bg-pattern {
+  position: relative;
+}
+
+/* WhatsApp Light Pattern */
+.whatsapp-light::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(0, 0, 0, 0.02) 10px,
+      rgba(0, 0, 0, 0.02) 20px
+    );
+  pointer-events: none;
+}
+
+/* WhatsApp Dark Pattern */
+.whatsapp-dark::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(255, 255, 255, 0.03) 10px,
+      rgba(255, 255, 255, 0.03) 20px
+    );
+  pointer-events: none;
 }

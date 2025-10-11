@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useFetchRoomMessage } from '@/hooks/api/room/useFetchRoomMessage';
 import { useGetRoomById } from '@/hooks/api/room/useGetRoomById';
 import { useAuth } from '@/hooks/context/useAuth';
+import { useChatTheme } from '@/hooks/context/useChatTheme';
 import { useRoomDetails } from '@/hooks/context/useRoomDetails';
 import { useRoomMessage } from '@/hooks/context/useRoomMessage';
 import { useSocket } from '@/hooks/context/useSocket';
@@ -32,6 +33,9 @@ export const Room = () => {
     
     const { auth } = useAuth();
     const { joinRoom } = useSocket();
+    const { getCurrentTheme } = useChatTheme();
+    
+    const currentTheme = getCurrentTheme();
 
     const { isSuccess: roomStatus, roomDetails } = useGetRoomById(roomId);
     const { isSuccess, RoomMessageDetails } = useFetchRoomMessage(roomId);
@@ -101,11 +105,11 @@ export const Room = () => {
     }
 
     return (
-        <div className='flex flex-col h-full bg-white'>
+        <div className={`flex flex-col h-full ${currentTheme.background} ${currentTheme.pattern || ''} transition-colors duration-300`}>
             <RoomHeader userID={userID} roomId={roomId}/>
             <div 
                 ref={messageContainerListRef} 
-                className='h-full overflow-y-auto p-3 sm:p-5 gap-y-2 mb-2 mt-1'
+                className='h-full overflow-y-auto p-3 sm:p-5 gap-y-2 mb-2 mt-1 relative'
             >
                 {roomMessageList?.map((message) => {
                     const separator = seperateTimeFormat(message?.createdAt);

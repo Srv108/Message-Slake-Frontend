@@ -171,7 +171,7 @@ export const RoomChatInput = () => {
     }, [socket, isSocketReady, isOnline, currentRoom, auth?.token, auth?.user?.id, auth?.user?.username, auth?.user?.avatar, queryClient, toast, setRoomMessageList]);
     return (
         <div
-            className="px-5 w-full"
+            className="px-5 w-full bg-transparent"
         >
             <Editor
                 placeholder="Type a message..."
