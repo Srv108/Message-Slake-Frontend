@@ -27,7 +27,7 @@ export const Room = () => {
 
     const queryClient = useQueryClient();
     const { roomMessageList, setRoomMessageList } = useRoomMessage();
-    const { setRecieverId, setSenderId } = useRoomDetails();
+    const { setRecieverId, setSenderId, setCurrentRoom } = useRoomDetails();
     const lastTimeSeparatorRef = useRef('');
     
     const { auth } = useAuth();
@@ -53,23 +53,29 @@ export const Room = () => {
     },[roomId]);
 
     useEffect(() => {
-        if(roomStatus){
-            console.log('room coming is', roomDetails);
-        }
-    },[roomStatus,roomDetails]);
-
-
-    useEffect(() => {
+        console.log('🔍 Room useEffect triggered:');
+        console.log('  - roomId:', roomId);
+        console.log('  - hasJoinedRoom.current:', hasJoinedRoom.current);
+        
         if (roomId && !hasJoinedRoom.current) {
+            console.log('🚪 Setting current room and joining:', roomId);
+            setCurrentRoom(roomId); // Set the current room in context
+            console.log('✅ setCurrentRoom called with:', roomId);
             joinRoom(roomId);
             scrollToBottom();
             hasJoinedRoom.current = true;
+        } else {
+            console.log('⚠️ Skipping room setup:', {
+                roomId,
+                hasJoinedRoom: hasJoinedRoom.current
+            });
         }
 
         return () => {
+            console.log('🧹 Room cleanup - resetting hasJoinedRoom');
             hasJoinedRoom.current = false;
         };
-    }, [roomId]);
+    }, [roomId, setCurrentRoom, joinRoom]);
     
     useEffect(() => {
         if (roomStatus && roomDetails) {
@@ -87,7 +93,6 @@ export const Room = () => {
         if (isSuccess) {
             setRoomMessageList(RoomMessageDetails);
             scrollToBottom();
-            console.log('messages of room coming is', RoomMessageDetails);
         }
     }, [isSuccess, RoomMessageDetails, setRoomMessageList]);
 
@@ -96,11 +101,11 @@ export const Room = () => {
     }
 
     return (
-        <div className='flex flex-col h-full bg-slack'>
+        <div className='flex flex-col h-full bg-white'>
             <RoomHeader userID={userID} roomId={roomId}/>
             <div 
                 ref={messageContainerListRef} 
-                className='h-full overflow-y-auto p-5 gap-y-2 mb-2 mt-1'
+                className='h-full overflow-y-auto p-3 sm:p-5 gap-y-2 mb-2 mt-1'
             >
                 {roomMessageList?.map((message) => {
                     const separator = seperateTimeFormat(message?.createdAt);
@@ -115,7 +120,7 @@ export const Room = () => {
                             {shouldRenderSeparator && (
                                 <div className='flex justify-center items-center'>
                                     <Button
-                                        className="text-center text-teal-600 bg-slack-dark my-2 font-semibold"
+                                        className="text-center text-gray-700 bg-gray-50 border border-gray-200 my-2 font-medium hover:bg-gray-100 transition-colors rounded-md"
                                     >
                                         {separator}
                                     </Button>

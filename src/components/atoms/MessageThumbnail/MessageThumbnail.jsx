@@ -14,10 +14,11 @@ export const MessageThumbnail = ({ url }) => {
             onOpenChange={setOpen}
         >
             <DialogTrigger>
-            <div className='relative overflow-hidden cursor-zoom-in border rounded-lg max-w-full max-h-[300px] mb-3'>
+            <div className='relative overflow-hidden cursor-zoom-in border border-gray-200 rounded-lg max-w-full max-h-[300px] mb-3 hover:border-gray-300 transition-colors'>
                 <img 
                     src={url} 
                     className='rounded-md w-auto h-auto' 
+                    alt="Message attachment"
                 />
             </div>
             </DialogTrigger>

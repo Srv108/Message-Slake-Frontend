@@ -106,7 +106,6 @@ export const addMemberToWorkspaceByUsernameRequest = async({ username, workspace
                 'access-token' : token
             }
         });
-        console.log(response?.data?.data);
         return response?.data?.data;
     } catch (error) {
         console.log('Error coming in adding user to workspace by username request',error);
@@ -138,7 +137,6 @@ export const joinWorkspaceRequest = async({ workspaceId, joinCode, token}) => {
                 'access-token' : token
             }
         });
-        console.log('Response coming from join workspace request',response);
         return response?.data?.data;
     } catch (error) {
         console.log('Error coming in workspace join request',error);

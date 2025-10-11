@@ -22,7 +22,7 @@ export const HomeLayout = ({
                     <ResizablePanel
                         defaultSize={20}
                         minSize={11}
-                        className='bg-slack-medium'
+                        className='bg-gray-900'
                     >
                         { Panel && <Panel />}
                     </ResizablePanel>

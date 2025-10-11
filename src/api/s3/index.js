@@ -11,7 +11,6 @@ export const uploadImageToAwsPresignedUrl = async({ url , file}) => {
             }
         });
 
-        console.log('response coming from s3 request',response);
         return response?.data?.data;
     } catch (error) {
         console.log('Error coming in uploading file to aws presigned url',error);

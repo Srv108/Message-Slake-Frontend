@@ -10,7 +10,6 @@ export const createRoomRequest = async({recieverId,username,token}) => {
             }
         });
 
-        console.log('response coming from creating room request',response);
         return response?.data?.data;
     } catch (error) {
         console.log('Error coming in creating room request',error);
@@ -27,7 +26,6 @@ export const fetchAllRoomsRequest = async(token) => {
             }
         });
 
-        console.log('response coming from fetching all rooms request',response);
         return response?.data?.data;
     } catch (error) {
         console.log('Error coming in fetching all rooms request',error);
@@ -44,7 +42,6 @@ export const fetchRoomOfAUserRequest = async(recieverId,token) => {
             }
         });
 
-        console.log('response coming from fetching room of a user request',response);
         return response?.data?.data;
     } catch (error) {
         console.log('Error coming in fetching room by both user and owner request',error);
@@ -77,7 +74,6 @@ export const updateRoomRequest = async(roomId,status,token) => {
             }
         });
 
-        console.log('response coming from updating room request',response);
         return response?.data?.data;
     } catch (error) {
         console.log('Error coming in updating room request',error);
@@ -94,7 +90,6 @@ export const deleteRoomRequest = async(roomId,token) => {
             }
         });
 
-        console.log('response coming from updating room request',response);
         return response?.data?.data;
     } catch (error) {
         console.log('Error coming in deleting room request',error);
@@ -111,7 +106,6 @@ export const getRoomByIdRequest = async({roomId,token}) => {
             }
         });
 
-        console.log('response coming from getting room details',response?.data?.data);
         return response?.data?.data;
     } catch (error) {
         console.log('Error coming in getting room request',error);
@@ -132,7 +126,6 @@ export const fetchRoomMessageRequest = async({roomId,limit,offset,token}) => {
             }
         });
 
-        console.log('response coming from fetching room message request',response);
         return response?.data?.data?.data;
     } catch (error) {
         console.log('Error coming in getting room message request',error);
@@ -148,7 +141,6 @@ export const fetchLastMessageDetailsRequest = async({ roomId, token,}) => {
                 'access-token': token
             }
         });
-        console.log('response coming from fetching last message ',response);
         return response?.data?.data;
     } catch (error) {
         console.log('Error coming in fetching last message Details',error);

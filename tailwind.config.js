@@ -14,9 +14,15 @@ export default {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			slack: {
-  				DEFAULT: '#5c3B58',
-  				dark: '#481349',
-  				medium: '#5E2C5F'
+  				DEFAULT: '#1a1a1a',
+  				dark: '#0a0a0a',
+  				medium: '#2a2a2a',
+  				light: '#f5f5f5'
+  			},
+  			brand: {
+  				black: '#0a0a0a',
+  				gray: '#f5f5f5',
+  				lightgray: '#fafafa'
   			},
   			card: {
   				DEFAULT: 'hsl(var(--card))',
@@ -59,6 +65,6 @@ export default {
   		}
   	}
   },
-  plugins: [tailwindcssAnimate, require('tailwindcss-animate')],
+  plugins: [tailwindcssAnimate],
 };
 

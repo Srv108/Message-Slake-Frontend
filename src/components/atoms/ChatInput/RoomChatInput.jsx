@@ -1,9 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { useCallback } from 'react';
 
 import { getPresignedUrlRequest, uploadImageToAwsPresignedUrl } from '@/api/s3';
 import { useAuth } from '@/hooks/context/useAuth';
 import { useRoomDetails } from '@/hooks/context/useRoomDetails';
+import { useRoomMessage } from '@/hooks/context/useRoomMessage';
 import { useSocket } from '@/hooks/context/useSocket';
+import { useToast } from '@/hooks/use-toast';
 
 import { Editor } from '../Editor/Editor';
 
@@ -11,46 +14,161 @@ export const RoomChatInput = () => {
 
     const queryClient = useQueryClient();
     const { auth } = useAuth();
-    const { socket } = useSocket();
+    const { socket, isSocketReady, isOnline } = useSocket();
     const { currentRoom } = useRoomDetails();
+    const { toast } = useToast();
+    const { setRoomMessageList } = useRoomMessage();
     
-    async function handleSubmit({ body, image }){
-        let fileUrl = null;
-        let timeStamp = null;
+    const handleSubmit = useCallback(async ({ body, image }) => {
+        try {
+            console.log('🔍 RoomChatInput Debug:');
+            console.log('  - socket exists:', !!socket);
+            console.log('  - socket.connected:', socket?.connected);
+            console.log('  - socket.id:', socket?.id);
+            console.log('  - isSocketReady:', isSocketReady);
+            console.log('  - isOnline:', isOnline);
+            console.log('  - currentRoom:', currentRoom);
 
-        if(image) {
-            const { presignedUrl, time } = await queryClient.fetchQuery({
-                queryKey: ['getPresignedUrl'],
-                queryFn: () => getPresignedUrlRequest({ 
-                    token: auth?.token,
-                    fileName: image.name,
-                    contentType: image.type
-                })
-            });
+            // Check network status first
+            if (!isOnline) {
+                console.error('❌ Network offline');
+                toast({
+                    variant: 'destructive',
+                    title: 'Network Error',
+                    description: 'You are offline. Please check your internet connection.',
+                });
+                return;
+            }
 
-            const responseAws = await uploadImageToAwsPresignedUrl({ 
-                url: presignedUrl,
-                file: image 
-            });
+            // Validate socket connection
+            if (!socket) {
+                console.error('❌ Socket object is null/undefined');
+                toast({
+                    variant: 'destructive',
+                    title: 'Connection Error',
+                    description: 'Socket not initialized. Reconnecting...',
+                });
+                return;
+            }
+
+            if (!socket.connected || !isSocketReady) {
+                console.error('❌ Socket not ready');
+                console.error('  - Socket connected:', socket.connected);
+                console.error('  - Socket ready:', isSocketReady);
+                toast({
+                    variant: 'destructive',
+                    title: 'Connection Error',
+                    description: 'Connecting to chat server... Please try again in a moment.',
+                });
+                return;
+            }
+
+            if (!currentRoom) {
+                console.error('❌ No room selected');
+                console.error('  - currentRoom value:', currentRoom);
+                toast({
+                    variant: 'destructive',
+                    title: 'No Room',
+                    description: 'Please select a chat room first.',
+                });
+                return;
+            }
+
+            console.log('✅ All validations passed!');
+            console.log('📤 Sending message to room:', currentRoom);
+
+            let fileUrl = null;
+            let timeStamp = null;
+
+            if(image) {
+                console.log('📎 Uploading image...');
+                const { presignedUrl, time } = await queryClient.fetchQuery({
+                    queryKey: ['getPresignedUrl', image.name],
+                    queryFn: () => getPresignedUrlRequest({ 
+                        token: auth?.token,
+                        fileName: image.name,
+                        contentType: image.type
+                    })
+                });
+
+                await uploadImageToAwsPresignedUrl({ 
+                    url: presignedUrl,
+                    file: image 
+                });
+                
+                console.log('✅ Image uploaded successfully');
+                fileUrl = presignedUrl.split('?')[0];
+                timeStamp = time;
+            }
+
+            // Create temp ID matching server format
+            const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
             
-            console.log('file upload success',responseAws);
-            fileUrl = presignedUrl.split('?')[0];
-            timeStamp = time;
-            console.log(fileUrl);
+            // Create optimistic message to show immediately
+            const optimisticMessage = {
+                _id: tempId,
+                body,
+                image: fileUrl,
+                senderId: {
+                    _id: auth?.user?.id,
+                    username: auth?.user?.username,
+                    avatar: auth?.user?.avatar
+                },
+                roomId: currentRoom,
+                createdAt: new Date().toISOString(),
+                isOptimistic: true // Server uses isOptimistic, not __optimistic
+            };
+
+            // Add message to UI immediately (optimistic update)
+            console.log('⚡ Adding optimistic room message to UI');
+            console.log('  - Temp ID:', tempId);
+            setRoomMessageList((prevList) => [...prevList, optimisticMessage]);
+            
+            // Prepare message data for server
+            const messageData = {
+                roomId: String(currentRoom),
+                body,
+                image: fileUrl,
+                senderId: auth?.user?.id,
+                filename: image?.name || '',
+                timeStamp: timeStamp,
+            };
+
+            console.log('📡 Emitting roomMessage event to socket server');
+            console.log('📡 Message data:', messageData);
+            console.log('📡 Socket object:', socket);
+            
+            // Emit message - server will send separate events for confirmation
+            socket.emit('roomMessage', messageData, (response) => {
+                console.log('📬 Server response received:', response);
+                if (response?.success) {
+                    console.log('✅ Room message sent successfully');
+                    console.log('  - Timing:', response.timing);
+                    console.log('  - Delivery:', response.delivery);
+                    // Server will emit roomMessageSent and roomMessageConfirmed events
+                    // No need to update UI here - events will handle it
+                } else {
+                    console.error('❌ Room message send failed:', response);
+                    // Remove optimistic message on failure
+                    setRoomMessageList((prevList) => 
+                        prevList.filter(msg => msg._id !== tempId)
+                    );
+                    toast({
+                        variant: 'destructive',
+                        title: 'Failed to send message',
+                        description: response?.message || 'Please try again.',
+                    });
+                }
+            });
+        } catch (error) {
+            console.error('❌ Error sending room message:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Failed to send message. Please try again.',
+            });
         }
-        
-        socket.emit('roomMessage',{
-            roomId: currentRoom,
-            body,
-            image: fileUrl,
-            senderId: auth?.user?.id,
-            filename: image?.name || '',
-            timeStamp: timeStamp,
-        },(data)=>{
-            console.log('room id is',currentRoom);
-            console.log('Message Sent',data);
-        });
-    }
+    }, [socket, isSocketReady, isOnline, currentRoom, auth?.token, auth?.user?.id, auth?.user?.username, auth?.user?.avatar, queryClient, toast, setRoomMessageList]);
     return (
         <div
             className="px-5 w-full"

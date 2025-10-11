@@ -1,7 +1,7 @@
-import { useContext } from 'react';
+// import { useContext } from 'react';
 
-import WebRtcContext from '@/context/WebRtcContext';
+// import WebRtcContext from '@/context/WebRtcContext';
 
-export const useWebRtc = () => {
-    return useContext(WebRtcContext);
-};
+// export const useWebRtc = () => {
+//     return useContext(WebRtcContext);
+// };

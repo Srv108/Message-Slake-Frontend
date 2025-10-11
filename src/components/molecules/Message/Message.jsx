@@ -94,56 +94,108 @@ export const Message = ({
     return (
         <>
             <ConfirmDialog />
-            <div className={`mb-3 flex ${isLoggedInUser ? 'justify-end' : 'justify-start'}`}>
-                <div className="relative group flex gap-2 max-w-[70%] min-w-[120px] bg-slate-500 text-black rounded-lg shadow-md p-3 pb-5">
-                    
-                    {type !== 'dms' && !isLoggedInUser && (
-                        <div className="flex-shrink-0 flex items-end">
-                            <Avatar>
-                                <AvatarImage src={authorImage} className="rounded-full w-9 h-9" />
-                                <AvatarFallback className="rounded-full bg-sky-500 text-white text-sm w-9 h-9 flex items-center justify-center">
-                                    {authorName?.charAt(0).toUpperCase()}
-                                </AvatarFallback>
-                            </Avatar>
-                        </div>
+            <div className={`mb-2 flex items-end gap-1 ${isLoggedInUser ? 'justify-end' : 'justify-start'} px-2 md:px-4`}>
+                {/* Avatar - Only for received messages in group chats */}
+                {type !== 'dms' && !isLoggedInUser && (
+                    <Avatar className="w-8 h-8 flex-shrink-0 mb-0.5">
+                        <AvatarImage src={authorImage} className="rounded-full" />
+                        <AvatarFallback className="rounded-full bg-teal-600 text-white text-xs flex items-center justify-center font-semibold">
+                            {authorName?.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                    </Avatar>
+                )}
+
+                <div className="relative group max-w-[85%] sm:max-w-[75%] md:max-w-[65%] min-w-[120px]">
+                    {/* Telegram-style Tail - positioned at bottom corner */}
+                    {isLoggedInUser ? (
+                        <svg 
+                            className="absolute bottom-0 right-0" 
+                            width="8" 
+                            height="13" 
+                            viewBox="0 0 8 13"
+                        >
+                            <path 
+                                d="M0,0 C0,0 8,0 8,7.5 C8,13 0,13 0,13 Z" 
+                                fill="#0d9488"
+                            />
+                        </svg>
+                    ) : (
+                        <svg 
+                            className="absolute bottom-0 left-0" 
+                            width="8" 
+                            height="13" 
+                            viewBox="0 0 8 13"
+                        >
+                            <path 
+                                d="M8,0 C8,0 0,0 0,7.5 C0,13 8,13 8,13 Z" 
+                                fill="#334155"
+                            />
+                        </svg>
                     )}
-                    
-                    <div className="flex flex-col w-full min-w-[80px]">
+
+                    {/* Message Bubble with Telegram-style rounded corners */}
+                    <div className={`relative px-3 py-2 transition-all ${
+                        isLoggedInUser 
+                            ? 'bg-teal-600 text-white rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl rounded-br-[4px]' 
+                            : 'bg-slate-700 text-white rounded-tl-2xl rounded-tr-2xl rounded-bl-[4px] rounded-br-2xl'
+                    }`}>
+                        {/* Author name for group chats */}
                         {type !== 'dms' && !isLoggedInUser && (
-                            <div className="flex items-start text-sm mb-1">
-                                <span className="font-extrabold font-serif">{authorName}</span>
+                            <div className="mb-1">
+                                <span className="font-semibold text-sm text-teal-400">{authorName}</span>
                             </div>
                         )}
-                        {image && <MessageThumbnail url={image} />}
                         
-                        <div className="relative flex flex-col w-full pr-4 pb-1">
+                        {/* Image if present */}
+                        {image && (
+                            <div className="mb-1">
+                                <MessageThumbnail url={image} />
+                            </div>
+                        )}
+                        
+                        {/* Message content */}
+                        <div className="pr-14 pb-0.5">
                             <MessageRenderer value={body} />
                         </div>
-                        <span className="absolute bottom-2 right-4 text-xs text-blue-900 font-bold whitespace-nowrap">
+                        
+                        {/* Timestamp */}
+                        <span className={`absolute bottom-1.5 right-2.5 text-[10px] font-normal whitespace-nowrap ${
+                            isLoggedInUser ? 'text-teal-100/80' : 'text-slate-400'
+                        }`}>
                             {handleMessageTime(createdAt)}
                         </span>
-
                     </div>
+                    
+                    {/* Dropdown Menu */}
                     <DropdownMenu>
-                        <DropdownMenuTrigger>
-                            <button className="absolute top-1 right-1 p-1  border border-slack-dark-medium rounded-sm scale-75 opacity-0 group-hover:opacity-100 hover:scale-90 group-hover:bg-slack transition-all ease-in-out duration-200">
-                                <FaChevronDown className='size-4 text-teal-600' />
+                        <DropdownMenuTrigger asChild>
+                            <button className={`absolute top-0 right-0 p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 ${
+                                isLoggedInUser 
+                                    ? 'hover:bg-teal-700' 
+                                    : 'hover:bg-slate-600'
+                            }`}>
+                                <FaChevronDown className={`w-3 h-3 ${
+                                    isLoggedInUser ? 'text-teal-100' : 'text-slate-300'
+                                }`} />
                             </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
-                            className='bg-slack-medium font-serif text-teal-500 font-medium border-2 border-slack-dark'
+                            className='bg-slate-800 text-white font-medium border border-slate-700 shadow-xl'
+                            align={isLoggedInUser ? 'end' : 'start'}
                         >
-                            <DropdownMenuItem>React</DropdownMenuItem>
-                            <DropdownMenuItem>Reply</DropdownMenuItem>
-                            <DropdownMenuItem>Forward</DropdownMenuItem>
-                            <DropdownMenuItem>Copy</DropdownMenuItem>
-                            <DropdownMenuItem>Info</DropdownMenuItem>
-                            {(image || isLoggedInUser) && <DropdownMenuSeparator className='p-[1px] bg-slack-dark'/>}
+                            <DropdownMenuItem className="hover:bg-slate-700 cursor-pointer focus:bg-slate-700 focus:text-white">React</DropdownMenuItem>
+                            <DropdownMenuItem className="hover:bg-slate-700 cursor-pointer focus:bg-slate-700 focus:text-white">Reply</DropdownMenuItem>
+                            <DropdownMenuItem className="hover:bg-slate-700 cursor-pointer focus:bg-slate-700 focus:text-white">Forward</DropdownMenuItem>
+                            <DropdownMenuItem className="hover:bg-slate-700 cursor-pointer focus:bg-slate-700 focus:text-white">Copy</DropdownMenuItem>
+                            <DropdownMenuItem className="hover:bg-slate-700 cursor-pointer focus:bg-slate-700 focus:text-white">Info</DropdownMenuItem>
+                            {(image || isLoggedInUser) && <DropdownMenuSeparator className='bg-slate-700'/>}
                             {image && <DropdownMenuItem
                                 onClick={handleSaveImage}
+                                className="hover:bg-slate-700 cursor-pointer focus:bg-slate-700 focus:text-white"
                             > Save </DropdownMenuItem>}
                             {isLoggedInUser && <DropdownMenuItem
                                 onClick={handleDeleteMessage}
+                                className="hover:bg-red-900/50 text-red-400 cursor-pointer focus:bg-red-900/50 focus:text-red-400"
                             >Delete</DropdownMenuItem>}
                         </DropdownMenuContent>
                     </DropdownMenu>

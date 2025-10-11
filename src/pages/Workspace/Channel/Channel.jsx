@@ -22,7 +22,7 @@ export const Channel = () => {
     const safeChannelId = channelId?.toString();
     const { isFetching, channelsDetails, isError } = useGetChannelById(safeChannelId);
 
-    const { joinChannel } = useSocket();
+    const { joinChannel, currentChannel: socketCurrentChannel, socket } = useSocket();
     const { messageList, setMessageList } = useChannelMessage();
 
     const { 
@@ -42,29 +42,64 @@ export const Channel = () => {
         scrollToBottom();
     },[messageList]);
 
+    // Only invalidate when switching channels, not on every render
     useEffect(() => {
-        queryClient.invalidateQueries('getChannelMessages');
-        scrollToBottom();
-    }, [channelId]);
+        if (channelId) {
+            queryClient.invalidateQueries('getChannelMessages');
+            scrollToBottom();
+        }
+    }, [channelId, queryClient]);
 
     useEffect(() => {
-        if (channelId && !hasJoinedChannel.current && !isFetching && !isError && channelId) {
+        console.log('🔍 Channel useEffect triggered:');
+        console.log('  - channelId:', channelId);
+        console.log('  - socketCurrentChannel:', socketCurrentChannel);
+        console.log('  - hasJoinedChannel.current:', hasJoinedChannel.current);
+        console.log('  - socket exists:', !!socket);
+        console.log('  - socket.connected:', socket?.connected);
+        
+        // Only join if channel changed and socket is ready
+        if (channelId && channelId !== socketCurrentChannel && !isFetching && !isError) {
+            console.log('🚪 Joining new channel:', channelId);
             joinChannel(channelId);
             scrollToBottom();
+            hasJoinedChannel.current = true;
+        } else if (channelId === socketCurrentChannel) {
+            console.log('✅ Already in channel:', channelId);
             hasJoinedChannel.current = true;
         }
 
         return () => {
-            hasJoinedChannel.current = false;
+            console.log('🧹 Channel cleanup');
+            // Don't reset hasJoinedChannel - causes re-joining issues
         };
-    },[isFetching,isError,channelId]);
+    },[isFetching, isError, channelId, socketCurrentChannel, socket, joinChannel]);
 
+    // Only load initial messages once when channel changes
+    const hasLoadedMessages = useRef(false);
+    
     useEffect(() => {
-        if(isSuccess){
+        if (isSuccess && channelMessages && !hasLoadedMessages.current) {
+            console.log('📥 Loading initial channel messages:', channelMessages.length);
             setMessageList(channelMessages);
             scrollToBottom();
+            hasLoadedMessages.current = true;
         }
-    }, [isSuccess,channelMessages,setMessageList,channelId]);
+    }, [isSuccess, channelMessages, setMessageList]);
+
+    // Reset hasLoadedMessages when channel changes AND clear old messages
+    useEffect(() => {
+        console.log('\n🔄 ========== CHANNEL CHANGE EFFECT ==========');
+        console.log('  - New channelId:', channelId);
+        console.log('  - Clearing old channel messages');
+        console.log('  - Resetting hasLoadedMessages flag');
+        
+        // Clear old messages when switching channels
+        setMessageList([]);
+        hasLoadedMessages.current = false;
+        
+        console.log('==================================================\n');
+    }, [channelId]);
 
     if(isFetching) {
         return (
@@ -87,11 +122,11 @@ export const Channel = () => {
 
     
     return (
-        <div className='flex flex-col h-full bg-slack'>
+        <div className='flex flex-col h-full bg-white'>
             <ChannelHeader name={channelsDetails?.name} />
             <div 
                 ref={messageContainerListRef} 
-                className='h-full overflow-y-auto p-5 gap-y-2 mb-2 mt-1'
+                className='h-full overflow-y-auto p-3 sm:p-5 gap-y-2 mb-2 mt-1'
             >
                 {messageList?.map((message) => {
                     
@@ -106,7 +141,7 @@ export const Channel = () => {
                             {shouldRenderSeparator && (
                                 <div className='flex justify-center items-center'>
                                     <Button
-                                        className="text-center text-teal-600 bg-slack-dark my-2 font-semibold"
+                                        className="text-center text-gray-700 bg-gray-50 border border-gray-200 my-2 font-medium hover:bg-gray-100 transition-colors rounded-md"
                                     >
                                         {separator}
                                     </Button>

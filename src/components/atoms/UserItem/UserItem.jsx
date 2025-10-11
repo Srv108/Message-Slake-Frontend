@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { useRoomDetails } from '@/hooks/context/useRoomDetails';
 import { useWorkspace } from '@/hooks/context/useWorkspace';
 import { cn } from '@/lib/utils';
 import { formatTime } from '@/utils/formatTime/formatTime';
@@ -40,6 +41,7 @@ export const UserItem = ({
 }) => {
 
     const { currentWorkspace } = useWorkspace();
+    const { setCurrentRoom } = useRoomDetails();
     const messageRef = useRef(null);
     const [ messageContent, setMessageContent ] = useState('');
 
@@ -47,6 +49,21 @@ export const UserItem = ({
         ? {to : `/workspace/${currentWorkspace?._id}/members/${id}`} 
         : {to : `/directMessages/chat/${id}`, state: {reciverId}};
 
+    // Handle room selection for DMs
+    const handleRoomClick = () => {
+        console.log('🔍 UserItem clicked:');
+        console.log('  - type:', type);
+        console.log('  - id:', id);
+        console.log('  - label:', label);
+        
+        if (type === 'dms' && id) {
+            console.log('🎯 UserItem: Setting current room to:', id);
+            setCurrentRoom(id);
+            console.log('✅ setCurrentRoom called from UserItem');
+        } else {
+            console.log('⚠️ Not a DM or no ID:', { type, id });
+        }
+    };
 
     useEffect(() => {
         const textContent = messageRef.current.innerText;
@@ -72,7 +89,7 @@ export const UserItem = ({
             >
                 
                 <div className="w-full p-1 flex flex-row justify-between items-center">
-                    <Link {...linkProps}  className="flex items-center space-x-5 w-4/5">
+                    <Link {...linkProps} onClick={handleRoomClick} className="flex items-center space-x-5 w-4/5">
                         <Avatar className="w-10 h-10">
                             <AvatarImage src={image} className="rounded-full w-full h-full object-cover" />
                             <AvatarFallback className="rounded-full bg-slate-600 text-white text-xl font-bold">

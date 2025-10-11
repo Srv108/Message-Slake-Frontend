@@ -4,9 +4,9 @@ export const Auth = ({children}) => {
     // Layout for auth related pages
     return (
         <div 
-        className="h-[100vh] flex items-center justify-center bg-slack"
+        className="min-h-screen flex items-center justify-center bg-gray-50 p-4"
         >
-            <div className="md:h-auto md:w-[420px]">
+            <div className="w-full max-w-md">
                 {children}
             </div>
 

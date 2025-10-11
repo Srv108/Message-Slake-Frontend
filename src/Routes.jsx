@@ -8,6 +8,7 @@ import { SignupContainer } from './components/organisms/Auth/SignupContainer';
 import { Auth } from './pages/Auth/Auth';
 import { DirectMessageLayout } from './pages/DirectMessages/Layout';
 import { Home } from './pages/Home/Home';
+import { Landing } from './pages/Landing/Landing';
 import { Member } from './pages/Member/Member';
 import { HomePage as RoomHomePage } from './pages/Room/HomePage';
 import { Room } from './pages/Room/Room';
@@ -21,6 +22,7 @@ import { WorkspaceLayout } from './pages/Workspace/Layout';
 export const AppRoutes = () => {
     return (
         <Routes>
+            <Route path='/' element={<Landing />} />
             <Route path='/auth/signup' element={<Auth><SignupContainer/> </Auth>} />
             <Route path='/auth/signin' element={<Auth><SigninContainer/> </Auth>} />
             <Route path='/auth/logincredentials' element={<Auth><ForgetAccountContainer/> </Auth>} />
@@ -33,7 +35,7 @@ export const AppRoutes = () => {
             <Route path='/directMessages/chat/:roomId/video/call' element={<ProtectedRoutes> <VideoChat /> </ProtectedRoutes>} />
 
             <Route path='/home' element={<ProtectedRoutes> <Home/> </ProtectedRoutes> } />
-            <Route path='/*' element={<Auth><SignupContainer/> </Auth>} />
+            <Route path='/*' element={<Landing />} />
         </Routes>
     );
 };
