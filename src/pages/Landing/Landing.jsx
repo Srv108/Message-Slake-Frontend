@@ -1,11 +1,13 @@
-import { ArrowRight, CheckCircle2, MessageSquare, Sparkles, Users, Video, Zap } from 'lucide-react';
+import { ArrowRight, CheckCircle2, MessageSquare, Moon, Sparkles, Sun, Users, Video, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { useTheme } from '@/hooks/context/useTheme';
 
 export const Landing = () => {
     const navigate = useNavigate();
+    const { theme, toggleTheme } = useTheme();
 
     const features = [
         {
@@ -47,30 +49,42 @@ export const Landing = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-white dark:bg-slate-900 transition-colors">
             {/* Navigation */}
-            <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-gray-100 z-50">
+            <nav className="fixed top-0 w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-100 dark:border-slate-800 z-50 transition-colors">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         <div className="flex items-center space-x-3 group cursor-pointer">
-                            <div className="w-9 h-9 bg-black rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <div className="w-9 h-9 bg-black dark:bg-teal-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                                 <MessageSquare className="w-5 h-5 text-white" strokeWidth={2.5} />
                             </div>
-                            <span className="text-xl font-bold text-black tracking-tight">
+                            <span className="text-xl font-bold text-black dark:text-white tracking-tight">
                                 MessageSlake
                             </span>
                         </div>
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-2">
+                            {/* Theme Toggle */}
+                            <button
+                                onClick={toggleTheme}
+                                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                            >
+                                {theme === 'dark' ? (
+                                    <Sun className="w-5 h-5 text-gray-600 dark:text-slate-300" />
+                                ) : (
+                                    <Moon className="w-5 h-5 text-gray-600" />
+                                )}
+                            </button>
                             <Button
                                 variant="ghost"
                                 onClick={() => navigate('/auth/signin')}
-                                className="hidden sm:inline-flex text-gray-600 hover:text-black hover:bg-gray-50 font-medium"
+                                className="hidden sm:inline-flex text-gray-600 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-800 font-medium"
                             >
                                 Sign In
                             </Button>
                             <Button
                                 onClick={() => navigate('/auth/signup')}
-                                className="bg-black hover:bg-gray-800 text-white rounded-lg font-medium shadow-sm hover:shadow-md transition-all"
+                                className="bg-black dark:bg-teal-600 hover:bg-gray-800 dark:hover:bg-teal-700 text-white rounded-lg font-medium shadow-sm hover:shadow-md transition-all"
                             >
                                 Get Started
                                 <ArrowRight className="ml-2 w-4 h-4" />
@@ -83,25 +97,25 @@ export const Landing = () => {
             {/* Hero Section */}
             <section className="pt-24 sm:pt-32 pb-12 sm:pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
                 {/* Decorative elements */}
-                <div className="absolute top-20 left-10 w-72 h-72 bg-gray-100 rounded-full blur-3xl opacity-50 animate-pulse"></div>
-                <div className="absolute bottom-20 right-10 w-96 h-96 bg-gray-50 rounded-full blur-3xl opacity-50 animate-pulse delay-1000"></div>
+                <div className="absolute top-20 left-10 w-72 h-72 bg-gray-100 dark:bg-slate-800 rounded-full blur-3xl opacity-50 animate-pulse"></div>
+                <div className="absolute bottom-20 right-10 w-96 h-96 bg-gray-50 dark:bg-slate-700 rounded-full blur-3xl opacity-50 animate-pulse delay-1000"></div>
                 
                 <div className="max-w-7xl mx-auto relative z-10">
                     <div className="text-center max-w-4xl mx-auto">
-                        <div className="inline-flex items-center space-x-2 bg-gray-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-6 sm:mb-8 animate-fade-in text-xs sm:text-sm">
-                            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-black" />
-                            <span className="font-medium text-gray-700">Introducing MessageSlake 2.0</span>
+                        <div className="inline-flex items-center space-x-2 bg-gray-100 dark:bg-slate-800 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-6 sm:mb-8 animate-fade-in text-xs sm:text-sm">
+                            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-black dark:text-teal-400" />
+                            <span className="font-medium text-gray-700 dark:text-slate-300">Introducing MessageSlake 2.0</span>
                         </div>
                         
-                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-black mb-4 sm:mb-6 tracking-tight leading-tight animate-fade-in-up px-2">
+                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-black dark:text-white mb-4 sm:mb-6 tracking-tight leading-tight animate-fade-in-up px-2">
                             Where teams
-                            <span className="block mt-2 relative inline-block">
+                            <span className="mt-2 relative">
                                 <span className="relative z-10">connect & collaborate</span>
-                                <span className="absolute bottom-1 sm:bottom-2 left-0 w-full h-2 sm:h-3 bg-gray-200 -rotate-1"></span>
+                                <span className="absolute bottom-1 sm:bottom-2 left-0 w-full h-2 sm:h-3 bg-gray-200 dark:bg-teal-600/30 -rotate-1"></span>
                             </span>
                         </h1>
                         
-                        <p className="mt-4 sm:mt-6 text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto animate-fade-in-up delay-200 px-4">
+                        <p className="mt-4 sm:mt-6 text-base sm:text-lg md:text-xl text-gray-600 dark:text-slate-400 leading-relaxed max-w-2xl mx-auto animate-fade-in-up delay-200 px-4">
                             The modern workspace for fast-moving teams. Real-time messaging, video calls, 
                             and seamless collaboration—all in one beautiful platform.
                         </p>
