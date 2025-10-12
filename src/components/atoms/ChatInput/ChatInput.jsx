@@ -19,7 +19,7 @@ export const ChatInput = () => {
     const { currentWorkspace } = useWorkspace();
     const { toast } = useToast();
     const { setMessageList } = useChannelMessage();
-    const { workspaceId } = useParams();
+    const { workspaceId, channelId } = useParams();
     
     const handleSubmit = useCallback(async ({ body, image }) => {
         try {
@@ -115,7 +115,7 @@ export const ChatInput = () => {
                     username: auth?.user?.username,
                     avatar: auth?.user?.avatar
                 },
-                channelId: currentChannel,
+                channelId: currentChannel ?? channelId.toString(),
                 createdAt: new Date().toISOString(),
                 isOptimistic: true // Server uses isOptimistic
             };
@@ -127,11 +127,11 @@ export const ChatInput = () => {
 
             // Prepare message data for server
             const messageData = {
-                channelId: String(currentChannel),
+                channelId: String(currentChannel) || channelId.toString(),
                 body,
                 image: fileUrl,
                 senderId: auth?.user?.id,
-                workspaceId: currentWorkspace?._id || workspaceId
+                workspaceId: currentWorkspace?._id || workspaceId.toString()
             };
 
             console.log('📡 Emitting NewMessage event to socket server');
