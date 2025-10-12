@@ -23,22 +23,23 @@ export const Room = () => {
     const params = useParams();
     const roomId = params?.roomId;
 
-    const hasJoinedRoom = useRef(false);
     const messageContainerListRef = useRef(null);
+    const hasLoadedMessages = useRef(false);
+    const lastJoinedRoomRef = useRef(null);
 
     const queryClient = useQueryClient();
     const { roomMessageList, setRoomMessageList } = useRoomMessage();
-    const { setRecieverId, setSenderId, setCurrentRoom } = useRoomDetails();
+    const { setRecieverId, setSenderId } = useRoomDetails();
     const lastTimeSeparatorRef = useRef('');
     
     const { auth } = useAuth();
-    const { joinRoom } = useSocket();
+    const { joinRoom, isSocketReady, currentRoom: socketCurrentRoom } = useSocket();
     const { getCurrentTheme } = useChatTheme();
     
     const currentTheme = getCurrentTheme();
 
     const { isSuccess: roomStatus, roomDetails } = useGetRoomById(roomId);
-    const { isSuccess, RoomMessageDetails } = useFetchRoomMessage(roomId);
+    const { isSuccess, isFetching, isError, data: RoomMessageDetails } = useFetchRoomMessage(roomId);
 
     const scrollToBottom = () => {
         if (messageContainerListRef.current) {
@@ -46,40 +47,51 @@ export const Room = () => {
         }
     };
 
-
+    // Auto-scroll when messages change
     useEffect(() => {
         scrollToBottom();
-    },[roomMessageList]);
+    }, [roomMessageList]);
 
+    // Reset and invalidate when roomId changes ONLY
     useEffect(() => {
-        queryClient.invalidateQueries('fetchRoomMessages');
-        scrollToBottom();
-    },[roomId]);
-
-    useEffect(() => {
-        console.log('🔍 Room useEffect triggered:');
-        console.log('  - roomId:', roomId);
-        console.log('  - hasJoinedRoom.current:', hasJoinedRoom.current);
+        if (!roomId) return;
         
-        if (roomId && !hasJoinedRoom.current) {
-            console.log('🚪 Setting current room and joining:', roomId);
-            setCurrentRoom(roomId); // Set the current room in context
-            console.log('✅ setCurrentRoom called with:', roomId);
-            joinRoom(roomId);
-            scrollToBottom();
-            hasJoinedRoom.current = true;
-        } else {
-            console.log('⚠️ Skipping room setup:', {
-                roomId,
-                hasJoinedRoom: hasJoinedRoom.current
-            });
+        console.log('\n🔄 ========== ROOM CHANGE ==========');
+        console.log('📍 New Room ID:', roomId);
+        
+        // Clear old messages
+        console.log('🧹 Clearing old room messages');
+        setRoomMessageList([]);
+        hasLoadedMessages.current = false;
+        
+        // Invalidate queries for fresh data
+        queryClient.invalidateQueries(['fetchRoomMessages', roomId]);
+        
+        console.log('==================================================\n');
+    }, [roomId, queryClient, setRoomMessageList]);
+
+    // Join room via socket when roomId is available and socket is ready
+    useEffect(() => {
+        if (!roomId) {
+            console.warn('⚠️ No roomId available');
+            return;
         }
 
-        return () => {
-            console.log('🧹 Room cleanup - resetting hasJoinedRoom');
-            hasJoinedRoom.current = false;
-        };
-    }, [roomId, setCurrentRoom, joinRoom]);
+        if (!isSocketReady) {
+            console.warn('⚠️ Socket not ready, waiting...');
+            return;
+        }
+
+        // Prevent duplicate joins - check both socket state and our ref
+        if (socketCurrentRoom === roomId || lastJoinedRoomRef.current === roomId) {
+            console.log('ℹ️ Already in room:', roomId);
+            return;
+        }
+
+        console.log('🚪 Joining room via socket:', roomId);
+        joinRoom(roomId);
+        lastJoinedRoomRef.current = roomId;
+    }, [roomId, isSocketReady, socketCurrentRoom, joinRoom]);
     
     useEffect(() => {
         if (roomStatus && roomDetails) {
@@ -93,10 +105,13 @@ export const Room = () => {
         }
     }, [roomStatus,setSenderId,setRecieverId,roomId,roomDetails]);
 
+    // Load initial messages only once when data is fetched
     useEffect(() => {
-        if (isSuccess) {
+        if (isSuccess && RoomMessageDetails && !hasLoadedMessages.current) {
+            console.log('📥 Loading initial room messages:', RoomMessageDetails.length);
             setRoomMessageList(RoomMessageDetails);
             scrollToBottom();
+            hasLoadedMessages.current = true;
         }
     }, [isSuccess, RoomMessageDetails, setRoomMessageList]);
 

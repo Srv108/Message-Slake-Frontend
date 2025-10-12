@@ -10,41 +10,105 @@ const SocketContext = createContext();
 
 export const SocketContextProvider = ({ children }) => {
     const { auth } = useAuth();
+    
+    // Socket state
+    const [isSocketReady, setIsSocketReady] = useState(false);
+    const [socketInstance, setSocketInstance] = useState(null);
+    const [isOnline, setIsOnline] = useState(navigator.onLine);
+    const [socketId, setSocketId] = useState(null);
+    
+    // Room/Channel state - stored in context
     const [currentChannel, setCurrentChannel] = useState(null);
+    const [currentRoom, setCurrentRoom] = useState(null);
+    
+    // Call state
     const [acceptCall, setCallAccepted] = useState(false);
     const [offerRecieved, setOfferRecieved] = useState(null);
     const [answerRecieved, setAnswerRecieved] = useState(null);
     const [candidateRecieved, setCandidateRecieved] = useState(null);
-    const [isSocketReady, setIsSocketReady] = useState(false); // Track socket readiness
-    const [socketInstance, setSocketInstance] = useState(null); // State for triggering re-renders
 
     const { setMessageList } = useChannelMessage();
     const { setRoomMessageList } = useRoomMessage();
-    const { currentRoom, setCurrentRoom } = useRoomDetails();
+    const { setCurrentRoom: setRoomDetailsCurrentRoom } = useRoomDetails();
 
-    // ✅ Use useRef to persist socket connection across renders
+    // Refs for socket management
     const socketRef = useRef(null);
     const messageHandlersSetup = useRef(false);
     const isInitializing = useRef(false);
-    const [isOnline, setIsOnline] = useState(navigator.onLine);
+    const hasInitializedOnce = useRef(false);
 
-    // Monitor network status
+    // ==================== STABLE MESSAGE HANDLERS ====================
+    // These callbacks prevent stale closure issues
+    const addChannelMessageStable = useCallback((message) => {
+        setMessageList(prev => {
+            // const exists = prev.some(msg => msg._id === message._id || msg._id === message.tempId);
+            // if (exists) {
+            //     console.log('⚠️ Duplicate channel message ignored:', message._id);
+            //     return prev;
+            // }
+            // console.log('✅ Adding received channel message to list');
+            return [...prev, message];
+        });
+    }, [setMessageList]);
+
+    const updateChannelMessageStable = useCallback((message) => {
+        setMessageList(prev => 
+            prev.map(msg => 
+                msg._id === message.tempId ? { ...msg, _id: message._id, isOptimistic: false } : msg
+            )
+        );
+    }, [setMessageList]);
+
+    const removeChannelMessageStable = useCallback((tempId) => {
+        setMessageList(prev => prev.filter(msg => msg._id !== tempId));
+    }, [setMessageList]);
+
+    const addRoomMessageStable = useCallback((message) => {
+        setRoomMessageList(prev => {
+            // const exists = prev.some(msg => msg._id === message._id || msg._id === message.tempId);
+            // if (exists) {
+            //     console.log('⚠️ Duplicate room message ignored:', message._id);
+            //     return prev;
+            // }
+            console.log('✅ Adding received room message to list');
+            return [...prev, message];
+        });
+    }, [setRoomMessageList]);
+
+    const updateRoomMessageStable = useCallback((message) => {
+        setRoomMessageList(prev => 
+            prev.map(msg => 
+                msg._id === message.tempId ? { ...msg, _id: message._id, isOptimistic: false } : msg
+            )
+        );
+    }, [setRoomMessageList]);
+
+    const removeRoomMessageStable = useCallback((tempId) => {
+        setRoomMessageList(prev => prev.filter(msg => msg._id !== tempId));
+    }, [setRoomMessageList]);
+
+    // ==================== NETWORK STATUS MONITORING ====================
     useEffect(() => {
         const handleOnline = () => {
             console.log('🌐 Network: ONLINE - Internet connection restored');
             setIsOnline(true);
+            // Socket.IO will auto-reconnect, no need to manually reconnect
         };
 
         const handleOffline = () => {
             console.log('🌐 Network: OFFLINE - Internet connection lost');
             setIsOnline(false);
+            // Don't clear messages or disconnect - Socket.IO handles reconnection
+            // Messages will be preserved and synced after reconnection
         };
 
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
 
         // Check initial status
-        console.log('🌐 Initial network status:', navigator.onLine ? 'ONLINE' : 'OFFLINE');
+        const initialStatus = navigator.onLine;
+        console.log('🌐 Initial network status:', initialStatus ? 'ONLINE' : 'OFFLINE');
+        setIsOnline(initialStatus);
 
         return () => {
             window.removeEventListener('online', handleOnline);
@@ -52,121 +116,194 @@ export const SocketContextProvider = ({ children }) => {
         };
     }, []);
 
-    // Cleanup socket when offline
-    useEffect(() => {
-        if (!isOnline && socketRef.current) {
-            console.log('🌐 Network offline - disconnecting socket gracefully');
-            socketRef.current.disconnect();
-            setIsSocketReady(false);
-            setSocketInstance(null); // Clear state
-            messageHandlersSetup.current = false;
-            // Don't set socketRef.current to null - keep it for reconnection
-        }
-    }, [isOnline]);
+    // ==================== REMOVED: Don't disconnect on offline ====================
+    // Socket.IO automatically handles reconnection when network returns
+    // Manual disconnect causes unnecessary state loss
 
-    // Setup socket connection - runs when auth is available AND online
+    // ==================== SOCKET INITIALIZATION ====================
     useEffect(() => {
-        if (!auth?.token) {
-            // User logged out, disconnect socket
+        // Step 1: Check authentication - STRICT validation
+        if (!auth?.token || typeof auth.token !== 'string' || auth.token.trim() === '') {
+            console.log('⚠️ No valid auth token available');
+            console.log('  - auth exists:', !!auth);
+            console.log('  - auth.token exists:', !!auth?.token);
+            console.log('  - auth.token type:', typeof auth?.token);
+            console.log('  - auth.token value:', auth?.token ? `${auth.token.substring(0, 20)}...` : 'null');
+            
             if (socketRef.current) {
-                console.log('🔌 User logged out, disconnecting socket...');
+                console.log('🔌 User logged out, cleaning up socket...');
                 socketRef.current.removeAllListeners();
                 socketRef.current.disconnect();
                 socketRef.current = null;
-                setSocketInstance(null); // Clear state
+                setSocketInstance(null);
                 setIsSocketReady(false);
+                setSocketId(null);
                 messageHandlersSetup.current = false;
                 isInitializing.current = false;
+                hasInitializedOnce.current = false;
+                
+                // Clear all data
+                console.log('🧹 Clearing all message lists on logout');
+                setMessageList([]);
+                setRoomMessageList([]);
+                setCurrentChannel(null);
+                setCurrentRoom(null);
             }
             return;
         }
 
-        // Check if online before creating socket
+        // Step 2: Check network connectivity
         if (!isOnline) {
             console.log('🌐 Network offline - waiting for connection before creating socket');
             return;
         }
 
-        // Prevent multiple socket creation attempts
+        // Step 3: Prevent multiple socket creation
         if (isInitializing.current) {
             console.log('⏳ Socket initialization already in progress...');
             return;
         }
 
-        // Only create socket if it doesn't exist
+        // Step 4: Create socket only once
         if (!socketRef.current) {
             isInitializing.current = true;
-            console.log('🔌 Creating new socket connection...');
+            console.log('\n🚀 ========== INITIALIZING SOCKET CONNECTION ==========');
+            console.log('📍 Step 1: Checking prerequisites');
+            console.log('  ✅ User authenticated:', !!auth.token);
+            console.log('  ✅ Token length:', auth.token.length);
+            console.log('  ✅ Token preview:', `${auth.token.substring(0, 30)}...`);
+            console.log('  ✅ Network online:', isOnline);
+            console.log('  ✅ Socket URL:', import.meta.env.VITE_BACKEND_SOCKET_URL);
+            
+            // DON'T clear messages on socket init - only clear on logout
+            console.log('📝 Step 2: Preserving existing messages');
+            
+            console.log('🔌 Step 3: Creating socket instance with auth token...');
             const newSocket = io(import.meta.env.VITE_BACKEND_SOCKET_URL, {
-                extraHeaders: {
-                    'access-token': auth.token,
+                auth: {
+                    token: auth.token  // Backend expects auth.token
                 },
                 autoConnect: true,
                 reconnection: true,
                 reconnectionAttempts: 5,
                 reconnectionDelay: 1000,
+                reconnectionDelayMax: 5000,
                 timeout: 10000,
+                transports: ['websocket', 'polling']
+            });
+            
+            console.log('📍 Socket config:', {
+                url: import.meta.env.VITE_BACKEND_SOCKET_URL,
+                hasToken: !!auth.token,
+                tokenLength: auth.token.length
             });
 
             socketRef.current = newSocket;
-            setSocketInstance(newSocket); // Update state to trigger re-render
-            isInitializing.current = false;
-            console.log('✅ Socket instance created and stored in ref');
+            setSocketInstance(newSocket);
+            hasInitializedOnce.current = true;
+            console.log('✅ Socket instance created and stored');
+            console.log('==================================================\n');
 
-            // Connection event handlers
+            // ==================== CONNECTION EVENT HANDLERS ====================
             newSocket.on('connect', () => {
-                console.log('✅ Socket connected:', newSocket.id);
-                setIsSocketReady(true); // Mark as ready
-                setSocketInstance(newSocket); // Update state to ensure components get the connected socket
+                console.log('\n🎉 ========== SOCKET CONNECTED ==========');
+                console.log('📍 Socket ID:', newSocket.id);
+                console.log('📍 Transport:', newSocket.io.engine.transport.name);
+                
+                setIsSocketReady(true);
+                setSocketId(newSocket.id);
+                setSocketInstance(newSocket);
+                isInitializing.current = false;
 
                 // Join personal notification room
                 const personalRoom = `${auth?.user?.username}-${auth?.user?.id}`;
+                console.log('🚪 Joining personal notification room:', personalRoom);
                 newSocket.emit('joinRoom', { roomId: personalRoom }, (ack) => {
-                    console.log('✅ Joined personal notification room:', ack?.message || ack);
+                    console.log('✅ Personal room joined:', ack?.message || ack);
                 });
+                
+                console.log('==================================================\n');
             });
 
             newSocket.on('disconnect', (reason) => {
-                console.log('❌ Socket disconnected:', reason);
+                console.log('\n⚠️ ========== SOCKET DISCONNECTED ==========');
+                console.log('📍 Reason:', reason);
+                console.log('📍 Will reconnect:', reason !== 'io client disconnect');
+                
                 setIsSocketReady(false);
-                // Don't clear socket ref on disconnect - allow reconnection
-                // Only clear if it's a manual disconnect (io client disconnect)
+                setSocketId(null);
+                
                 if (reason === 'io client disconnect') {
-                    console.log('🔌 Manual disconnect detected');
+                    console.log('🔌 Manual disconnect - cleaning up');
                     messageHandlersSetup.current = false;
                 } else {
-                    console.log('🔄 Will attempt to reconnect...');
-                    // Keep socket in ref for reconnection
+                    console.log('🔄 Automatic reconnection will be attempted');
                 }
+                console.log('==================================================\n');
             });
 
             newSocket.on('connect_error', (error) => {
                 console.error('❌ Socket connection error:', error.message);
+                setIsSocketReady(false);
+                isInitializing.current = false;
             });
 
-            newSocket.on('reconnect', (attemptNumber) => {
-                console.log('🔄 Socket reconnected after', attemptNumber, 'attempts');
-                setIsSocketReady(true); // Mark as ready again
-                setSocketInstance(newSocket); // Update state to trigger re-render
+            // ==================== RECONNECTION HANDLERS ====================
+            
+            // Backend's special 'reconnected' event - rooms are auto-restored
+            newSocket.on('reconnected', async ({ message, rooms, previousSocketId }) => {
+                console.log('\n🎉 ========== BACKEND RECONNECTED EVENT ==========');
+                console.log('📍 Message:', message);
+                console.log('📍 Previous Socket ID:', previousSocketId);
+                console.log('📍 Restored Rooms:', rooms);
+                console.log('✅ All previous rooms automatically rejoined by backend!');
                 
-                // Rejoin rooms/channels after reconnection
+                setIsSocketReady(true);
+                setSocketId(newSocket.id);
+                setSocketInstance(newSocket);
+                
+                // DON'T clear messages - they're preserved during reconnection
+                console.log('✅ Messages preserved during reconnection');
+                
+                console.log('==================================================\n');
+            });
+            
+            // Socket.io's standard reconnect event (fallback)
+            newSocket.on('reconnect', async (attemptNumber) => {
+                console.log('\n🔄 ========== SOCKET.IO RECONNECT ==========');
+                console.log('📍 Attempts taken:', attemptNumber);
+                console.log('📍 Socket ID:', newSocket.id);
+                
+                setIsSocketReady(true);
+                setSocketId(newSocket.id);
+                setSocketInstance(newSocket);
+                
+                // DON'T clear messages - preserve them during reconnection
+                console.log('✅ Messages preserved during reconnection');
+                
+                // Wait briefly to ensure React state syncs before rejoining
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Manually rejoin current room/channel if backend didn't auto-restore
                 if (currentChannel) {
-                    console.log('🔄 Rejoining channel after reconnect:', currentChannel);
+                    console.log('🔄 Rejoining channel:', currentChannel);
                     newSocket.emit('JoinChannel', { channelId: currentChannel }, (ack) => {
-                        console.log('✅ Rejoined channel:', ack);
+                        console.log('✅ Channel rejoined:', ack?.message || ack);
                     });
                 }
                 
                 if (currentRoom) {
-                    console.log('🔄 Rejoining room after reconnect:', currentRoom);
+                    console.log('🔄 Rejoining room:', currentRoom);
                     newSocket.emit('joinRoom', { roomId: currentRoom }, (ack) => {
-                        console.log('✅ Rejoined room:', ack);
+                        console.log('✅ Room rejoined:', ack?.message || ack);
                     });
                 }
+                
+                console.log('==================================================\n');
             });
 
             newSocket.on('reconnect_attempt', (attemptNumber) => {
-                console.log('🔄 Reconnection attempt:', attemptNumber);
+                console.log('🔄 Reconnection attempt #' + attemptNumber);
             });
 
             newSocket.on('reconnect_error', (error) => {
@@ -174,7 +311,11 @@ export const SocketContextProvider = ({ children }) => {
             });
 
             newSocket.on('reconnect_failed', () => {
-                console.error('❌ Reconnection failed after all attempts');
+                console.error('\n❌ ========== RECONNECTION FAILED ==========');
+                console.error('All reconnection attempts exhausted');
+                console.error('User may need to refresh the page');
+                console.error('==================================================\n');
+                setIsSocketReady(false);
             });
 
             // Channel message event handlers
@@ -186,15 +327,7 @@ export const SocketContextProvider = ({ children }) => {
                 console.log('  - Channel:', message.channelId);
                 console.log('  - Is Optimistic:', message.isOptimistic);
                 
-                setMessageList((prevList) => {
-                    const exists = prevList.some(msg => msg._id === message._id || msg._id === message.tempId);
-                    if (exists) {
-                        console.log('⚠️ Duplicate channel message ignored:', message._id);
-                        return prevList;
-                    }
-                    console.log('✅ Adding received channel message to list');
-                    return [...prevList, message];
-                });
+                addChannelMessageStable(message);
             });
 
             // Listen for sender confirmation (immediate)
@@ -213,11 +346,7 @@ export const SocketContextProvider = ({ children }) => {
                 console.log('  - Temp ID:', message.tempId);
                 
                 // Replace temp ID with real ID
-                setMessageList((prevList) => 
-                    prevList.map(msg => 
-                        msg._id === message.tempId ? { ...msg, _id: message._id, isOptimistic: false } : msg
-                    )
-                );
+                updateChannelMessageStable(message);
             });
 
             // Listen for message failure
@@ -227,9 +356,7 @@ export const SocketContextProvider = ({ children }) => {
                 console.log('  - Error:', data.error);
                 
                 // Remove failed message
-                setMessageList((prevList) => 
-                    prevList.filter(msg => msg._id !== data.tempId)
-                );
+                removeChannelMessageStable(data.tempId);
             });
 
             // Room message event handlers - matching server events
@@ -241,15 +368,7 @@ export const SocketContextProvider = ({ children }) => {
                 console.log('  - Room:', message.roomId);
                 console.log('  - Is Optimistic:', message.isOptimistic);
                 
-                setRoomMessageList((prevList) => {
-                    const exists = prevList.some(msg => msg._id === message._id || msg._id === message.tempId);
-                    if (exists) {
-                        console.log('⚠️ Duplicate room message ignored:', message._id);
-                        return prevList;
-                    }
-                    console.log('✅ Adding received room message to list');
-                    return [...prevList, message];
-                });
+                addRoomMessageStable(message);
             });
 
             // Listen for sender confirmation (immediate)
@@ -268,11 +387,7 @@ export const SocketContextProvider = ({ children }) => {
                 console.log('  - Temp ID:', message.tempId);
                 
                 // Replace temp ID with real ID
-                setRoomMessageList((prevList) => 
-                    prevList.map(msg => 
-                        msg._id === message.tempId ? { ...msg, _id: message._id, isOptimistic: false } : msg
-                    )
-                );
+                updateRoomMessageStable(message);
             });
 
             // Listen for message failure
@@ -282,9 +397,7 @@ export const SocketContextProvider = ({ children }) => {
                 console.log('  - Error:', data.error);
                 
                 // Remove failed message
-                setRoomMessageList((prevList) => 
-                    prevList.filter(msg => msg._id !== data.tempId)
-                );
+                removeRoomMessageStable(data.tempId);
             });
 
             // Video call event handlers
@@ -331,92 +444,133 @@ export const SocketContextProvider = ({ children }) => {
         }
 
         // No cleanup - socket persists across component re-renders
-    }, [auth?.token, auth?.user?.username, auth?.user?.id, isOnline, currentChannel, currentRoom, setCurrentRoom, setMessageList, setRoomMessageList]);
+    }, [
+        auth?.token, 
+        auth?.user?.username, 
+        auth?.user?.id, 
+        isOnline, 
+        currentChannel, 
+        currentRoom, 
+        setMessageList, 
+        setRoomMessageList,
+        addChannelMessageStable,
+        updateChannelMessageStable,
+        removeChannelMessageStable,
+        addRoomMessageStable,
+        updateRoomMessageStable,
+        removeRoomMessageStable
+    ]);
 
-    // Join room function with useCallback
+    // ==================== JOIN ROOM FUNCTION ====================
     const joinRoom = useCallback((roomId) => {
+        if (!roomId) {
+            console.warn('⚠️ Cannot join room: roomId is required');
+            return;
+        }
+
         if (!socketRef.current) {
             console.warn('⚠️ Socket not available, cannot join room');
             return;
         }
 
-        if (!socketRef.current.connected) {
-            console.warn('⚠️ Socket not connected, queueing room join:', roomId);
-            // Queue the join for when socket connects
+        if (!isSocketReady) {
+            console.warn('⚠️ Socket not ready, queueing room join:', roomId);
             socketRef.current.once('connect', () => {
                 console.log('🔄 Socket connected, now joining room:', roomId);
-                socketRef.current.emit('joinRoom', { roomId }, (data) => {
-                    console.log('✅ Successfully joined room:', data);
-                    setCurrentRoom(roomId);
+                socketRef.current.emit('joinRoom', { roomId }, (response) => {
+                    if (response?.success) {
+                        console.log('✅ Room joined successfully:', response);
+                        setCurrentRoom(roomId);
+                        setRoomDetailsCurrentRoom(roomId);
+                    } else {
+                        console.error('❌ Failed to join room:', response);
+                    }
                 });
             });
             return;
         }
 
-        if (roomId !== currentRoom) {
-            console.log('🚪 Joining room:', roomId);
-            socketRef.current.emit('joinRoom', { roomId }, (data) => {
-                console.log('✅ Successfully joined room:', data);
-                setCurrentRoom(roomId);
-            });
-        } else {
+        if (roomId === currentRoom) {
             console.log('ℹ️ Already in room:', roomId);
+            return;
         }
-    }, [currentRoom, setCurrentRoom]);
 
-    // Join channel function with useCallback
+        console.log('\n🚪 ========== JOINING ROOM ==========');
+        console.log('📍 Room ID:', roomId);
+        console.log('📍 Previous Room:', currentRoom || 'None');
+        
+        socketRef.current.emit('joinRoom', { roomId }, (response) => {
+            if (response?.success) {
+                console.log('✅ Room joined successfully');
+                console.log('📍 Connected users:', response.data?.connectedUsers || 'Unknown');
+                setCurrentRoom(roomId);
+                setRoomDetailsCurrentRoom(roomId);
+            } else {
+                console.error('❌ Failed to join room:', response);
+            }
+            console.log('==================================================\n');
+        });
+    }, [currentRoom, isSocketReady, setRoomDetailsCurrentRoom]);
+
+    // ==================== JOIN CHANNEL FUNCTION ====================
     const joinChannel = useCallback((channelId) => {
+        if (!channelId) {
+            console.warn('⚠️ Cannot join channel: channelId is required');
+            return;
+        }
+
         if (!socketRef.current) {
             console.warn('⚠️ Socket not available, cannot join channel');
             return;
         }
 
-        if (!socketRef.current.connected) {
-            console.warn('⚠️ Socket not connected, queueing channel join:', channelId);
-            // Queue the join for when socket connects
+        if (!isSocketReady) {
+            console.warn('⚠️ Socket not ready, queueing channel join:', channelId);
             socketRef.current.once('connect', () => {
                 console.log('🔄 Socket connected, now joining channel:', channelId);
-                socketRef.current.emit('JoinChannel', { channelId }, (data) => {
-                    console.log('✅ Successfully joined channel:', data);
-                    setCurrentChannel(channelId);
+                socketRef.current.emit('JoinChannel', { channelId }, (response) => {
+                    if (response?.success) {
+                        console.log('✅ Channel joined successfully:', response);
+                        setCurrentChannel(channelId);
+                    } else {
+                        console.error('❌ Failed to join channel:', response);
+                    }
                 });
             });
             return;
         }
 
-        if (channelId !== currentChannel) {
-            console.log('🚪 Joining channel:', channelId);
-            socketRef.current.emit('JoinChannel', { channelId }, (data) => {
-                console.log('✅ Successfully joined channel:', data);
-                setCurrentChannel(channelId);
-            });
-        } else {
+        if (channelId === currentChannel) {
             console.log('ℹ️ Already in channel:', channelId);
+            return;
         }
-    }, [currentChannel]);
 
-    // Auto-join room when currentRoom changes
-    useEffect(() => {
-        if (currentRoom && socketRef.current) {
-            joinRoom(currentRoom);
-        }
-    }, [currentRoom, joinRoom]);
-
-    // Auto-join channel when currentChannel changes
-    useEffect(() => {
-        if (currentChannel && socketRef.current) {
-            joinChannel(currentChannel);
-        }
-    }, [currentChannel, joinChannel]);
+        console.log('\n🚪 ========== JOINING CHANNEL ==========');
+        console.log('📍 Channel ID:', channelId);
+        console.log('📍 Previous Channel:', currentChannel || 'None');
+        
+        socketRef.current.emit('JoinChannel', { channelId }, (response) => {
+            if (response?.success) {
+                console.log('✅ Channel joined successfully');
+                console.log('📍 Connected users:', response.data?.connectedUsers || 'Unknown');
+                setCurrentChannel(channelId);
+            } else {
+                console.error('❌ Failed to join channel:', response);
+            }
+            console.log('==================================================\n');
+        });
+    }, [currentChannel, isSocketReady]);
 
     return (
         <SocketContext.Provider
             value={{
-                socket: socketInstance || socketRef.current, // Use state first, fallback to ref
+                socket: socketInstance || socketRef.current,
                 isSocketReady,
-                isOnline, // ✅ Expose network status
-                joinChannel,
+                isOnline,
+                socketId,
                 currentChannel,
+                currentRoom,
+                joinChannel,
                 joinRoom,
                 acceptCall,
                 offerRecieved,

@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 
 import { getPresignedUrlRequest, uploadImageToAwsPresignedUrl } from '@/api/s3';
 import { useAuth } from '@/hooks/context/useAuth';
@@ -18,6 +19,7 @@ export const ChatInput = () => {
     const { currentWorkspace } = useWorkspace();
     const { toast } = useToast();
     const { setMessageList } = useChannelMessage();
+    const { workspaceId } = useParams();
     
     const handleSubmit = useCallback(async ({ body, image }) => {
         try {
@@ -129,7 +131,7 @@ export const ChatInput = () => {
                 body,
                 image: fileUrl,
                 senderId: auth?.user?.id,
-                workspaceId: currentWorkspace?._id
+                workspaceId: currentWorkspace?._id || workspaceId
             };
 
             console.log('📡 Emitting NewMessage event to socket server');

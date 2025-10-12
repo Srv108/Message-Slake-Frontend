@@ -18,13 +18,14 @@ import { seperateTimeFormat } from '@/utils/formatTime/seperator';
 export const Channel = () => {
 
     const { channelId } = useParams();
-    const hasJoinedChannel = useRef(false); 
     const lastTimeSeparatorRef = useRef('');
+    const hasLoadedMessages = useRef(false);
+    const lastJoinedChannelRef = useRef(null);
     const queryClient = useQueryClient();
     const safeChannelId = channelId?.toString();
-    const { isFetching, channelsDetails, isError } = useGetChannelById(safeChannelId);
+    const { channelsDetails, isFetching, isError } = useGetChannelById(safeChannelId);
 
-    const { joinChannel, currentChannel: socketCurrentChannel, socket } = useSocket();
+    const { joinChannel, currentChannel: socketCurrentChannel, isSocketReady } = useSocket();
     const { messageList, setMessageList } = useChannelMessage();
     const { getCurrentTheme } = useChatTheme();
     const [showDetailsDrawer, setShowDetailsDrawer] = useState(false);
@@ -56,33 +57,43 @@ export const Channel = () => {
         }
     }, [channelId, queryClient]);
 
+    // Join channel via socket when channelId is available and socket is ready
     useEffect(() => {
-        console.log('🔍 Channel useEffect triggered:');
-        console.log('  - channelId:', channelId);
-        console.log('  - socketCurrentChannel:', socketCurrentChannel);
-        console.log('  - hasJoinedChannel.current:', hasJoinedChannel.current);
-        console.log('  - socket exists:', !!socket);
-        console.log('  - socket.connected:', socket?.connected);
-        
-        // Only join if channel changed and socket is ready
-        if (channelId && channelId !== socketCurrentChannel && !isFetching && !isError) {
-            console.log('🚪 Joining new channel:', channelId);
-            joinChannel(channelId);
-            scrollToBottom();
-            hasJoinedChannel.current = true;
-        } else if (channelId === socketCurrentChannel) {
-            console.log('✅ Already in channel:', channelId);
-            hasJoinedChannel.current = true;
+        if (!channelId) {
+            console.warn('⚠️ No channelId available');
+            return;
         }
 
-        return () => {
-            console.log('🧹 Channel cleanup');
-            // Don't reset hasJoinedChannel - causes re-joining issues
-        };
-    },[isFetching, isError, channelId, socketCurrentChannel, socket, joinChannel]);
+        if (!isSocketReady) {
+            console.warn('⚠️ Socket not ready, waiting...');
+            return;
+        }
 
-    // Only load initial messages once when channel changes
-    const hasLoadedMessages = useRef(false);
+        // Prevent duplicate joins - check both socket state and our ref
+        if (socketCurrentChannel === channelId || lastJoinedChannelRef.current === channelId) {
+            console.log('ℹ️ Already in channel:', channelId);
+            return;
+        }
+
+        console.log('🚪 Joining channel via socket:', channelId);
+        joinChannel(channelId);
+        lastJoinedChannelRef.current = channelId;
+    }, [channelId, isSocketReady, socketCurrentChannel, joinChannel]);
+
+    // Reset and clear messages when channel changes ONLY
+    useEffect(() => {
+        if (!channelId) return;
+        
+        console.log('\n🔄 ========== CHANNEL CHANGE ==========');
+        console.log('📍 New Channel ID:', channelId);
+        
+        // Clear old messages
+        console.log('🧹 Clearing old channel messages');
+        setMessageList([]);
+        hasLoadedMessages.current = false;
+        
+        console.log('==================================================\n');
+    }, [channelId, setMessageList]);
     
     useEffect(() => {
         if (isSuccess && channelMessages && !hasLoadedMessages.current) {
@@ -93,19 +104,6 @@ export const Channel = () => {
         }
     }, [isSuccess, channelMessages, setMessageList]);
 
-    // Reset hasLoadedMessages when channel changes AND clear old messages
-    useEffect(() => {
-        console.log('\n🔄 ========== CHANNEL CHANGE EFFECT ==========');
-        console.log('  - New channelId:', channelId);
-        console.log('  - Clearing old channel messages');
-        console.log('  - Resetting hasLoadedMessages flag');
-        
-        // Clear old messages when switching channels
-        setMessageList([]);
-        hasLoadedMessages.current = false;
-        
-        console.log('==================================================\n');
-    }, [channelId]);
 
     if(isFetching) {
         return (
