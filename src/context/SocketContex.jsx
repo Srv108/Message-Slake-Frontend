@@ -65,11 +65,11 @@ export const SocketContextProvider = ({ children }) => {
 
     const addRoomMessageStable = useCallback((message) => {
         setRoomMessageList(prev => {
-            // const exists = prev.some(msg => msg._id === message._id || msg._id === message.tempId);
-            // if (exists) {
-            //     console.log('⚠️ Duplicate room message ignored:', message._id);
-            //     return prev;
-            // }
+            const validRoomId = message.roomId === currentRoom || message.roomId === socketCurrentRoom;
+            if (!validRoomId) {
+                console.log('⚠️ Invalid room ID received:', message.roomId);
+                return prev;
+            }
             console.log('✅ Adding received room message to list');
             return [...prev, message];
         });
@@ -367,7 +367,10 @@ export const SocketContextProvider = ({ children }) => {
                 console.log('  - Sender:', message.senderId?.username);
                 console.log('  - Room:', message.roomId);
                 console.log('  - Is Optimistic:', message.isOptimistic);
-                
+                // const validRoomId = message.roomId === currentRoom || message.roomId === socketCurrentRoom;
+                // if (validRoomId) {
+                //     console.log('valid room ID received:', message.roomId);
+                // }
                 addRoomMessageStable(message);
             });
 
@@ -385,9 +388,14 @@ export const SocketContextProvider = ({ children }) => {
                 console.log('✅ Room message confirmed (saved to DB):', message);
                 console.log('  - Real ID:', message._id);
                 console.log('  - Temp ID:', message.tempId);
-                
-                // Replace temp ID with real ID
+                console.log('  - message room id :', message.roomId);
+                console.log('  - current room id :', currentRoom);
+                // const validRoomId = message.roomId === currentRoom || message.roomId === socketCurrentRoom;
+                // if (validRoomId) {
+                //     console.log('valid room ID received:', message.roomId);
+                // }
                 updateRoomMessageStable(message);
+                // Replace temp ID with real ID
             });
 
             // Listen for message failure

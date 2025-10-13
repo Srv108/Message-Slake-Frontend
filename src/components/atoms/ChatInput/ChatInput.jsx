@@ -116,6 +116,7 @@ export const ChatInput = () => {
                     avatar: auth?.user?.avatar
                 },
                 channelId: currentChannel ?? channelId.toString(),
+                workspaceId: currentWorkspace?._id || workspaceId.toString(),
                 createdAt: new Date().toISOString(),
                 isOptimistic: true // Server uses isOptimistic
             };
