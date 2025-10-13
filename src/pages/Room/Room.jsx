@@ -49,38 +49,16 @@ export const Room = () => {
 
     // Load initial messages only once when data is fetched
     useEffect(() => {
-        console.log('🔍 Message Loading Check:');
-        console.log('  - isSuccess:', isSuccess);
-        console.log('  - RoomMessageDetails:', RoomMessageDetails);
-        console.log('  - RoomMessageDetails type:', typeof RoomMessageDetails);
-        console.log('  - RoomMessageDetails is array:', Array.isArray(RoomMessageDetails));
-        console.log('  - RoomMessageDetails length:', RoomMessageDetails?.length);
-        console.log('  - hasLoadedMessages:', hasLoadedMessages.current);
-        console.log('  - Current roomMessageList length:', roomMessageList?.length);
-        
-        if (RoomMessageDetails && Array.isArray(RoomMessageDetails) && RoomMessageDetails.length > 0) {
-            console.log('✅ CONDITION MET - Loading messages');
+        if (isSuccess && RoomMessageDetails && !hasLoadedMessages.current) {
             console.log('📥 Loading initial room messages:', RoomMessageDetails.length);
-            console.log('📥 First message:', RoomMessageDetails[0]);
-            console.log('📥 Calling setRoomMessageList with:', RoomMessageDetails);
             setRoomMessageList(RoomMessageDetails);
-            console.log('✅ setRoomMessageList called');
             scrollToBottom();
             hasLoadedMessages.current = true;
-            console.log('✅ hasLoadedMessages set to true');
-        } else {
-            console.log('❌ CONDITION NOT MET');
-            console.log('  - Has RoomMessageDetails?', !!RoomMessageDetails);
-            console.log('  - Is Array?', Array.isArray(RoomMessageDetails));
-            console.log('  - Has length > 0?', RoomMessageDetails?.length > 0);
         }
-    }, [isSuccess, RoomMessageDetails, setRoomMessageList, roomMessageList]);
+    }, [isSuccess, RoomMessageDetails, setRoomMessageList]);
 
     // Monitor roomMessageList changes
     useEffect(() => {
-        console.log('📊 roomMessageList CHANGED:');
-        console.log('  - New length:', roomMessageList?.length);
-        console.log('  - Messages:', roomMessageList);
         scrollToBottom();
     }, [roomMessageList]);
 
@@ -98,10 +76,9 @@ export const Room = () => {
         
         // Invalidate queries for fresh data
         queryClient.invalidateQueries(['fetchRoomMessages', roomId]);
-        console.log('Invalidating room messages queries', ['fetchRoomMessages', roomId], RoomMessageDetails);
         
         console.log('==================================================\n');
-    }, [roomId, queryClient]);
+    }, [roomId, queryClient, setRoomMessageList]);
 
     // Join room via socket when roomId is available and socket is ready
     useEffect(() => {
@@ -190,4 +167,4 @@ export const Room = () => {
             <RoomChatInput />
         </div>
     );
-};
+};   

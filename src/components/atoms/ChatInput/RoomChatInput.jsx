@@ -4,7 +4,6 @@ import { useParams } from 'react-router-dom';
 
 import { getPresignedUrlRequest, uploadImageToAwsPresignedUrl } from '@/api/s3';
 import { useAuth } from '@/hooks/context/useAuth';
-import { useRoomDetails } from '@/hooks/context/useRoomDetails';
 import { useRoomMessage } from '@/hooks/context/useRoomMessage';
 import { useSocket } from '@/hooks/context/useSocket';
 import { useToast } from '@/hooks/use-toast';
@@ -15,8 +14,7 @@ export const RoomChatInput = () => {
 
     const queryClient = useQueryClient();
     const { auth } = useAuth();
-    const { socket, isSocketReady, currentRoom: socketCurrentRoom, isOnline } = useSocket();
-    const { currentRoom } = useRoomDetails();
+    const { socket, isSocketReady, currentRoom, isOnline } = useSocket();
     const { roomId } = useParams();
     const { toast } = useToast();
     const { setRoomMessageList } = useRoomMessage();
@@ -116,7 +114,7 @@ export const RoomChatInput = () => {
                     username: auth?.user?.username,
                     avatar: auth?.user?.avatar
                 },
-                roomId: currentRoom || socketCurrentRoom || roomId,
+                roomId: currentRoom || roomId,
                 createdAt: new Date().toISOString(),
                 isOptimistic: true // Server uses isOptimistic, not __optimistic
             };
@@ -170,7 +168,7 @@ export const RoomChatInput = () => {
                 description: 'Failed to send message. Please try again.',
             });
         }
-    }, [socket, isSocketReady, isOnline, currentRoom, socketCurrentRoom, roomId, auth?.token, auth?.user?.id, auth?.user?.username, auth?.user?.avatar, queryClient, toast, setRoomMessageList]);
+    }, [socket, isSocketReady, isOnline, currentRoom, roomId, auth?.token, auth?.user?.id, auth?.user?.username, auth?.user?.avatar, queryClient, toast, setRoomMessageList]);
     return (
         <div
             className="px-5 w-full bg-transparent"
