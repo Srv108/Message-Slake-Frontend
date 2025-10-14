@@ -18,7 +18,7 @@ export const ChatInput = () => {
     const { socket, currentChannel, isSocketReady, isOnline } = useSocket();
     const { currentWorkspace } = useWorkspace();
     const { toast } = useToast();
-    const { setMessageList } = useChannelMessage();
+    const { addMessageToCurrentChannel } = useChannelMessage();
     const { workspaceId, channelId } = useParams();
     
     const handleSubmit = useCallback(async ({ body, image }) => {
@@ -118,13 +118,13 @@ export const ChatInput = () => {
                 channelId: currentChannel ?? channelId.toString(),
                 workspaceId: currentWorkspace?._id || workspaceId.toString(),
                 createdAt: new Date().toISOString(),
-                isOptimistic: true // Server uses isOptimistic
+                isOptimistic: true
             };
 
             // Add message to UI immediately (optimistic update)
             console.log('⚡ Adding optimistic channel message to UI');
             console.log('  - Temp ID:', tempId);
-            setMessageList((prevList) => [...prevList, optimisticMessage]);
+            addMessageToCurrentChannel(optimisticMessage);
 
             // Prepare message data for server
             const messageData = {
@@ -137,23 +137,12 @@ export const ChatInput = () => {
 
             console.log('📡 Emitting NewMessage event to socket server');
             console.log('📡 Message data:', messageData);
-            console.log('📡 Socket object:', socket);
 
             // Emit message - server will send separate events for confirmation
             socket.emit('NewMessage', messageData, (response) => {
                 console.log('📬 Server response received:', response);
-                if (response?.success) {
-                    console.log('✅ Channel message sent successfully');
-                    console.log('  - Timing:', response.timing);
-                    console.log('  - Delivery:', response.delivery);
-                    // Server will emit channelMessageSent and channelMessageConfirmed events
-                    // No need to update UI here - events will handle it
-                } else {
+                if (!response?.success) {
                     console.error('❌ Channel message send failed:', response);
-                    // Remove optimistic message on failure
-                    setMessageList((prevList) => 
-                        prevList.filter(msg => msg._id !== tempId)
-                    );
                     toast({
                         variant: 'destructive',
                         title: 'Failed to send message',
@@ -169,11 +158,10 @@ export const ChatInput = () => {
                 description: 'Failed to send message. Please try again.',
             });
         }
-    }, [socket, isSocketReady, isOnline, currentChannel, auth?.token, auth?.user?.id, auth?.user?.username, auth?.user?.avatar, currentWorkspace?._id, queryClient, toast, setMessageList]);
+    }, [socket, isSocketReady, isOnline, currentChannel, workspaceId, channelId, auth, currentWorkspace, queryClient, toast, addMessageToCurrentChannel]);
+
     return (
-        <div
-            className="px-5 w-full"
-        >
+        <div className="px-5 w-full">
             <Editor
                 placeholder="Type a message..."
                 onSubmit={handleSubmit}

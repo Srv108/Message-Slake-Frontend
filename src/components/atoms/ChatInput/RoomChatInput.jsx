@@ -11,20 +11,18 @@ import { useToast } from '@/hooks/use-toast';
 import { Editor } from '../Editor/Editor';
 
 export const RoomChatInput = () => {
-
     const queryClient = useQueryClient();
     const { auth } = useAuth();
     const { socket, isSocketReady, currentRoom, isOnline } = useSocket();
     const { roomId } = useParams();
     const { toast } = useToast();
-    const { setRoomMessageList } = useRoomMessage();
+    const { addMessageToCurrentRoom } = useRoomMessage();
     
     const handleSubmit = useCallback(async ({ body, image }) => {
         try {
             console.log('🔍 RoomChatInput Debug:');
             console.log('  - socket exists:', !!socket);
             console.log('  - socket.connected:', socket?.connected);
-            console.log('  - socket.id:', socket?.id);
             console.log('  - isSocketReady:', isSocketReady);
             console.log('  - isOnline:', isOnline);
             console.log('  - currentRoom:', currentRoom);
@@ -116,13 +114,13 @@ export const RoomChatInput = () => {
                 },
                 roomId: currentRoom || roomId,
                 createdAt: new Date().toISOString(),
-                isOptimistic: true // Server uses isOptimistic, not __optimistic
+                isOptimistic: true
             };
 
             // Add message to UI immediately (optimistic update)
             console.log('⚡ Adding optimistic room message to UI');
             console.log('  - Temp ID:', tempId);
-            setRoomMessageList((prevList) => [...prevList, optimisticMessage]);
+            addMessageToCurrentRoom(optimisticMessage);
             
             // Prepare message data for server
             const messageData = {
@@ -136,23 +134,12 @@ export const RoomChatInput = () => {
 
             console.log('📡 Emitting roomMessage event to socket server');
             console.log('📡 Message data:', messageData);
-            console.log('📡 Socket object:', socket);
             
             // Emit message - server will send separate events for confirmation
             socket.emit('roomMessage', messageData, (response) => {
                 console.log('📬 Server response received:', response);
-                if (response?.success) {
-                    console.log('✅ Room message sent successfully');
-                    console.log('  - Timing:', response.timing);
-                    console.log('  - Delivery:', response.delivery);
-                    // Server will emit roomMessageSent and roomMessageConfirmed events
-                    // No need to update UI here - events will handle it
-                } else {
+                if (!response?.success) {
                     console.error('❌ Room message send failed:', response);
-                    // Remove optimistic message on failure
-                    setRoomMessageList((prevList) => 
-                        prevList.filter(msg => msg._id !== tempId)
-                    );
                     toast({
                         variant: 'destructive',
                         title: 'Failed to send message',
@@ -168,11 +155,10 @@ export const RoomChatInput = () => {
                 description: 'Failed to send message. Please try again.',
             });
         }
-    }, [socket, isSocketReady, isOnline, currentRoom, roomId, auth?.token, auth?.user?.id, auth?.user?.username, auth?.user?.avatar, queryClient, toast, setRoomMessageList]);
+    }, [socket, isSocketReady, isOnline, currentRoom, roomId, auth, queryClient, toast, addMessageToCurrentRoom]);
+
     return (
-        <div
-            className="px-5 w-full bg-transparent"
-        >
+        <div className="px-5 w-full bg-transparent">
             <Editor
                 placeholder="Type a message..."
                 onSubmit={handleSubmit}
