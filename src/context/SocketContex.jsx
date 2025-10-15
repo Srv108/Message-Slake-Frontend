@@ -47,72 +47,11 @@ export const SocketContextProvider = ({ children }) => {
         addChannelMessage(message);
     }, [addChannelMessage ]);
 
-    // const handleChannelMessageUpdate = useCallback(({ tempId, message }) => {
-        // console.log('🔄 Updating channel message:', { tempId, messageId: message._id });
-    //     updateChannelMessage(tempId, message);
-    // }, [updateChannelMessage]);
-
     const handleNewRoomMessage = useCallback((message) => {
         console.log('📨 Received room message: ....from socket', message);
         addRoomMessage(message);
     }, [addRoomMessage]);
 
-    // const handleRoomMessageUpdate = useCallback(({ tempId, message }) => {
-    //     console.log('🔄 Updating room message:', { tempId, messageId: message._id });
-    //     updateRoomMessage(tempId, message);
-    // }, [updateRoomMessage]);
-
-    // ==================== STABLE MESSAGE HANDLERS ====================
-    // // These callbacks prevent stale closure issues
-    // const addChannelMessageStable = useCallback((message) => {
-    //     setMessageList(prev => {
-    //         // const exists = prev.some(msg => msg._id === message._id || msg._id === message.tempId);
-    //         // if (exists) {
-    //         //     console.log('⚠️ Duplicate channel message ignored:', message._id);
-    //         //     return prev;
-    //         // }
-    //         // console.log('✅ Adding received channel message to list');
-    //         return [...prev, message];
-    //     });
-    // }, [setMessageList]);
-
-    // const updateChannelMessageStable = useCallback((message) => {
-    //     setMessageList(prev => 
-    //         prev.map(msg => 
-    //             msg._id === message.tempId ? { ...msg, _id: message._id, isOptimistic: false } : msg
-    //         )
-    //     );
-    // }, [setMessageList]);
-
-    // const removeChannelMessageStable = useCallback((tempId) => {
-    //     setMessageList(prev => prev.filter(msg => msg._id !== tempId));
-    // }, [setMessageList]);
-
-    // const addRoomMessageStable = useCallback((message) => {
-    //     setRoomMessageList(prev => {
-    //         const validRoomId = message.roomId === currentRoom || message.roomId === socketCurrentRoom;
-    //         if (!validRoomId) {
-    //             console.log('⚠️ Invalid room ID received:', message.roomId);
-    //             return prev;
-    //         }
-    //         console.log('✅ Adding received room message to list');
-    //         return [...prev, message];
-    //     });
-    // }, [setRoomMessageList]);
-
-    // const updateRoomMessageStable = useCallback((message) => {
-    //     setRoomMessageList(prev => 
-    //         prev.map(msg => 
-    //             msg._id === message.tempId ? { ...msg, _id: message._id, isOptimistic: false } : msg
-    //         )
-    //     );
-    // }, [setRoomMessageList]);
-
-    // const removeRoomMessageStable = useCallback((tempId) => {
-    //     setRoomMessageList(prev => prev.filter(msg => msg._id !== tempId));
-    // }, [setRoomMessageList]);
-
-    
     // ==================== NETWORK STATUS MONITORING ====================
     useEffect(() => {
         const handleOnline = () => {
@@ -415,12 +354,6 @@ export const SocketContextProvider = ({ children }) => {
                 console.log('  - Temp ID:', message._doc.tempId);
                 console.log('  - message room id :', message._doc.roomId);
                 console.log('  - current room id :', currentRoom);
-                // const validRoomId = message.roomId === currentRoom || message.roomId === socketCurrentRoom;
-                // if (validRoomId) {
-                //     console.log('valid room ID received:', message.roomId);
-                // }
-                // handleRoomMessageUpdate({ tempId: message.tempId, message });
-                // Replace temp ID with real ID
             });
 
             // Listen for message failure
@@ -428,9 +361,6 @@ export const SocketContextProvider = ({ children }) => {
                 console.log('❌ Room message failed:', data);
                 console.log('  - Temp ID:', data.tempId);
                 console.log('  - Error:', data.error);
-                
-                // Remove failed message
-                // removeRoomMessageStable(data.tempId);
             });
 
             // Video call event handlers

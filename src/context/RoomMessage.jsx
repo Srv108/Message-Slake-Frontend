@@ -17,6 +17,38 @@ export const RoomMessageProvider = ({ children }) => {
     const isFetchingRoomsRef = useRef({});
 
     // ======================================================
+    // 🔹 whenever need to fetch messages from db
+    // ======================================================
+    const handleFetchDBMessages = useCallback(async({roomId}) => {
+        if (!roomId) return [];
+        if (isFetchingRoomsRef.current[roomId]) return []; // Skip if already fetching
+        if (roomMessages[roomId]) return roomMessages[roomId]; // Skip if already fetched
+
+        isFetchingRoomsRef.current[roomId] = true;
+
+        try {
+            const fetchedMessages = await fetchRoomMessageRequest({
+                roomId,
+                limit: 100,
+                offset: 0,
+                token: auth?.token || auth?.user?.token,
+            });
+
+            setRoomMessages(prev => ({
+                ...prev,
+                [roomId]: fetchedMessages || []
+            }));
+
+            return fetchedMessages;
+        } catch (err) {
+            console.error(`❌ Failed to fetch messages for Room ${roomId}:`, err);
+            return [];
+        } finally {
+            isFetchingRoomsRef.current[roomId] = false;
+        }
+    }, [auth]);
+
+    // ======================================================
     // 🔹 Log whenever roomMessages changes
     // ======================================================
     useEffect(() => {
@@ -35,7 +67,7 @@ export const RoomMessageProvider = ({ children }) => {
     //         then update the maps by setRoomMessages
     //  */
     // ======================================================
-    const setCurrentRoom = useCallback((roomId, Messages) => {
+    const setCurrentRoom = useCallback(async(roomId) => {
         if (!roomId) {
             console.warn('⚠️ [RoomMessage] setCurrentRoom called with no roomId');
             return;
@@ -43,45 +75,26 @@ export const RoomMessageProvider = ({ children }) => {
 
         console.log(`🏠 [RoomMessage] Switching to Room: ${roomId}`);
 
-        // Always update the current room ID first
-        setCurrentRoomId(roomId);
+        // Avoid redundant room switch
+        setCurrentRoomId(prev => (prev === roomId ? prev : roomId));
+        console.log(`🏠 [RoomMessage] Switching to Room: ${roomId}`);
 
-        // If roomMessages object isn't ready yet, initialize it
-        if (!roomMessages || typeof roomMessages !== 'object') {
-            console.warn('⚠️ [RoomMessage] roomMessages is not initialized yet');
-            setCurrentRoomMessages([]);
-            return;
-        }
+        // Clear current messages immediately to prevent showing stale messages
+        setCurrentRoomMessages([]);
 
-        // 🧠 If we have cached messages, use them immediately
+        // If we have cached messages, use them
         const cachedMessages = roomMessages?.[roomId];
         if (Array.isArray(cachedMessages) && cachedMessages.length > 0) {
             console.log(`✅ [RoomMessage] Using ${cachedMessages.length} cached messages for Room:`, roomId);
             setCurrentRoomMessages(cachedMessages);
             return;
         }
-
-        // 🆕 If we have new messages (from DB fetch), use them
-        if (Array.isArray(Messages)) {
-            console.log(`🆕 [RoomMessage] Setting ${Messages.length} messages for Room:`, roomId);
-            setCurrentRoomMessages(Messages);
-
-            // Update the cache safely
-            setRoomMessages(prev => {
-                const newState = { ...(prev || {}), [roomId]: Messages };
-                console.log('💾 [RoomMessage] Updated message store with new room:', {
-                    roomId,
-                    messageCount: Messages.length,
-                    allRooms: Object.keys(newState)
-                });
-                return newState;
-            });
-        } else {
-            // 🧹 Clear stale messages if no data provided
-            console.log('🧹 [RoomMessage] No messages provided or cached, clearing current messages');
-            setCurrentRoomMessages([]);
-        }
-    }, [roomMessages, setRoomMessages, setCurrentRoomId, setCurrentRoomMessages]);
+        
+        // If we have new messages (from DB fetch), use them
+        const newMessages = await handleFetchDBMessages({roomId});
+        console.log('newMessages fetched from db', newMessages);
+        setCurrentRoomMessages(newMessages);
+    }, [roomMessages, handleFetchDBMessages]);
 
 
     // ======================================================
@@ -94,6 +107,8 @@ export const RoomMessageProvider = ({ children }) => {
     //  */
     // ======================================================
     const addMessageToRoom = useCallback(async (message) => {
+        if(!message?.roomId) return;
+
         const roomId = message.roomId;
         console.log(`📩 New message received for Room ${roomId}:`, message);
 
@@ -105,21 +120,10 @@ export const RoomMessageProvider = ({ children }) => {
             else update the ui messages and maps
         */
 
-        if (!roomMessages[roomId] && currentRoomId && currentRoomId.toString() !== roomId.toString() && !isFetchingRoomsRef.current[roomId]) {
-            console.log(`Room ${roomId} not initialized yet. Skipping message.`);
-            isFetchingRoomsRef.current[roomId] = true;
-            try {
-                const fetchedMessages = await fetchRoomMessageRequest({roomId, limit: 100, offset: 0, token: auth?.token || auth?.user?.token});
-                /* update the message with the all fetched message */
-                setRoomMessages(prev => {
-                    const newState = { ...prev, [roomId]: [...fetchedMessages, message] };
-                    console.log('💾 Updated RoomMessage Map (after addMessageToRoom):', JSON.parse(JSON.stringify(newState)));
-                    return newState;
-                });
-            } finally {
-                isFetchingRoomsRef.current[roomId] = false;
-            }
-            return;
+        // 🧭 Ensure room is initialized
+        if (!roomMessages[roomId] && !isFetchingRoomsRef.current[roomId]) {
+            console.log(`🆕 Room ${roomId} not initialized — fetching DB messages first.`);
+            await handleFetchDBMessages({ roomId });
         }
 
         /* if the coming socket message is of current active room then update the ui messages 
@@ -147,7 +151,7 @@ export const RoomMessageProvider = ({ children }) => {
             console.log('💾 Updated RoomMessage Map (after addMessageToRoom):', JSON.parse(JSON.stringify(newState)));
             return newState;
         });
-    }, [currentRoomId, currentParamsRoomId, roomMessages]);
+    }, [currentRoomId, currentParamsRoomId, roomMessages, handleFetchDBMessages]);
 
     // ======================================================
     // 🔹 Add message to CURRENT room (UI send) handle message when we send message from the ui
@@ -170,7 +174,7 @@ export const RoomMessageProvider = ({ children }) => {
             console.log('💾 Updated RoomMessage Map (after addMessageToRoom):', JSON.parse(JSON.stringify(newState)));
             return newState;
         });
-    }, [currentRoomId, setCurrentRoomMessages, addMessageToRoom]);
+    }, [currentRoomId]);
 
     // ======================================================
     // 🔹 Utilities
@@ -183,6 +187,7 @@ export const RoomMessageProvider = ({ children }) => {
             roomMessages,
             currentRoomMessages,
             currentRoomId,
+            setCurrentRoomId,
             setCurrentRoom,
             addMessageToCurrentRoom,
             addMessage: addMessageToRoom,
