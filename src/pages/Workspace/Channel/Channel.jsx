@@ -83,7 +83,7 @@ const scrollToBottom = (smooth = false) => {
             console.log('[Channel] No channelId, skipping reset');
             return;
         }
-
+        
         console.log('\n🔄 ========== CHANNEL CHANGE ==========');
         console.log('📍 New Channel ID:', channelId);
         console.log('🏢 Workspace ID:', workspaceId);
