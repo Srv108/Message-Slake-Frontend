@@ -2,23 +2,18 @@ import { Loader2Icon } from 'lucide-react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { UserButton } from '@/components/atoms/UserButton/UserButton';
 import { useFetchWorkspaceOfMember } from '@/hooks/api/workspace/useFetchWorkspaceOfMember';
 import { useAuth } from '@/hooks/context/useAuth';
-import { useWorkspaceCreateModal } from '@/hooks/context/useWorkspaceCreateModal';
+
+import { DefaultWorkspacePage } from './DefaultWorkspacePage';
 
 export const Home = () => {
-
     const { logout } = useAuth();
     const navigate = useNavigate();
-
-    const { setOpenWorkspaceCreateModal } = useWorkspaceCreateModal();
-
     const { isFetching, Workspaces, error } = useFetchWorkspaceOfMember();
     
     useEffect(() => {
-        if(isFetching) return;
-        console.log(Workspaces,Workspaces.length);
+        if (isFetching) return;
         
         if (error?.status === 403) {
             console.log('Token expired or unauthorized. Redirecting to signin...');
@@ -27,19 +22,11 @@ export const Home = () => {
             return;
         }
 
-        if (Workspaces.length === 0 || !Workspaces) {
-            console.log('Hey you have to open modal to create');
-            setOpenWorkspaceCreateModal(true);
-        } else {
+        // If user has workspaces, redirect to the first one
+        if (Workspaces?.length > 0) {
             navigate(`/workspace/${Workspaces[0]._id}`);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-        isFetching,
-        Workspaces,
-        error,
-        navigate
-    ]);
+    }, [isFetching, Workspaces, error, navigate, logout]);
 
     if (isFetching) {
         return (
@@ -48,9 +35,12 @@ export const Home = () => {
             </div>
         );
     }
-    return(
-        <>
-            <UserButton/>
-        </>
-    );
+
+    // Show default page only when there are no workspaces
+    if (!Workspaces || Workspaces.length === 0) {
+        return <DefaultWorkspacePage />;
+    }
+
+    // This return is a fallback, should not be reached in normal flow
+    return null;
 };
