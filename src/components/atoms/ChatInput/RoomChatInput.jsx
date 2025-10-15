@@ -138,6 +138,9 @@ export const RoomChatInput = () => {
             // Emit message - server will send separate events for confirmation
             socket.emit('roomMessage', messageData, (response) => {
                 console.log('📬 Server response received:', response);
+
+                /* TODO */
+                /* we can implement here nexted message reply if any message failed to send  and create a new message or modify the send message with tab message failed to send....*/
                 if (!response?.success) {
                     console.error('❌ Room message send failed:', response);
                     toast({

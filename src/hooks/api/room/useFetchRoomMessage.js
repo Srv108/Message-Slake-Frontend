@@ -15,11 +15,12 @@ export const useFetchRoomMessage = (roomId) => {
         }),
         queryKey: ['fetchRoomMessages', roomId],
         enabled: !!roomId && !!auth?.token,
-        cacheTime: 0,
-        staleTime: 0,
+        cacheTime: 5 * 60 * 1000,  // 5 minutes
+        staleTime: 30 * 1000,
+        keepPreviousData: true,
     });
 
-    console.log('🔍 useFetchRoomMessage Debug:');
+    // console.log('🔍 useFetchRoomMessage Debug:');
     // console.log('  - roomId:', roomId);
     // console.log('  - isSuccess:', isSuccess);
     // console.log('  - data:', data);

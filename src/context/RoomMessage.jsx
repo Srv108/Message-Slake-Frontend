@@ -84,7 +84,7 @@ export const RoomMessageProvider = ({ children }) => {
 
         // If we have cached messages, use them
         const cachedMessages = roomMessages?.[roomId];
-        if (Array.isArray(cachedMessages) && cachedMessages.length > 0) {
+        if (cachedMessages) {
             console.log(`✅ [RoomMessage] Using ${cachedMessages.length} cached messages for Room:`, roomId);
             setCurrentRoomMessages(cachedMessages);
             return;
@@ -93,7 +93,7 @@ export const RoomMessageProvider = ({ children }) => {
         // If we have new messages (from DB fetch), use them
         const newMessages = await handleFetchDBMessages({roomId});
         console.log('newMessages fetched from db', newMessages);
-        setCurrentRoomMessages(newMessages);
+        setCurrentRoomMessages(newMessages || []);
     }, [roomMessages, handleFetchDBMessages]);
 
 

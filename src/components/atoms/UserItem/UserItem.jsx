@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useRoomDetails } from '@/hooks/context/useRoomDetails';
+import { useRoomMessage } from '@/hooks/context/useRoomMessage';
 import { useWorkspace } from '@/hooks/context/useWorkspace';
 import { cn } from '@/lib/utils';
 import { formatTime } from '@/utils/formatTime/formatTime';
@@ -45,6 +46,7 @@ export const UserItem = ({
     const { setCurrentRoom } = useRoomDetails();
     const messageRef = useRef(null);
     const [ messageContent, setMessageContent ] = useState('');
+    const { setCurrentRoomId } = useRoomMessage();
 
     // Determine link path based on type
     const getLinkProps = () => {
@@ -72,6 +74,7 @@ export const UserItem = ({
         if (type === 'dms' && id) {
             console.log('🎯 UserItem: Setting current room to:', id);
             setCurrentRoom(id);
+            setCurrentRoomId(id);
             console.log('✅ setCurrentRoom called from UserItem');
         } else {
             console.log('⚠️ Not a DM or no ID:', { type, id });

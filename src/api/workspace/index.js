@@ -20,6 +20,9 @@ export const createWorkspaceRequest = async(workspaceDetails) => {
 
 export const getWorkspaceRequest = async({workspaceId, token}) => {
     try{
+        if(!workspaceId){
+            throw new Error('No workspace id provided');
+        }
         const response = await axiosInstance.get(`/workspace/${workspaceId}`,{
             headers: {
                 'access-token' : token

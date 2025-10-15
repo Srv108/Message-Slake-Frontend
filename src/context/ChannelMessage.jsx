@@ -1,4 +1,4 @@
-import { createContext, useCallback, useEffect, useRef, useState } from 'react';
+import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { getPaginatedMessageRequest } from '@/api/channel';
 import { useAuth } from '@/hooks/context/useAuth';
@@ -148,7 +148,7 @@ export const ChannelMessageProvider = ({ children }) => {
             console.log('💾 Updated ChannelMessage Map (after addMessageToChannel):', JSON.parse(JSON.stringify(newState)));
             return newState;
         });
-    }, [currentChannel, channelMessages, handleFetchDBMessages]);
+    }, [currentChannel.channelId, currentChannel.workspaceId, channelMessages, handleFetchDBMessages]);
 
     // ======================================================
     // 🔹 Add message to current channel (UI-active one)
@@ -185,18 +185,21 @@ export const ChannelMessageProvider = ({ children }) => {
     const isWorkspaceInitialized = useCallback(workspaceId => Boolean(channelMessages[workspaceId]), [channelMessages]);
     const isChannelInitialized = useCallback((workspaceId, channelId) => Boolean(channelMessages[workspaceId]?.[channelId]), [channelMessages]);
 
+
+    const contextValue = useMemo(() => ({
+        channelMessages,
+        currentChannelMessages,
+        currentChannel,
+        setCurrentChannel: setCurrentChannelContext,
+        addMessage: addMessageToChannel,
+        addMessageToCurrentChannel,
+        isWorkspaceInitialized,
+        isChannelInitialized,
+    }), [channelMessages, currentChannelMessages, currentChannel, setCurrentChannelContext, addMessageToChannel]);
+
     return (
         <ChannelMessage.Provider
-            value={{
-                channelMessages,
-                currentChannelMessages,
-                currentChannel,
-                setCurrentChannel: setCurrentChannelContext,
-                addMessage: addMessageToChannel,
-                addMessageToCurrentChannel,
-                isWorkspaceInitialized,
-                isChannelInitialized,
-            }}
+            value={contextValue}
         >
             {children}
         </ChannelMessage.Provider>

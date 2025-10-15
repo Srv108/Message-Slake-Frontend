@@ -1,4 +1,3 @@
-import { useQueryClient } from '@tanstack/react-query';
 import { Loader2Icon, TriangleAlertIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -9,7 +8,6 @@ import { ChannelHeader } from '@/components/molecules/Channel/ChannelHeader';
 import { Message } from '@/components/molecules/Message/Message';
 import { Button } from '@/components/ui/button';
 import { useGetChannelById } from '@/hooks/api/channel/useGetChannelById';
-import { useGetChannelMessage } from '@/hooks/api/channel/useGetChannelMessage';
 import { useChannelMessage } from '@/hooks/context/useChannelMessage';
 import { useChatTheme } from '@/hooks/context/useChatTheme';
 import { useSocket } from '@/hooks/context/useSocket';
@@ -17,45 +15,44 @@ import { seperateTimeFormat } from '@/utils/formatTime/seperator';
 
 export const Channel = () => {
 
-    const { channelId } = useParams();
+    const { channelId, workspaceId } = useParams();
+    const safeChannelId = channelId?.toString();
+
+    // local refs/state
     const lastTimeSeparatorRef = useRef('');
     const hasLoadedMessages = useRef(false);
     const lastJoinedChannelRef = useRef(null);
-    const queryClient = useQueryClient();
-    const safeChannelId = channelId?.toString();
-    const { channelsDetails, isFetching, isError } = useGetChannelById(safeChannelId);
-
-    const { joinChannel, currentChannel: socketCurrentChannel, isSocketReady } = useSocket();
-    const { messageList, setMessageList } = useChannelMessage();
-    const { getCurrentTheme } = useChatTheme();
-    const [showDetailsDrawer, setShowDetailsDrawer] = useState(false);
-    
-    const currentTheme = getCurrentTheme();
-
-    const { 
-        isSuccess, 
-        channelMessages 
-    } = useGetChannelMessage(safeChannelId);
-
     const messageContainerListRef = useRef(null);
 
-    const scrollToBottom = () => {
-        if (messageContainerListRef.current) {
-            messageContainerListRef.current.scrollTop = messageContainerListRef?.current?.scrollHeight;
-        }
-    };
-    
-    useEffect(() => {
-        scrollToBottom();
-    },[messageList]);
+    const [showDetailsDrawer, setShowDetailsDrawer] = useState(false);
+    const [isLoadingMessages, setIsLoadingMessages] = useState(false);
 
-    // Only invalidate when switching channels, not on every render
+    // theme/hooks
+    const { getCurrentTheme } = useChatTheme();
+    const currentTheme = getCurrentTheme();
+    const { joinChannel, currentChannel: socketCurrentChannel, isSocketReady } = useSocket();
+    const { currentChannelMessages, setCurrentChannel } = useChannelMessage();
+
+    // api hooks
+    const { channelsDetails, isFetching: detailsFetching, isError: detailsError } = useGetChannelById(safeChannelId);
+
+const scrollToBottom = (smooth = false) => {
+        if (!messageContainerListRef.current) return;
+        messageContainerListRef.current.scrollTo({
+            top: messageContainerListRef.current.scrollHeight,
+            behavior: smooth ? 'smooth' : 'auto',
+        });
+    };
+
+    const isNearBottom = (threshold = 200) => {
+        const el = messageContainerListRef.current;
+        if (!el) return true;
+        return el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+    };
+
     useEffect(() => {
-        if (channelId) {
-            queryClient.invalidateQueries('getChannelMessages');
-            scrollToBottom();
-        }
-    }, [channelId, queryClient]);
+        if (currentChannelMessages?.length && isNearBottom()) scrollToBottom(true);
+    }, [currentChannelMessages]);
 
     // Join channel via socket when channelId is available and socket is ready
     useEffect(() => {
@@ -82,40 +79,38 @@ export const Channel = () => {
 
     // Reset and clear messages when channel changes ONLY
     useEffect(() => {
-        if (!channelId) return;
-        
+        if (!channelId) {
+            console.log('[Channel] No channelId, skipping reset');
+            return;
+        }
+
         console.log('\n🔄 ========== CHANNEL CHANGE ==========');
         console.log('📍 New Channel ID:', channelId);
-        
-        // Clear old messages
-        console.log('🧹 Clearing old channel messages');
-        setMessageList([]);
+        console.log('🏢 Workspace ID:', workspaceId);
+
+        // 🟢 FIX: do not immediately wipe UI to empty — set placeholder & reset flags
+        lastTimeSeparatorRef.current = '';
         hasLoadedMessages.current = false;
-        
+        setIsLoadingMessages(true);
+
+        // show previous messages (if any) while new ones are fetched, to avoid UI flash
+        // we pass [] as Messages so provider sets an empty array only if no cache exist
+        setCurrentChannel(workspaceId, channelId, currentChannelMessages || []);
+
+        console.log('🧹 [Channel] Set current channel context (placeholder). Waiting for fetch...');
         console.log('==================================================\n');
-    }, [channelId, setMessageList]);
-    
-    useEffect(() => {
-        if (isSuccess && channelMessages && !hasLoadedMessages.current) {
-            console.log('📥 Loading initial channel messages:', channelMessages.length);
-            setMessageList(channelMessages);
-            scrollToBottom();
-            hasLoadedMessages.current = true;
-        }
-    }, [isSuccess, channelMessages, setMessageList]);
+    }, [channelId, workspaceId, setCurrentChannel]);
 
-
-    if(isFetching) {
+    // render states for fetch/errors
+    if (detailsFetching) {
         return (
-            <div
-                className='h-full flex-1 flex items-center justify-center'
-            >
+            <div className='h-full flex-1 flex items-center justify-center'>
                 <Loader2Icon className='size-5 animate-spin text-muted-foreground' />
             </div>
         );
     }
 
-    if(isError) {
+    if (detailsError || !channelsDetails) {
         return (
             <div className='h-full flex-1 flex flex-col gap-y-2 items-center justify-center'>
                 <TriangleAlertIcon className='size-6 text-muted-foreground' />
@@ -123,7 +118,6 @@ export const Channel = () => {
             </div>
         );
     }
-
     
     return (
         <div 
@@ -138,7 +132,7 @@ export const Channel = () => {
                 ref={messageContainerListRef} 
                 className='h-full overflow-y-auto p-3 sm:p-5 gap-y-2 mb-2 mt-1'
             >
-                {messageList?.map((message) => {
+                {currentChannelMessages?.map((message) => {
                     
                     const separator = seperateTimeFormat(message?.createdAt);
                     const shouldRenderSeparator = lastTimeSeparatorRef.current !== separator;
