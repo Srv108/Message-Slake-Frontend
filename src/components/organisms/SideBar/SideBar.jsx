@@ -57,8 +57,9 @@ export const SideBar = ({
                     label="More"
                 />
                 <div className='flex flex-col items-center justify-center mt-auto mb-5 gap-y-1'>
-                    <UserButton />
+                    <UserButton size={48} buttonClassName="bg-gray-700 hover:bg-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 shadow-md" />
                 </div>
+
             </aside>
 
             {/* Mobile Bottom Tab Bar */}
@@ -110,7 +111,9 @@ export const SideBar = ({
                     </button>
 
                     {/* Profile Tab */}
-                    <UserButton isMobile={true} activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <div className='flex flex-col items-center justify-center mt-aut gap-y-1'>
+                        <UserButton size={48} buttonClassName="bg-gray-700 hover:bg-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 shadow-md" />
+                    </div>
                 </div>
             </nav>
         </>

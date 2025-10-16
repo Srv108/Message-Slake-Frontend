@@ -1,0 +1,111 @@
+import { Avatar, AvatarImage } from '@radix-ui/react-avatar';
+import { UserCircle } from 'lucide-react';
+import { useState } from 'react';
+
+import { UserProfileDrawer } from '@/components/molecules/UserProfileDrawer/UserProfileDrawer';
+import { AvatarFallback } from '@/components/ui/avatar';
+import { useAuth } from '@/hooks/context/useAuth';
+
+/**
+ * UserButton Component
+ * @param {Object} props - Component props
+ * @param {boolean} [props.isMobile] - If true, shows mobile-specific styling
+ * @param {string} [props.activeTab] - Currently active tab
+ * @param {function} [props.setActiveTab] - Function to set active tab
+ * @param {number} [props.size=32] - Size of the button in pixels
+ * @param {string} [props.className=''] - Additional CSS classes for the avatar container
+ * @param {string} [props.buttonClassName=''] - Additional classes for the button element
+ * @param {boolean} [props.showLabel=false] - Whether to show the label (default: false)
+ */
+export const UserButton = ({
+    isMobile = false,
+    activeTab,
+    setActiveTab,
+    size = 32,
+    className = '',
+    buttonClassName = '',
+    showLabel = false
+}) => {
+    const { auth } = useAuth();
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+    const handleClick = () => {
+        if (isMobile && setActiveTab) {
+            setActiveTab('profile');
+        }
+        setIsDrawerOpen(true);
+    };
+
+    // Calculate dynamic classes based on size
+    const avatarSize = `w-[${size}px] h-[${size}px]`;
+    const iconSize = Math.max(16, size / 2); // Ensure minimum icon size of 16px
+    const iconSizeClass = `w-[${iconSize}px] h-[${iconSize}px]`;
+    const textSize = size < 32 ? 'text-[10px]' : 'text-xs';
+    const containerClass = isMobile ? 'flex flex-col items-center justify-center flex-1' : '';
+    const buttonClass = `transition-colors ${isMobile ? (activeTab === 'profile' ? 'text-teal-600 dark:text-teal-400' : 'text-gray-600 dark:text-slate-400') : ''} ${buttonClassName}`.trim();
+
+    const avatarContent = (
+        <>
+            {auth?.user?.profilePic ? (
+                <Avatar className={`${avatarSize} ${className}`}>
+                    <AvatarImage 
+                        src={auth.user.profilePic} 
+                        alt={auth.user.username} 
+                        className="w-full h-full rounded-full object-cover"
+                    />
+                    <AvatarFallback className="w-full h-full flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+                        <UserCircle className={iconSizeClass} />
+                    </AvatarFallback>
+                </Avatar>
+            ) : (
+                <div className={`${avatarSize} rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center ${className}`}>
+                    <UserCircle className={`${iconSizeClass} text-emerald-600 dark:text-emerald-400`} />
+                </div>
+            )}
+        </>
+    );
+
+    const labelContent = showLabel && (
+        <span className={`${textSize} font-medium ${activeTab === 'profile' ? 'font-semibold' : ''} mt-1`}>
+            Profile
+        </span>
+    );
+
+    // Mobile tab view
+    if (isMobile) {
+        return (
+            <>
+                <button
+                    onClick={handleClick}
+                    className={`${containerClass} ${buttonClass}`}
+                >
+                    {avatarContent}
+                    {labelContent}
+                </button>
+                <UserProfileDrawer 
+                    open={isDrawerOpen}
+                    onOpenChange={setIsDrawerOpen}
+                    isMobile={true}
+                />
+            </>
+        );
+    }
+
+    // Desktop view
+    return (
+        <>
+            <button
+                onClick={handleClick}
+                className={`flex items-center justify-center ${buttonClass}`}
+                aria-label="User profile"
+            >
+                {avatarContent}
+            </button>
+            <UserProfileDrawer 
+                open={isDrawerOpen}
+                onOpenChange={setIsDrawerOpen}
+                isMobile={false}
+            />
+        </>
+    );
+};

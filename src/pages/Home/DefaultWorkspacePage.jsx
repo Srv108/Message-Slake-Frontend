@@ -14,6 +14,7 @@ export const DefaultWorkspacePage = () => {
     const { setOpenWorkspaceCreateModal } = useWorkspaceCreateModal();
     const { theme, toggleTheme } = useTheme();
     const [isMobile, setIsMobile] = useState(false);
+    const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState(true);
     const { setOpenAddMemberModal, setIsPending, setFormSubmitHandler } = useAddMemberContext();
     const { isPending, createRoomMutation } = useCreateRoom();
 
@@ -49,19 +50,21 @@ export const DefaultWorkspacePage = () => {
             <div className="fixed right-5 bottom-10 flex flex-col items-center space-y-5 z-50">
                 {/* Profile Button */}
                 <div className="relative">
-                    <div 
-                        className={`w-8 h-8 md:w-14 md:h-14 rounded-full bg-gray-700 hover:bg-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 
-                            flex items-center justify-center transition-all cursor-pointer`}
-                        onClick={() => document.querySelector('#user-button').click()}
-                        onMouseEnter={() => setIsProfileHovered(true)}
-                        onMouseLeave={() => setIsProfileHovered(false)}
-                    >
-                        <UserButton 
-                            className="w-full h-full" 
-                            style={{ pointerEvents: 'none' }}
-                            id="user-button"
-                        />
-                    </div>
+                        <div 
+                            className={`rounded-full bg-gray-700 hover:bg-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 
+                                flex items-center justify-center transition-all cursor-pointer`}
+                            onClick={() => {
+                                setIsProfileDrawerOpen(true);
+                                document.dispatchEvent(new CustomEvent('toggleUserProfile', { detail: true }));
+                            }}
+                            onMouseEnter={() => setIsProfileHovered(true)}
+                            onMouseLeave={() => setIsProfileHovered(false)}
+                            >
+                            <UserButton
+                                size={48}
+                                buttonClassName="bg-gray-700 hover:bg-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 text-white shadow-lg"
+                            />
+                        </div>
                     <AnimatePresence>
                         {isProfileHovered && (
                             <motion.div 
@@ -249,6 +252,22 @@ export const DefaultWorkspacePage = () => {
 
         {/* Floating Buttons */}
         <div className="fixed right-5 bottom-10 flex flex-col items-center space-y-5 z-50">
+        <button
+            onClick={() => {
+                setIsProfileDrawerOpen(true);
+                document.dispatchEvent(new CustomEvent('toggleUserProfile', { detail: true }));
+            }}
+            className={`flex items-center justify-center w-12 h-12 rounded-full ${
+                theme === 'dark' 
+                ? 'bg-gray-800/80 hover:bg-gray-700 shadow-black/40' 
+                : 'bg-gray-100 hover:bg-gray-200 shadow-gray-300/60'
+            } transition-colors shadow-md`}
+            >
+            <UserButton 
+                size={48}
+                buttonClassName="bg-gray-700 hover:bg-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 text-white shadow-lg" 
+            />
+        </button>
         <ActionButton
             icon={theme === 'dark' ? Sun : Moon}
             label={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
