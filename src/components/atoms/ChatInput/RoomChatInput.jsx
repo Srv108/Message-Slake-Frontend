@@ -82,13 +82,12 @@ export const RoomChatInput = () => {
                 console.log('📎 Uploading image...');
                 const { presignedUrl, time } = await queryClient.fetchQuery({
                     queryKey: ['getPresignedUrl', image.name],
-                    queryFn: () => getPresignedUrlRequest({ 
+                    queryFn: async() => await getPresignedUrlRequest({ 
                         token: auth?.token,
                         fileName: image.name,
                         contentType: image.type
                     })
                 });
-
                 await uploadImageToAwsPresignedUrl({ 
                     url: presignedUrl,
                     file: image 
