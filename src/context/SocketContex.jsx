@@ -26,6 +26,7 @@ export const SocketContextProvider = ({ children }) => {
     const [offerRecieved, setOfferRecieved] = useState(null);
     const [answerRecieved, setAnswerRecieved] = useState(null);
     const [candidateRecieved, setCandidateRecieved] = useState(null);
+    const [renegotiationRequested, setRenegotiationRequested] = useState(null);
 
     // Use the new context methods
     const { addMessage: addChannelMessage } = useChannelMessage();
@@ -399,6 +400,13 @@ export const SocketContextProvider = ({ children }) => {
                 }
             });
 
+            newSocket.on('renegotiation-request', (requestObj) => {
+                console.log('🔄 Renegotiation requested by remote peer.');
+                
+                // Set state to trigger the initiator to create a new offer
+                setRenegotiationRequested(requestObj);
+            });
+
             messageHandlersSetup.current = true;
             console.log('✅ All event listeners setup complete');
         } else {
@@ -416,6 +424,11 @@ export const SocketContextProvider = ({ children }) => {
         currentRoom, 
         handleNewChannelMessage,
         handleNewRoomMessage,
+        setOfferRecieved, 
+        setCallAccepted, 
+        setAnswerRecieved, 
+        setCandidateRecieved,
+        setRenegotiationRequested
     ]);
 
     // ==================== JOIN ROOM FUNCTION ====================

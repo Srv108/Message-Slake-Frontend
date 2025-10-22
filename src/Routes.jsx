@@ -10,6 +10,7 @@ import { DirectMessageLayout } from './pages/DirectMessages/Layout';
 import { Home } from './pages/Home/Home';
 import { Landing } from './pages/Landing/Landing';
 import { Member } from './pages/Member/Member';
+import EnhancedVideoChat from './pages/Room/EnhancedVideoChat';
 import { HomePage as RoomHomePage } from './pages/Room/HomePage';
 import { Room } from './pages/Room/Room';
 import { VideoChat } from './pages/Room/VideoChat';
@@ -32,7 +33,7 @@ export const AppRoutes = () => {
             <Route path='/workspace/join/:workspaceId' element={<JoinPage />} />
             <Route path='/directMessages' element={<ProtectedRoutes> <DirectMessageLayout> <RoomHomePage /> </DirectMessageLayout> </ProtectedRoutes>} />
             <Route path='/directMessages/chat/:roomId' element={<ProtectedRoutes> <DirectMessageLayout> <Room />  </DirectMessageLayout> </ProtectedRoutes>} />
-            <Route path='/directMessages/chat/:roomId/video/call' element={<ProtectedRoutes> <VideoChat /> </ProtectedRoutes>} />
+            <Route path='/directMessages/chat/:roomId/video/call' element={<ProtectedRoutes> <EnhancedVideoChat /> </ProtectedRoutes>} />
 
             <Route path='/home' element={<ProtectedRoutes> <Home/> </ProtectedRoutes> } />
             <Route path='/*' element={<Landing />} />

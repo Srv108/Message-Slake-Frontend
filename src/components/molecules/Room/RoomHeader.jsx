@@ -1,20 +1,23 @@
 import { ArrowLeft, EllipsisVertical, Phone, Search, Video } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// Assuming this path is correct for your API call
+import { fetchMemberDetailsRequest } from '@/api/room'; 
 import { ProfileDetailsDrawer } from '@/components/molecules/Room/ProfileDetailsDrawer';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useGetMemberDetails } from '@/hooks/api/room/useGetMemberDetails';
+import { useAuth } from '@/hooks/context/useAuth';
 import { useGetUserMedia } from '@/hooks/context/useGetUserMedia';
 
 export const RoomHeader = ({ userID, roomId }) => {
 
     const navigate = useNavigate();
-    const { isSuccess, RoomMember } = useGetMemberDetails(userID);
-    const { setCallDialed, setRemoteUser } = useGetUserMedia();
+    const [RoomMember, setRoomMember] = useState(null);
+    const { startCall } = useGetUserMedia();
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const { auth } = useAuth(); // Destructure auth correctly
 
-    // Generate initials from username
+    // Generate initials from username (UNCHANGED)
     const getInitials = (name) => {
         if (!name) return '?';
         const parts = name.trim().split(' ');
@@ -24,7 +27,7 @@ export const RoomHeader = ({ userID, roomId }) => {
         return name.substring(0, 2).toUpperCase();
     };
 
-    // Generate consistent color from username
+    // Generate consistent color from username (UNCHANGED)
     const getAvatarColor = (name) => {
         if (!name) return 'bg-teal-600';
         const colors = [
@@ -43,16 +46,93 @@ export const RoomHeader = ({ userID, roomId }) => {
         return colors[index];
     };
     
-    useEffect(() => {
-        if(isSuccess){
-            console.log('room member details is ',RoomMember);
-            setRemoteUser({
-                username: RoomMember?.username,
-                id: RoomMember?._id,
-                email: RoomMember?.email
-            });
+    // Video Call Handler (Logic is good, ensuring stable dependencies)
+    const handleVideoCall = useCallback(async () => {
+        console.log('handleVideoCall triggered with RoomMember:', RoomMember);
+        
+        if (!RoomMember || !RoomMember._id) {
+            console.warn('RoomMember data incomplete.');
+            return;
         }
-    },[isSuccess,RoomMember,setRemoteUser]);
+
+        console.log('Starting call with member:', {
+            id: RoomMember._id,
+            username: RoomMember.username,
+            email: RoomMember.email
+        });
+
+        try {
+            // FIX: Remove navigation here. The startCall function now triggers an EFFECT 
+            // inside the Provider that handles navigation after setting the state.
+            startCall({
+                id: RoomMember._id,
+                username: RoomMember.username,
+                email: RoomMember.email,
+                room: roomId // Pass roomId if not handled by useRoomDetails
+            });
+            
+        } catch (error) {
+            console.error('Error in handleVideoCall:', error);
+        }
+    }, [startCall, RoomMember, roomId]);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const fetchMember = async () => {
+            if (!userID || !auth?.token) {
+                console.log('Missing userID or auth token');
+                return;
+            }
+
+            try {
+                console.log('Fetching member with userID:', userID);
+                const response = await fetchMemberDetailsRequest({
+                    memberId: userID,
+                    token: auth.token
+                });
+
+                console.log('API Response:', {
+                    response,
+                    hasData: !!response?.data,
+                    isMounted
+                });
+
+                if (isMounted) {
+                    if (response?.data) {
+                        console.log('Setting member from response.data');
+                        setRoomMember(response.data);
+                    } else if (response) {
+                        console.log('Setting member from response (direct)');
+                        setRoomMember(response);
+                    } else {
+                        console.warn('No valid data in response');
+                    }
+                }
+            } catch (error) {
+                console.error('Error in fetchMember:', {
+                    error,
+                    message: error.message,
+                    stack: error.stack
+                });
+                if (isMounted) {
+                    setRoomMember(null);
+                }
+            }
+        };
+
+        fetchMember();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [userID, auth?.token]);
+
+    useEffect(() => {
+        console.log('RoomMember updated:', RoomMember);
+    }, [RoomMember]);
+    // Determine if the video button should be disabled
+    // const isVideoDisabled = !RoomMember || !RoomMember.id;
 
     return (
         <>
@@ -93,7 +173,8 @@ export const RoomHeader = ({ userID, roomId }) => {
                         <div className="flex items-center gap-1.5">
                             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                             <p className="text-xs text-gray-600 dark:text-slate-400 truncate">
-                                {RoomMember?.email ? 'Online' : 'Loading...'}
+                                {/* Assuming status is determined by email presence or another API field */}
+                                {RoomMember?.email ? 'Online' : 'Loading...'} 
                             </p>
                         </div>
                     </div>
@@ -119,12 +200,11 @@ export const RoomHeader = ({ userID, roomId }) => {
 
                     {/* Video Call Button */}
                     <button 
-                        onClick={() => {
-                            setCallDialed(true);
-                            navigate(`/directMessages/chat/${roomId}/video/call`);
-                        }}
+                        onClick={handleVideoCall}
                         className="p-2 hover:bg-gray-200 dark:hover:bg-slate-700/40 rounded-full transition-all duration-200 group"
                         aria-label="Video call"
+                        // Disable if member data is not loaded
+                        disabled={!RoomMember} 
                     >
                         <Video className="w-5 h-5 text-gray-600 dark:text-slate-400 group-hover:text-teal-400 transition-colors" />
                     </button>

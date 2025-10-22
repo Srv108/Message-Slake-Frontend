@@ -638,3 +638,24 @@ socket.emit('joinRoom', { roomId: null }, (response) => {
 6. **Auto-rejoin rooms** on reconnection (handled automatically by server)
 7. **Validate data** before emitting events
 8. **Handle offline scenarios** - Queue messages when disconnected
+
+
+sequenceDiagram
+    participant C as Caller
+    participant S as Server
+    participant R as Callee
+    
+    C->>S: call-request
+    S->>R: incoming-call
+    R->>S: call-accepted
+    S->>C: call-accepted
+    C->>S: offer
+    S->>R: offer
+    R->>S: answer
+    S->>C: answer
+    loop ICE
+        C->>S: ice-candidate
+        S->>R: ice-candidate
+        R->>S: ice-candidate
+        S->>C: ice-candidate
+    end
