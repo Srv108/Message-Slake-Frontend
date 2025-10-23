@@ -136,16 +136,17 @@ const createEnhancedPeerConnection = (
 
     // FIX: Simplified pc.ontrack handler to directly manage the remoteStream instance
     pc.ontrack = (event) => {
-        console.log(`🎥 Remote track received: ${event.track.kind}`, event.streams);
+        const { track } = event;
+        console.log(`🎥 Remote track received: ${track.kind}`);
 
         const streamToUpdate = remoteStream; 
-        const existingTracks = streamToUpdate.getTracks().filter(t => t.id === event.track.id);
+        const existingTracks = streamToUpdate.getTracks().filter(t => t.id === track.id);
         
         if (existingTracks.length === 0) {
-            streamToUpdate.addTrack(event.track);
-            console.log(`✅ Added ${event.track.kind} track to remote stream`);
+            streamToUpdate.addTrack(track);
+            console.log(`✅ Added ${track.kind} track to remote stream`);
         } else {
-            console.log(`⚠️ ${event.track.kind} track already exists - skipping add.`);
+            console.log(`⚠️ ${track.kind} track already exists - skipping add.`);
         }
 
         // CRITICAL FIX: Update React state, but DO NOT call .play() here.
@@ -153,15 +154,14 @@ const createEnhancedPeerConnection = (
 
         // Set video element properties via ref immediately for faster processing
         if (remoteVideoRef?.current) {
-            // Re-link srcObject (this triggers browser processing)
-            remoteVideoRef.current.srcObject = streamToUpdate;
-            remoteVideoRef.current.muted = false; // Remote audio must be unmuted
-            remoteVideoRef.current.playsInline = true;
-            // IMPORTANT: Removed ALL aggressive .play() calls here.
+            const videoElement = remoteVideoRef.current;
+            videoElement.srcObject = streamToUpdate;
+            videoElement.muted = false; // Remote audio must be unmuted (rely on user gesture)
+            videoElement.playsInline = true;
         }
 
         if (typeof onTrackReceived === 'function') {
-            onTrackReceived(event.track.kind);
+            onTrackReceived(track.kind);
         }
     };
 
@@ -625,7 +625,7 @@ export const UserMediaProvider = ({ children }) => {
                     if (localVideoRef.current) {
                         localVideoRef.current.srcObject = w.stream;
                         localVideoRef.current.muted = true;
-                        await localVideoRef.current.play().catch(console.error);
+                        // CRITICAL FIX: Removed local video play call here
                     }
                 }
                 
@@ -734,7 +734,7 @@ export const UserMediaProvider = ({ children }) => {
             if (localVideoRef.current) {
                 localVideoRef.current.srcObject = w.stream;
                 localVideoRef.current.muted = true;
-                await localVideoRef.current.play().catch(console.error);
+                // CRITICAL FIX: Removed local video play call here
             }
             setIsCameraOn(true);
             setIsMuted(false);
@@ -861,13 +861,19 @@ export const UserMediaProvider = ({ children }) => {
 
     const startCall = useCallback(
         (user) => {
+            // FINAL FIX A: Guard against redundant calls if the flow is already initiated
+            if (callDialed === true || isInitiatorRef.current === true) {
+                console.warn('Start call blocked: Call already initiated.');
+                return;
+            }
+
             if (user) {
                 isInitiatorRef.current = true;
                 setRemoteUser(user);
                 setCallDialed(true);
             }
         },
-        [setRemoteUser, setCallDialed]
+        [setRemoteUser, setCallDialed, callDialed] // Added callDialed to deps for strict guard
     );
     
     // We need a manual way to trigger playback outside of ontrack/openMediaDevices
@@ -876,27 +882,43 @@ export const UserMediaProvider = ({ children }) => {
         const remoteVideo = remoteVideoRef.current;
         let successCount = 0;
 
-        // Helper to log and play
-        const activate = (video, type) => {
+        const activate = async (video, type) => {
             if (video && video.srcObject && video.paused) {
-                video.play().then(() => {
+                try {
+                    await video.play();
                     console.log(`✅ ${type} Video Playback Succeeded.`);
-                    successCount++;
-                }).catch(e => {
+                    return true;
+                } catch (e) {
                     console.error(`❌ ${type} Video Playback FAILED:`, e.name, e.message);
-                });
+                    return false;
+                }
             }
+            return true; // Already playing or no stream to activate
         };
 
-        // Local Video Activation (should always succeed if muted)
-        activate(localVideo, 'Local');
+        const attemptAllPlayback = async () => {
+            // 1. Activate Local Video first (Muted, highest chance of success)
+            if (streamWrapper?.stream) {
+                if (await activate(localVideo, 'Local')) {
+                    successCount++;
+                }
+            }
+            
+            // Wait a moment for the local playback to settle the DOM/browser policy
+            await new Promise(r => setTimeout(r, 100));
 
-        // Remote Video Activation (needs user gesture)
-        activate(remoteVideo, 'Remote');
+            // 2. Activate Remote Video
+            if (remoteStream && remoteStream.getTracks().length > 0) { // <--- CRITICAL CHECK ADDED
+                if (await activate(remoteVideo, 'Remote')) {
+                    successCount++;
+                }
+            }
+            console.log(`🎬 Finished activation routine. Successes: ${successCount}/2`);
+        };
         
-        console.log(`🎬 Finished activation routine. Successes: ${successCount}/2`);
+        attemptAllPlayback();
 
-    }, []);
+    }, [streamWrapper, remoteStream]);
 
 
     /* ----------------
@@ -1067,7 +1089,7 @@ export const UserMediaProvider = ({ children }) => {
                 recoveryTimer = setTimeout(() => {
                     if (connectionState === ConnectionState.CONNECTED && 
                         (navigator.connection.effectiveType === '2g' || 
-                        navigator.connection.effectiveType === 'slow-2g')) {
+                        navigator.connection.connectionState === 'slow-2g')) {
                         console.warn('Poor network persists, triggering reconnection...');
                         attemptReconnectionRef.current('network-degraded');
                     }
@@ -1092,6 +1114,21 @@ export const UserMediaProvider = ({ children }) => {
         };
     }, [stopMediaDevices]);
 
+    useEffect(() => {
+        return () => {
+            // Cleanup video elements
+            if (localVideoRef.current) {
+                localVideoRef.current.srcObject = null;
+            }
+            if (remoteVideoRef.current) {
+                remoteVideoRef.current.srcObject = null;
+            }
+            // Cleanup peer connection
+            if (pcWrapperRef.current) {
+                pcWrapperRef.current.close();
+            }
+        };
+    }, []);
 
     /* ----------------
         Exposed API
