@@ -390,3 +390,55 @@
     );
   pointer-events: none;
 }
+
+
+video {
+  /* Ensure the video element is always treated as a block element */
+  display: block; 
+  /* Prevent background from interfering with opacity transition */
+  background-color: transparent !important; 
+}
+
+/* FIX 2: Simplify video container styles */
+.video-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #000; /* Fallback for black background */
+  overflow: hidden;
+}
+
+/* FIX 3: Remove redundant .remote-video class—use Tailwind utility classes directly in JSX instead */
+/* .remote-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+} 
+*/
+
+/* Debug styles */
+/* This rule is crucial for debugging stream attachment */
+video[srcObject] {
+  border: 2px solid red !important; 
+}
+
+/* Controls */
+.controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+  transition: opacity 0.3s ease;
+}
+
+/* Hide controls when not hovering */
+.hide-controls {
+  opacity: 0;
+  pointer-events: none;
+}

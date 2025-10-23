@@ -1,5 +1,4 @@
 import {
-    Component,
     createContext,
     useCallback,
     useEffect,
@@ -53,9 +52,6 @@ const enhancedPeerConfig = {
 /* ----------------
     Connection quality monitor (UNCHANGED)
 ---------------- */
-/* ----------------
-    Connection quality monitor (FIXED TYPO)
----------------- */
 const monitorConnectionQuality = (pc, onQualityChange) => {
     if (!pc) return () => {};
 
@@ -83,7 +79,6 @@ const monitorConnectionQuality = (pc, onQualityChange) => {
 
             const packetLossRate = totalPackets > 0 ? (packetsLost / totalPackets) * 100 : 0;
             
-            // 🐛 FIX: Changed 'packetLossLossRate' to 'packetLossRate'
             const quality =
                 packetLossRate < 2 ? 'excellent' : packetLossRate < 5 ? 'good' : packetLossRate < 10 ? 'poor' : 'bad';
 
@@ -95,15 +90,15 @@ const monitorConnectionQuality = (pc, onQualityChange) => {
                 timestamp: Date.now(),
             });
         } catch (error) {
-            // Log the error for safety, though the typo should be fixed now
             console.error('Error monitoring connection quality:', error);
         }
     }, 5000);
 
     return () => clearInterval(statsInterval);
 };
+
 /* ----------------
-    Enhanced createPeerConnection factory (IMPROVED DEBUGGING)
+    Enhanced createPeerConnection factory (FIXED pc.ontrack)
 ---------------- */
 const createEnhancedPeerConnection = (
     config = {},
@@ -113,6 +108,7 @@ const createEnhancedPeerConnection = (
     onConnectionStateChange,
     onTrackReceived
 ) => {
+    // Initial empty stream is created and provided via state/ref
     const remoteStream = new MediaStream();
     setRemoteStream(remoteStream);
 
@@ -138,36 +134,42 @@ const createEnhancedPeerConnection = (
         }
     };
 
+    // FIX: Simplified pc.ontrack handler to directly manage the remoteStream instance
     pc.ontrack = (event) => {
-        console.log(`🎥 Remote track received: ${event.track.kind}`);
+        console.log(`🎥 Remote track received: ${event.track.kind}`, event.streams);
 
-        const existingTracks = remoteStream.getTracks().filter(t => t.kind === event.track.kind);
-        existingTracks.forEach(track => remoteStream.removeTrack(track));
-
-        remoteStream.addTrack(event.track);
-        console.log(`✅ Added ${event.track.kind} track to remote stream`);
-
-        if (remoteVideoRef?.current) {
-            const videoElement = remoteVideoRef.current;
-            if (videoElement.srcObject !== remoteStream) {
-                videoElement.srcObject = remoteStream;
-            }
-            videoElement.muted = true;
-            videoElement.playsInline = true;
-            videoElement.play().catch(e => {
-                if (e.name === 'NotAllowedError') {
-                    console.warn('⚠️ Autoplay prevented, user interaction needed.');
-                }
-            });
+        const streamToUpdate = remoteStream; 
+        const existingTracks = streamToUpdate.getTracks().filter(t => t.id === event.track.id);
+        
+        if (existingTracks.length === 0) {
+            streamToUpdate.addTrack(event.track);
+            console.log(`✅ Added ${event.track.kind} track to remote stream`);
+        } else {
+            console.log(`⚠️ ${event.track.kind} track already exists - skipping add.`);
         }
-        onTrackReceived();
+
+        // CRITICAL FIX: Update React state, but DO NOT call .play() here.
+        setRemoteStream(streamToUpdate); 
+
+        // Set video element properties via ref immediately for faster processing
+        if (remoteVideoRef?.current) {
+            // Re-link srcObject (this triggers browser processing)
+            remoteVideoRef.current.srcObject = streamToUpdate;
+            remoteVideoRef.current.muted = false; // Remote audio must be unmuted
+            remoteVideoRef.current.playsInline = true;
+            // IMPORTANT: Removed ALL aggressive .play() calls here.
+        }
+
+        if (typeof onTrackReceived === 'function') {
+            onTrackReceived(event.track.kind);
+        }
     };
-    
-    // NEW DEBUG HANDLER: Log ICE connection status
+
+
+    // DEBUG HANDLER: Log ICE connection status
     pc.oniceconnectionstatechange = () => {
         const iceState = pc.iceConnectionState;
         console.log('🧊 ICE Connection State:', iceState);
-        // Note: 'completed' or 'connected' usually means success
     };
 
     pc.onconnectionstatechange = () => {
@@ -301,6 +303,9 @@ export const UserMediaProvider = ({ children }) => {
     const [isCameraOn, setIsCameraOn] = useState(true);
     const [isMuted, setIsMuted] = useState(false);
     const [callDialed, setCallDialed] = useState(false);
+    
+    // STATE: To stabilize receiver processing after navigation
+    const [pendingOfferData, setPendingOfferData] = useState(null); 
     
     // Connection and Error State
     const [connectionState, setConnectionState] = useState(ConnectionState.DISCONNECTED);
@@ -623,6 +628,10 @@ export const UserMediaProvider = ({ children }) => {
                         await localVideoRef.current.play().catch(console.error);
                     }
                 }
+                
+                // FINAL CRITICAL FIX: Allow React to finish all synchronous renders/effects 
+                // caused by stream acquisition BEFORE creating the PeerConnection.
+                await new Promise(r => setTimeout(r, 0)); // Non-blocking microtask delay
 
                 // 2. Create peer connection
                 const wrapper = await createPeerConnection();
@@ -860,6 +869,35 @@ export const UserMediaProvider = ({ children }) => {
         },
         [setRemoteUser, setCallDialed]
     );
+    
+    // We need a manual way to trigger playback outside of ontrack/openMediaDevices
+    const tryActivateVideo = useCallback(() => {
+        const localVideo = localVideoRef.current;
+        const remoteVideo = remoteVideoRef.current;
+        let successCount = 0;
+
+        // Helper to log and play
+        const activate = (video, type) => {
+            if (video && video.srcObject && video.paused) {
+                video.play().then(() => {
+                    console.log(`✅ ${type} Video Playback Succeeded.`);
+                    successCount++;
+                }).catch(e => {
+                    console.error(`❌ ${type} Video Playback FAILED:`, e.name, e.message);
+                });
+            }
+        };
+
+        // Local Video Activation (should always succeed if muted)
+        activate(localVideo, 'Local');
+
+        // Remote Video Activation (needs user gesture)
+        activate(remoteVideo, 'Remote');
+        
+        console.log(`🎬 Finished activation routine. Successes: ${successCount}/2`);
+
+    }, []);
+
 
     /* ----------------
         Socket/State Effects
@@ -872,7 +910,7 @@ export const UserMediaProvider = ({ children }) => {
         setCandidateRecieved(null);
     }, [candidateRecieved, handleCandidate, setCandidateRecieved]);
 
-    // 2. Incoming Offer/Call Acceptance Effect (GUARDED & STABILIZED)
+    // 2. Incoming Offer/Call Acceptance Effect (STABILIZED RECEIVER)
     useEffect(() => {
         if (!offerRecieved || !acceptCall) return;
 
@@ -880,7 +918,7 @@ export const UserMediaProvider = ({ children }) => {
         
         const room = offerRecieved.to?.room;
         
-        // FIX B: Clear the received states immediately to stop re-runs
+        // Clear the received states immediately to stop re-runs
         const currentOffer = offerRecieved;
         setOfferRecieved(null);
         setCallAccepted(false);
@@ -893,15 +931,33 @@ export const UserMediaProvider = ({ children }) => {
 
         setRemoteUser(currentOffer.from);
         isInitiatorRef.current = false;
-        try {
-            navigate(`/directMessages/chat/${room}/video/call`);
-        } catch (e) {
-            console.warn('Navigation failed:', e);
-        }
-
-        handleOffer({ offer: currentOffer.offer, from: currentOffer.from, to: currentOffer.to });
         
-    }, [acceptCall, offerRecieved, handleOffer, navigate, setOfferRecieved, setCallAccepted, remoteUser, connectionState]);
+        // FIX A: Delay navigation slightly on the receiver side for component stabilization
+        setTimeout(() => {
+            try {
+                navigate(`/directMessages/chat/${room}/video/call`);
+            } catch (e) {
+                console.warn('Receiver Navigation failed:', e);
+            }
+        }, 50);
+
+        // FINAL FIX: Defer handling the offer to the new useEffect to run after navigation stabilization
+        setPendingOfferData({ offer: currentOffer.offer, from: currentOffer.from, to: currentOffer.to });
+        
+    }, [acceptCall, offerRecieved, navigate, setOfferRecieved, setCallAccepted, remoteUser, connectionState]);
+
+    // 2a. Process Pending Offer (Runs only after navigation/render is stable)
+    useEffect(() => {
+        if (pendingOfferData && pcWrapperRef.current === null) {
+            console.log('✅ Processing deferred offer data...');
+            // Run the core logic, which includes media acquisition and PC creation
+            handleOffer(pendingOfferData);
+            
+            // Clear the state after processing
+            setPendingOfferData(null);
+        }
+    }, [pendingOfferData, handleOffer]);
+
 
     // 3. Incoming Answer Effect (UNCHANGED)
     useEffect(() => {
@@ -919,7 +975,7 @@ export const UserMediaProvider = ({ children }) => {
         const getInitialMedia = async () => {
             try {
                 console.log('🎬 Acquiring initial media devices...');
-                // FIX A-1: Pass false to prevent immediate renegotiation/track replacement logic
+                // Pass false to prevent immediate renegotiation/track replacement logic
                 await openMediaDevices(false); 
             } catch (err) {
                 console.error('Initial media acquisition failed:', err);
@@ -937,51 +993,60 @@ export const UserMediaProvider = ({ children }) => {
         };
     }, [callDialed, remoteUser, streamWrapper, openMediaDevices, stopMediaDevices]);
 
-    // 4. Call Dialed Effect - Handles call initiation (WAITS FOR STREAM)
+    // 4. Call Dialed Effect - Handles call initiation (FINAL DEBOUNCE FIX)
     useEffect(() => {
         // Now requires streamWrapper to be set by Effect 4a before proceeding
         if (!callDialed || !remoteUser || !isInitiatorRef.current || !streamWrapper) return; 
         
-        // Check 1: If PC already exists, skip initiation. (Cleaned up redundant log)
+        // Check 1: If PC already exists, skip initiation.
         if (pcWrapperRef.current) {
             return;
         }
 
         let isActive = true;
+        let initTimer;
         
-        // Initiator Navigation (MUST HAPPEN HERE)
-        try {
-            if (currentRoom) {
-                navigate(`/directMessages/chat/${currentRoom}/video/call`);
-            }
-        } catch (e) {
-            console.warn('Initiator Navigation failed:', e);
-        }
+        // FINAL FIX: Debounce the core logic to prevent the immediate AbortError loop.
+        initTimer = setTimeout(() => {
+            if (!isActive) return;
 
-        const initiateCall = async () => {
+            // Initiator Navigation (MUST HAPPEN HERE)
             try {
-                // openMediaDevices is handled by Effect 4a
-                
-                await createPeerConnection();
-                if (!isActive) return;
-                
-                await createOffer();
-                
-                console.log('Call initiation sequence completed');
-            } catch (err) {
-                console.error('Dial flow error', err);
-                if (isActive) {
-                    setError(err);
-                    setErrorCode(err?.code || WebRTCError.PEER_CONNECTION);
-                    attemptReconnectionRef.current('call-init-failed'); 
+                if (currentRoom) {
+                    navigate(`/directMessages/chat/${currentRoom}/video/call`);
                 }
+            } catch (e) {
+                console.warn('Initiator Navigation failed:', e);
             }
-        };
-        
-        initiateCall();
-        
+
+            const initiateCall = async () => {
+                if (!isActive) return;
+                try {
+                    // openMediaDevices is handled by Effect 4a
+                    
+                    await createPeerConnection();
+                    if (!isActive) return;
+                    
+                    await createOffer();
+                    
+                    console.log('Call initiation sequence completed');
+                } catch (err) {
+                    console.error('Dial flow error', err);
+                    if (isActive) {
+                        setError(err);
+                        setErrorCode(err?.code || WebRTCError.PEER_CONNECTION);
+                        attemptReconnectionRef.current('call-init-failed'); 
+                    }
+                }
+            };
+            
+            initiateCall();
+            
+        }, 100); // 100ms delay to let synchronous effects and cleanup finish
+
         return () => {
             isActive = false;
+            clearTimeout(initTimer);
         };
     }, [callDialed, remoteUser, streamWrapper, createPeerConnection, createOffer, currentRoom, navigate]);
 
@@ -1034,7 +1099,7 @@ export const UserMediaProvider = ({ children }) => {
     const providerValue = useMemo(() => ({
         localVideoRef,
         remoteVideoRef,
-        stream: streamWrapper?.stream ?? null,
+        stream: streamWrapper?.stream || null,
         remoteStream,
         isCameraOn,
         isMuted,
@@ -1046,6 +1111,7 @@ export const UserMediaProvider = ({ children }) => {
         setRemoteUser,
         stopMediaDevices,
         openMediaDevices,
+        tryActivateVideo, // EXPOSED NEW FUNCTION
         error,
         errorCode,
         connectionState,
@@ -1060,7 +1126,7 @@ export const UserMediaProvider = ({ children }) => {
     }), [
         streamWrapper, remoteStream, isCameraOn, isMuted,
         toggleCamera, toggleMute, stopMediaDevices, openMediaDevices,
-        error, errorCode, connectionState, connectionQuality, callDialed, startCall,
+        tryActivateVideo, error, errorCode, connectionState, connectionQuality, callDialed, startCall,
     ]);
 
     return (
