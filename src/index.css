@@ -390,33 +390,24 @@
     );
   pointer-events: none;
 }
-
-/* Custom video sizing rules for WebRTC stability */
-
-video {
-  /* Ensure the video element is always treated as a block element */
-  display: block; 
-  /* Prevent background from interfering with opacity transition */
-  background-color: transparent !important; 
-  /* FIX: Ensure element size is fully controlled by its parent container */
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* FIX: Ensure the remote video element is positioned correctly to fill the container */
+/* 
 .remote-video {
-  /* Re-add necessary positioning logic that Tailwind might not apply correctly 
-     when competing with the placeholder */
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: 1; /* Keep it below controls but above the container background */
-}
+  z-index: 10;
+} */
 
+video {
+  display: block;
+  background-color: transparent !important;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .video-container {
   position: relative;
   width: 100%;
@@ -425,8 +416,3 @@ video {
   overflow: hidden;
 }
 
-/* Debug styles */
-video[srcObject] {
-  border: 2px solid red !important; 
-}
-/* ... (rest of the CSS is fine) ... */

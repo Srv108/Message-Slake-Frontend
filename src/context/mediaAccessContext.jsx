@@ -1,3 +1,7 @@
+/* ===========================================
+   UserMediaContext.js (FIXED)
+   =========================================== */
+
 import {
     createContext,
     useCallback,
@@ -15,7 +19,7 @@ import { useRoomDetails } from '@/hooks/context/useRoomDetails';
 import { useSocket } from '@/hooks/context/useSocket';
 
 /* ============================
-    Enhanced Constants / Utilities (UNCHANGED)
+    Enhanced Constants / Utilities
 ============================ */
 
 export const WebRTCError = {
@@ -98,21 +102,22 @@ const monitorConnectionQuality = (pc, onQualityChange) => {
 };
 
 /* ----------------
-    Enhanced createPeerConnection factory (FIXED pc.ontrack)
+    Enhanced createPeerConnection factory
 ---------------- */
 const createEnhancedPeerConnection = (
     config = {},
-    remoteVideoRef,
+    remoteVideoRef, // This ref is no longer used for srcObject here, but kept for context API
     setRemoteStream,
     onIceCandidate,
     onConnectionStateChange,
     onTrackReceived
 ) => {
-    // Initial empty stream is created and provided via state/ref
+    // This is the initial, empty stream
     const remoteStream = new MediaStream();
     setRemoteStream(remoteStream);
 
     const pc = new RTCPeerConnection({ ...enhancedPeerConfig, ...config });
+    window.pc = pc;
     const dataChannels = new Map();
 
     const setupDataChannel = (channel) => {
@@ -134,11 +139,11 @@ const createEnhancedPeerConnection = (
         }
     };
 
-    // FIX: Simplified pc.ontrack handler to directly manage the remoteStream instance
     pc.ontrack = (event) => {
         const { track } = event;
         console.log(`🎥 Remote track received: ${track.kind}`);
 
+        // remoteStream here is the stale closure from the factory's scope
         const streamToUpdate = remoteStream; 
         const existingTracks = streamToUpdate.getTracks().filter(t => t.id === track.id);
         
@@ -149,16 +154,18 @@ const createEnhancedPeerConnection = (
             console.log(`⚠️ ${track.kind} track already exists - skipping add.`);
         }
 
-        // CRITICAL FIX: Update React state, but DO NOT call .play() here.
-        setRemoteStream(streamToUpdate); 
+        // =================================================================
+        // CRITICAL FIX: Set state with a *new* MediaStream object.
+        // This forces React to recognize a change and re-render the UI,
+        // triggering the useEffect in the UI component.
+        // =================================================================
+        setRemoteStream(new MediaStream(streamToUpdate.getTracks())); 
 
-        // Set video element properties via ref immediately for faster processing
-        if (remoteVideoRef?.current) {
-            const videoElement = remoteVideoRef.current;
-            videoElement.srcObject = streamToUpdate;
-            videoElement.muted = false; // Remote audio must be unmuted (rely on user gesture)
-            videoElement.playsInline = true;
-        }
+        // =================================================================
+        // REMOVED: Manual srcObject assignment.
+        // This is now handled by the UI component (EnhancedVideoChat)
+        // =================================================================
+        // if (remoteVideoRef?.current) { ... }
 
         if (typeof onTrackReceived === 'function') {
             onTrackReceived(track.kind);
@@ -253,7 +260,7 @@ const setupNetworkMonitoring = (onNetworkChange) => {
 };
 
 /* ----------------
-    Media access wrapper (UNCHANGED)
+    Media access wrapper
 ---------------- */
 const getMediaStream = async (constraints) => {
     try {
@@ -286,6 +293,7 @@ export const UserMediaProvider = ({ children }) => {
     const {
         socket,
         acceptCall,
+        joinRoom,
         offerRecieved,
         answerRecieved,
         setCallAccepted,
@@ -413,7 +421,7 @@ export const UserMediaProvider = ({ children }) => {
     let createOffer;
     let attemptReconnection;
 
-    const createPeerConnection = useCallback(async (isReconnection = false) => {
+    const createPeerConnection = useCallback(async (isReconnection = false, localStream = null) => {
         console.log('🔄 Creating new Peer Connection (Reconnection:', isReconnection, ')');
     
         if (pcWrapperRef.current) {
@@ -455,7 +463,12 @@ export const UserMediaProvider = ({ children }) => {
 
         pcWrapperRef.current = wrapper;
 
-        const stream = streamWrapper?.stream;
+        // =================================================================
+        // FIX 1 (Continued): Use the passed-in stream first, then fall back to state
+        // This solves the race condition in handleOffer
+        // =================================================================
+        const stream = localStream || streamWrapper?.stream;
+
         if (stream) {
             // FIX: Only add tracks that haven't been added yet (check senders)
             const currentSenders = wrapper.pc.getSenders();
@@ -497,7 +510,6 @@ export const UserMediaProvider = ({ children }) => {
 
         return wrapper;
     }, [streamWrapper, remoteVideoRef, setRemoteStream, handleOutgoingCandidate, changeConnectionState]);
-
 
     attemptReconnection = useCallback(
         (reason = 'unknown') => {
@@ -609,7 +621,6 @@ export const UserMediaProvider = ({ children }) => {
         async ({ offer, from, to }) => {
             console.log('📞 Handling incoming offer from:', from?.username || 'unknown');
             
-            // Prevent handling multiple offers if a PC already exists
             if (pcWrapperRef.current) {
                 console.warn('Skipping offer handling: PeerConnection already initialized for this call.');
                 return;
@@ -619,22 +630,16 @@ export const UserMediaProvider = ({ children }) => {
                 // 1. Initialize media if not already done
                 let w = streamWrapper;
                 if (!w) {
-                    // Media acquisition for receiver happens here if streamWrapper is null
                     w = await getMediaStream({ video: true, audio: true });
                     setStreamWrapper(w);
-                    if (localVideoRef.current) {
-                        localVideoRef.current.srcObject = w.stream;
-                        localVideoRef.current.muted = true;
-                        // CRITICAL FIX: Removed local video play call here
-                    }
                 }
                 
-                // FINAL CRITICAL FIX: Allow React to finish all synchronous renders/effects 
-                // caused by stream acquisition BEFORE creating the PeerConnection.
                 await new Promise(r => setTimeout(r, 0)); // Non-blocking microtask delay
 
-                // 2. Create peer connection
-                const wrapper = await createPeerConnection();
+                // =================================================================
+                // FIX 1 (Continued): Pass the newly acquired stream 'w.stream' directly
+                // =================================================================
+                const wrapper = await createPeerConnection(false, w.stream);
                 const pc = wrapper.pc;
 
                 // 3. Set remote description
@@ -731,11 +736,12 @@ export const UserMediaProvider = ({ children }) => {
             const w = await getMediaStream({ video: true, audio: true });
             setStreamWrapper(w);
             
-            if (localVideoRef.current) {
-                localVideoRef.current.srcObject = w.stream;
-                localVideoRef.current.muted = true;
-                // CRITICAL FIX: Removed local video play call here
-            }
+            // =================================================================
+            // REMOVED: Manual srcObject assignment.
+            // This is now handled by the UI component (EnhancedVideoChat)
+            // =================================================================
+            // if (localVideoRef.current) { ... }
+            
             setIsCameraOn(true);
             setIsMuted(false);
 
@@ -772,7 +778,7 @@ export const UserMediaProvider = ({ children }) => {
                         );
                     }
                 } else {
-                     console.log('Skipping renegotiation after initial media acquisition.');
+                    console.log('Skipping renegotiation after initial media acquisition.');
                 }
             }
             return w;
@@ -876,16 +882,26 @@ export const UserMediaProvider = ({ children }) => {
         [setRemoteUser, setCallDialed, callDialed] // Added callDialed to deps for strict guard
     );
     
-    // We need a manual way to trigger playback outside of ontrack/openMediaDevices
+    // This function is now critical for triggering playback after user interaction
     const tryActivateVideo = useCallback(() => {
         const localVideo = localVideoRef.current;
         const remoteVideo = remoteVideoRef.current;
-        let successCount = 0;
 
         const activate = async (video, type) => {
             if (video && video.srcObject && video.paused) {
                 try {
+                    // Mute remote video temporarily to increase chance of autoplay success
+                    const originalMuted = video.muted;
+                    if (type === 'Remote') {
+                        video.muted = true;
+                    }
+
                     await video.play();
+                    
+                    // Unmute remote video after play succeeds
+                    if (type === 'Remote') {
+                        video.muted = false;
+                    }
                     console.log(`✅ ${type} Video Playback Succeeded.`);
                     return true;
                 } catch (e) {
@@ -893,14 +909,17 @@ export const UserMediaProvider = ({ children }) => {
                     return false;
                 }
             }
-            return true; // Already playing or no stream to activate
+            return false; // Already playing or no stream to activate
         };
 
         const attemptAllPlayback = async () => {
+            let localSuccess = false;
+            let remoteSuccess = false;
+
             // 1. Activate Local Video first (Muted, highest chance of success)
             if (streamWrapper?.stream) {
                 if (await activate(localVideo, 'Local')) {
-                    successCount++;
+                    localSuccess = true;
                 }
             }
             
@@ -908,12 +927,12 @@ export const UserMediaProvider = ({ children }) => {
             await new Promise(r => setTimeout(r, 100));
 
             // 2. Activate Remote Video
-            if (remoteStream && remoteStream.getTracks().length > 0) { // <--- CRITICAL CHECK ADDED
+            if (remoteStream && remoteStream.getTracks().length > 0) {
                 if (await activate(remoteVideo, 'Remote')) {
-                    successCount++;
+                    remoteSuccess = true;
                 }
             }
-            console.log(`🎬 Finished activation routine. Successes: ${successCount}/2`);
+            console.log(`🎬 Finished activation routine. Successes: ${localSuccess ? 1 : 0 + remoteSuccess ? 1 : 0}/2`);
         };
         
         attemptAllPlayback();
@@ -932,7 +951,7 @@ export const UserMediaProvider = ({ children }) => {
         setCandidateRecieved(null);
     }, [candidateRecieved, handleCandidate, setCandidateRecieved]);
 
-    // 2. Incoming Offer/Call Acceptance Effect (STABILIZED RECEIVER)
+    // 2. Incoming Offer/Call Acceptance Effect (UNCHANGED)
     useEffect(() => {
         if (!offerRecieved || !acceptCall) return;
 
@@ -968,7 +987,7 @@ export const UserMediaProvider = ({ children }) => {
         
     }, [acceptCall, offerRecieved, navigate, setOfferRecieved, setCallAccepted, remoteUser, connectionState]);
 
-    // 2a. Process Pending Offer (Runs only after navigation/render is stable)
+    // 2a. Process Pending Offer (UNCHANGED)
     useEffect(() => {
         if (pendingOfferData && pcWrapperRef.current === null) {
             console.log('✅ Processing deferred offer data...');
@@ -988,7 +1007,7 @@ export const UserMediaProvider = ({ children }) => {
         setAnswerRecieved(null);
     }, [answerRecieved, handleAnswer, setAnswerRecieved]);
     
-    // 4a. Media Stream Acquisition (Decoupled Effect)
+    // 4a. Media Stream Acquisition (UNCHANGED)
     useEffect(() => {
         if (!callDialed || !remoteUser || streamWrapper) return;
 
@@ -1015,7 +1034,7 @@ export const UserMediaProvider = ({ children }) => {
         };
     }, [callDialed, remoteUser, streamWrapper, openMediaDevices, stopMediaDevices]);
 
-    // 4. Call Dialed Effect - Handles call initiation (FINAL DEBOUNCE FIX)
+    // 4. Call Dialed Effect - Handles call initiation (UNCHANGED)
     useEffect(() => {
         // Now requires streamWrapper to be set by Effect 4a before proceeding
         if (!callDialed || !remoteUser || !isInitiatorRef.current || !streamWrapper) return; 
@@ -1039,6 +1058,11 @@ export const UserMediaProvider = ({ children }) => {
                 }
             } catch (e) {
                 console.warn('Initiator Navigation failed:', e);
+            }
+
+            if (currentRoom) {
+                console.log('🚪 Initiator joining call room:', currentRoom);
+                joinRoom(currentRoom);
             }
 
             const initiateCall = async () => {
@@ -1071,6 +1095,8 @@ export const UserMediaProvider = ({ children }) => {
             clearTimeout(initTimer);
         };
     }, [callDialed, remoteUser, streamWrapper, createPeerConnection, createOffer, currentRoom, navigate]);
+
+
 
     // 5. Network Monitoring Effect (UNCHANGED)
     useEffect(() => {
@@ -1148,7 +1174,6 @@ export const UserMediaProvider = ({ children }) => {
         setRemoteUser,
         stopMediaDevices,
         openMediaDevices,
-        tryActivateVideo, // EXPOSED NEW FUNCTION
         error,
         errorCode,
         connectionState,
@@ -1163,7 +1188,7 @@ export const UserMediaProvider = ({ children }) => {
     }), [
         streamWrapper, remoteStream, isCameraOn, isMuted,
         toggleCamera, toggleMute, stopMediaDevices, openMediaDevices,
-        tryActivateVideo, error, errorCode, connectionState, connectionQuality, callDialed, startCall,
+        error, errorCode, connectionState, connectionQuality, callDialed, startCall,
     ]);
 
     return (

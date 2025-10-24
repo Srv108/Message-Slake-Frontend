@@ -393,7 +393,7 @@ export const SocketContextProvider = ({ children }) => {
                 }
             });
 
-            newSocket.on('newIce-candidate', (candidateObject) => {
+            newSocket.on('ice-candidate', (candidateObject) => {
                 console.log('📞 ICE candidate received');
                 if (candidateObject) {
                     setCandidateRecieved(candidateObject);
