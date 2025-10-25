@@ -27,6 +27,7 @@ export const AppRoutes = () => {
             <Route path='/auth/signup' element={<Auth><SignupContainer/> </Auth>} />
             <Route path='/auth/signin' element={<Auth><SigninContainer/> </Auth>} />
             <Route path='/auth/logincredentials' element={<Auth><ForgetAccountContainer/> </Auth>} />
+            <Route path='/workspace' element={<ProtectedRoutes> <WorkspaceLayout> <HomePage /> </WorkspaceLayout></ProtectedRoutes>} />
             <Route path='/workspace/:workspaceId' element={<ProtectedRoutes> <WorkspaceLayout> <HomePage /> </WorkspaceLayout></ProtectedRoutes>} />
             <Route path='/workspace/:workspaceId/channels/:channelId' element={<ProtectedRoutes> <WorkspaceLayout> <Channel /> </WorkspaceLayout></ProtectedRoutes>} />
             <Route path='/workspace/:workspaceId/members/:memberId' element={<ProtectedRoutes> <WorkspaceLayout> <Member /> </WorkspaceLayout></ProtectedRoutes>} />

@@ -48,7 +48,7 @@ export const SideBar = ({
                     Icon={Users}
                     label="Groups"
                     iconOnClick={() => {
-                        navigate('/home');
+                        navigate('/workspace');
                     }}
                 />
 

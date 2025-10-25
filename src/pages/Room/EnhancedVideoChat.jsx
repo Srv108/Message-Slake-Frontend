@@ -97,16 +97,11 @@ const EnhancedVideoChat = () => {
 
   // --- Attach and handle remote stream ---
   
-  // In EnhancedVideoChat.jsx
-
-// ... (keep all the existing imports and component setup) ...
-
-  // --- Handle remote video stream ---
   useEffect(() => {
     const videoElement = remoteVideoRef.current;
     if (!videoElement) return;
 
-    console.log('🔄 Remote stream state:', {
+    console.log('🔄 Remote stream updated:', {
       id: remoteStream?.id,
       active: remoteStream?.active,
       videoTracks: remoteStream?.getVideoTracks().map(t => ({
@@ -116,23 +111,18 @@ const EnhancedVideoChat = () => {
       })) || []
     });
 
-    // Always update the srcObject if it's different
-    if (remoteStream && videoElement.srcObject !== remoteStream) {
-      console.log('🔄 Updating video srcObject');
-      videoElement.srcObject = remoteStream;
-    }
-
     const handleTrackAdded = () => {
       console.log('🎥 Track added to remote stream');
+      if (videoElement.srcObject !== remoteStream) {
+        console.log('🔄 Updating video srcObject with new stream');
+        videoElement.srcObject = remoteStream;
+      }
       attemptPlay();
     };
 
     const attemptPlay = async () => {
-      if (!videoElement || !remoteStream?.getVideoTracks().length) {
-        console.log('⏳ No video tracks available yet');
-        return;
-      }
-
+      if (!videoElement || !remoteStream?.getVideoTracks().length) return;
+      
       try {
         console.log('▶️ Attempting to play remote video');
         videoElement.muted = true; // Start muted to allow autoplay
@@ -157,18 +147,15 @@ const EnhancedVideoChat = () => {
     if (remoteStream) {
       remoteStream.onaddtrack = handleTrackAdded;
       
-      // If tracks already exist, try to play immediately
-      const videoTracks = remoteStream.getVideoTracks();
-      if (videoTracks.length > 0) {
-        console.log('🎥 Found existing video tracks, attempting playback');
+      // If tracks already exist when this effect runs
+      if (remoteStream.getVideoTracks().length > 0) {
+        if (videoElement.srcObject !== remoteStream) {
+          videoElement.srcObject = remoteStream;
+        }
         attemptPlay();
-      } else {
-        console.log('⏳ Waiting for video tracks...');
-        setIsRemoteVideoLoading(true);
       }
     }
 
-    // Cleanup
     return () => {
       if (remoteStream) {
         remoteStream.onaddtrack = null;
@@ -176,57 +163,8 @@ const EnhancedVideoChat = () => {
     };
   }, [remoteStream]);
 
-  // --- Safety watcher: monitor track state ---
-  useEffect(() => {
-    if (!remoteStream) return;
-    
-    const videoElement = remoteVideoRef.current;
-    if (!videoElement) return;
-
-    const checkTrackState = () => {
-      const tracks = remoteStream.getVideoTracks();
-      console.log('🔍 Checking track state:', {
-        tracks: tracks.map(t => ({
-          id: t.id,
-          readyState: t.readyState,
-          enabled: t.enabled,
-          muted: t.muted
-        })),
-        videoReadyState: videoElement.readyState
-      });
-
-      if (tracks.length > 0) {
-        const track = tracks[0];
-        if (track.readyState === 'live' && track.enabled) {
-          console.log('🟢 Video track is live and enabled');
-          if (isRemoteVideoLoading) {
-            setIsRemoteVideoLoading(false);
-          }
-          return true;
-        }
-      }
-      return false;
-    };
-
-    // Initial check
-    const isLive = checkTrackState();
-    
-    if (!isLive) {
-      console.log('⏳ Setting up track state watcher');
-      const interval = setInterval(() => {
-        if (checkTrackState()) {
-          clearInterval(interval);
-        }
-      }, 500);
-      
-      return () => clearInterval(interval);
-    }
-  }, [remoteStream, isRemoteVideoLoading]);
-
-  // ... (rest of the component) ...
-
 // Add this new effect to handle track changes
-  useEffect(() => {
+  useEffect(() => {re
     const videoElement = remoteVideoRef.current;
     if (!videoElement || !remoteStream) return;
 
@@ -323,13 +261,13 @@ const EnhancedVideoChat = () => {
     >
       {/* Remote Video */}
       <div className="relative flex-1 bg-black">
-        {/* {isRemoteVideoLoading && (
+        {isRemoteVideoLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
             <div className="animate-pulse text-white">
               Connecting to video...
             </div>
           </div>
-        )} */}
+        )}
         <video
           ref={remoteVideoRef}
           autoPlay

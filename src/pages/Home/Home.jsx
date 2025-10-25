@@ -22,9 +22,20 @@ export const Home = () => {
             return;
         }
 
+        /* check local storage data is user has token in the local storage or not */
+        const token = localStorage.getItem('token');
+        const user = localStorage.getItem('user');
+        if (!token || !user) {
+            console.log('No token found. Redirecting to signin...');
+            logout();
+            navigate('/auth/signin');
+            return;
+        }
+
+        console.log('Workspaces:', Workspaces);
         // If user has workspaces, redirect to the first one
-        if (Workspaces?.length > 0) {
-            navigate(`/workspace/${Workspaces[0]._id}`);
+        if (token && user && Workspaces?.length > 0) {
+            navigate('/workspace');
         }
     }, [isFetching, Workspaces, error, navigate, logout]);
 

@@ -23,5 +23,7 @@ export const ProtectedRoutes = ({children}) => {
         return <Navigate to='/auth/signin' />;
     }
 
+    /* also check for the localstorage to validate the token */
+    
     return children;
 };
