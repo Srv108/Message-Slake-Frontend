@@ -35,20 +35,20 @@ export const SideBar = ({
                 className="hidden md:flex w-[70px] h-full bg-gray-100 dark:bg-slack-dark flex-col gap-y-5 items-center pt-[10px] pb-[5px]"
             >
                 {(WorkspaceSwitcher) && <WorkspaceSwitcher />}
-
-                <SidebarButton
-                    Icon={MessageSquareText}
-                    label="Chats"
-                    iconOnClick={() => {
-                        navigate('/directMessages');
-                    }}
-                />
                 
                 <SidebarButton 
                     Icon={Users}
                     label="Groups"
                     iconOnClick={() => {
                         navigate('/workspace');
+                    }}
+                />
+
+                <SidebarButton
+                    Icon={MessageSquareText}
+                    label="Chats"
+                    iconOnClick={() => {
+                        navigate('/directMessages');
                     }}
                 />
 

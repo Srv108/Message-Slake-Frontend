@@ -50,6 +50,7 @@ export const SocketContextProvider = ({ children }) => {
 
     const handleNewRoomMessage = useCallback((message) => {
         console.log('📨 Received room message: ....from socket', message);
+        console.log('message comes from socket -> going to add');
         addRoomMessage(message);
     }, [addRoomMessage]);
 
