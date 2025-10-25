@@ -164,7 +164,7 @@ const EnhancedVideoChat = () => {
   }, [remoteStream]);
 
 // Add this new effect to handle track changes
-  useEffect(() => {re
+  useEffect(() => {
     const videoElement = remoteVideoRef.current;
     if (!videoElement || !remoteStream) return;
 
